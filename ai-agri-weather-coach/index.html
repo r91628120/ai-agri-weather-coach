@@ -777,7 +777,7 @@
       請不要直接把 API Token 寫在前端。
     */
 
-    const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbwDpsxf7685pj17CaBkFgwvMp03dX4vL_sQPTj9-euRippVYllvunXADJ0QdN5NzMAB/exec";
+    const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbwudn3W_7AMhcOqYnRD6582NTcLD2gtTrzn7KWrPjcD6ibvs4Uqn6TlrDE0f-q8b4rS/exec";
     // 例如未來可以放：
     // const MOA_API_PROXY_URL = "https://script.google.com/macros/s/你的GAS網址/exec";
 
@@ -818,6 +818,13 @@
       const note = document.getElementById("note").value.trim();
 
       const weather = await fetchMoaWeatherData(county);
+       
+       if (!weather || !weather.temp) {
+           alert("氣象資料格式不正確，請檢查 GAS 回傳欄位是否包含 temp、humidity、rain、wind、condition。");
+           console.log("GAS 回傳資料：", weather);
+           return;
+       }
+
 
       document.getElementById("resultTitle").textContent = `${county}｜${crop}｜${stage}`;
       document.getElementById("resultSubtitle").textContent = `目前天氣情境：${weather.condition}，判斷重點：${task}`;
