@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AI農業氣象教練 1.0｜AI農業教育平台</title>
+  <meta name="description" content="AI農業氣象教練 1.0，導入真實農業氣象資料，協助學生學習氣象判讀、農事決策、病蟲害風險與智慧農業推演。">
+
+  <style>
+    :root {
+      --green-dark: #14532d;
+      --green-main: #16a34a;
+      --green-soft: #dcfce7;
+      --sky-main: #0ea5e9;
+      --sky-soft: #e0f2fe;
+      --yellow-soft: #fef9c3;
+      --orange: #f97316;
+      --text-main: #1f2937;
+      --text-soft: #6b7280;
+      --white: #ffffff;
+      --bg: #f7fee7;
+      --shadow: 0 18px 45px rgba(20, 83, 45, 0.15);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+      color: var(--text-main);
+      background:
+        radial-gradient(circle at top left, #d9f99d 0, transparent 32%),
+        radial-gradient(circle at top right, #bae6fd 0, transparent 30%),
+        linear-gradient(180deg, #f0fdf4 0%, #f7fee7 45%, #ffffff 100%);
+      line-height: 1.7;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 22px 0;
+      gap: 16px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      color: var(--green-dark);
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #bbf7d0, #7dd3fc);
+      box-shadow: var(--shadow);
+      font-size: 24px;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .nav-links a {
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(22, 163, 74, 0.15);
+      color: var(--green-dark);
+      font-size: 0.95rem;
+      font-weight: 700;
+      backdrop-filter: blur(10px);
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      margin-top: 10px;
+      padding: 62px 34px;
+      border-radius: var(--radius-xl);
+      background:
+        linear-gradient(135deg, rgba(20, 83, 45, 0.92), rgba(14, 165, 233, 0.82)),
+        url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1600&q=80");
+      background-size: cover;
+      background-position: center;
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -130px auto;
+      width: 360px;
+      height: 360px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.2rem, 5vw, 4.7rem);
+      line-height: 1.12;
+      letter-spacing: -1px;
+      font-weight: 950;
+    }
+
+    .hero-subtitle {
+      margin: 20px 0 0;
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      max-width: 700px;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 20px;
+      border: none;
+      border-radius: 999px;
+      font-weight: 900;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .btn-primary {
+      background: #facc15;
+      color: #422006;
+      box-shadow: 0 12px 24px rgba(250, 204, 21, 0.28);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.18);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+    }
+
+    .section {
+      margin: 48px 0;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 26px;
+    }
+
+    .section-title .eyebrow {
+      color: var(--green-main);
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .section-title h2 {
+      margin: 8px 0 10px;
+      color: var(--green-dark);
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+    }
+
+    .section-title p {
+      margin: 0 auto;
+      max-width: 720px;
+      color: var(--text-soft);
+      font-size: 1.05rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(22, 163, 74, 0.12);
+      box-shadow: 0 12px 28px rgba(20, 83, 45, 0.08);
+    }
+
+    .feature-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 14px;
+      font-size: 28px;
+      background: var(--green-soft);
+    }
+
+    .feature-card h3 {
+      margin: 0 0 8px;
+      color: var(--green-dark);
+      font-size: 1.18rem;
+    }
+
+    .feature-card p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.96rem;
+    }
+
+    .coach-panel {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .form-card,
+    .result-card {
+      background: rgba(255, 255, 255, 0.94);
+      border-radius: var(--radius-xl);
+      border: 1px solid rgba(22, 163, 74, 0.14);
+      box-shadow: var(--shadow);
+      padding: 28px;
+    }
+
+    .form-card h2,
+    .result-card h2 {
+      margin-top: 0;
+      color: var(--green-dark);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+
+    label {
+      display: block;
+      font-weight: 900;
+      color: var(--green-dark);
+      margin-bottom: 8px;
+    }
+
+    select,
+    input,
+    textarea {
+      width: 100%;
+      border: 1px solid #bbf7d0;
+      border-radius: 16px;
+      padding: 13px 14px;
+      font: inherit;
+      background: #ffffff;
+      outline: none;
+      transition: border 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    select:focus,
+    input:focus,
+    textarea:focus {
+      border-color: var(--green-main);
+      box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.12);
+    }
+
+    textarea {
+      min-height: 110px;
+      resize: vertical;
+    }
+
+    .full {
+      grid-column: 1 / -1;
+    }
+
+    .action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .btn-green {
+      background: linear-gradient(135deg, #16a34a, #0ea5e9);
+      color: white;
+      box-shadow: 0 12px 26px rgba(14, 165, 233, 0.2);
+    }
+
+    .btn-light {
+      background: #ecfccb;
+      color: var(--green-dark);
+      border: 1px solid #bbf7d0;
+    }
+
+    .weather-status {
+      display: grid;
+      gap: 14px;
+    }
+
+    .status-box {
+      padding: 18px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #ecfccb, #e0f2fe);
+      border: 1px solid rgba(22, 163, 74, 0.15);
+    }
+
+    .status-box strong {
+      display: block;
+      color: var(--green-dark);
+      font-size: 1.05rem;
+      margin-bottom: 4px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .metric {
+      padding: 16px;
+      border-radius: 18px;
+      background: #f8fafc;
+      border: 1px solid #e5e7eb;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--text-soft);
+      font-size: 0.88rem;
+    }
+
+    .metric b {
+      color: var(--green-dark);
+      font-size: 1.4rem;
+    }
+
+    .advice-list {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .advice-list li {
+      margin: 8px 0;
+    }
+
+    .prompt-box {
+      margin-top: 18px;
+      padding: 18px;
+      border-radius: 18px;
+      background: #111827;
+      color: #d1fae5;
+      font-size: 0.92rem;
+      white-space: pre-wrap;
+      max-height: 260px;
+      overflow: auto;
+    }
+
+    .api-note {
+      margin-top: 18px;
+      padding: 16px;
+      border-radius: 18px;
+      background: var(--yellow-soft);
+      color: #713f12;
+      font-size: 0.94rem;
+    }
+
+    .learning-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .flow-step {
+      position: relative;
+      padding: 22px;
+      border-radius: 22px;
+      background: white;
+      box-shadow: 0 12px 28px rgba(20, 83, 45, 0.08);
+      border: 1px solid rgba(22, 163, 74, 0.12);
+    }
+
+    .step-num {
+      width: 38px;
+      height: 38px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--green-main);
+      color: white;
+      font-weight: 900;
+      margin-bottom: 12px;
+    }
+
+    .flow-step h3 {
+      margin: 0 0 8px;
+      color: var(--green-dark);
+    }
+
+    .flow-step p {
+      margin: 0;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    .footer {
+      margin: 64px 0 32px;
+      text-align: center;
+      color: var(--text-soft);
+      font-size: 0.95rem;
+    }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .footer-links a {
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: white;
+      color: var(--green-dark);
+      font-weight: 800;
+      border: 1px solid rgba(22, 163, 74, 0.15);
+    }
+
+    @media (max-width: 960px) {
+      .feature-grid,
+      .learning-flow {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .coach-panel {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero {
+        padding: 42px 22px;
+      }
+
+      .feature-grid,
+      .learning-flow,
+      .form-grid,
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .full {
+        grid-column: auto;
+      }
+
+      .form-card,
+      .result-card {
+        padding: 22px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+
+    <header class="topbar">
+      <a class="brand" href="#">
+        <span class="brand-icon">🌦️</span>
+        <span>AI農業氣象教練 1.0</span>
+      </a>
+
+      <nav class="nav-links">
+        <a href="#coach">開始判讀</a>
+        <a href="#features">核心功能</a>
+        <a href="#flow">學習流程</a>
+        <a href="https://r91628120.github.io/ai-agri-education/">回主平台</a>
+      </nav>
+    </header>
+
+    <section class="hero">
+      <div class="hero-content">
+        <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
+        <h1>AI農業氣象教練 1.0</h1>
+        <p class="hero-subtitle">
+          導入農業部農業氣象資料，協助學生從「看天氣」進一步學會
+          氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#coach">🚀 開始氣象判讀</a>
+          <a class="btn btn-secondary" href="https://weather.moa.gov.tw/" target="_blank" rel="noopener">
+            🌦️ 農業部農業氣象服務網
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="section-title">
+        <div class="eyebrow">WEATHER COACH</div>
+        <h2>把天氣資料變成農業決策能力</h2>
+        <p>
+          這不是單純查天氣，而是讓學生學會根據氣溫、雨量、濕度、風速與作物階段，做出合理的田間管理判斷。
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card">
+          <div class="feature-icon">🌡️</div>
+          <h3>氣象判讀</h3>
+          <p>學習判讀溫度、濕度、降雨、風速與氣象風險。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">🌱</div>
+          <h3>農事建議</h3>
+          <p>依據作物與生育期，推演灌溉、施肥與田間管理。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">🦠</div>
+          <h3>病蟲害風險</h3>
+          <p>分析高濕、豪雨、高溫與病害發生風險的關聯。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">📅</div>
+          <h3>農事曆規劃</h3>
+          <p>協助學生建立作物管理時程與天氣應變策略。</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="coach">
+      <div class="section-title">
+        <div class="eyebrow">AI SIMULATION</div>
+        <h2>AI農業氣象判讀模擬器</h2>
+        <p>
+          第一版先以教學模擬為主，未來可正式串接農業部 API，自動帶入真實農業氣象資料。
+        </p>
+      </div>
+
+      <div class="coach-panel">
+        <div class="form-card">
+          <h2>🌦️ 輸入農業情境</h2>
+
+          <div class="form-grid">
+            <div>
+              <label for="county">地區</label>
+              <select id="county">
+                <option value="屏東縣 枋山鄉">屏東縣 枋山鄉</option>
+                <option value="高雄市 美濃區">高雄市 美濃區</option>
+                <option value="臺南市 關廟區">臺南市 關廟區</option>
+                <option value="嘉義縣 阿里山鄉">嘉義縣 阿里山鄉</option>
+                <option value="花蓮縣 玉里鎮">花蓮縣 玉里鎮</option>
+                <option value="臺東縣 池上鄉">臺東縣 池上鄉</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="crop">作物</label>
+              <select id="crop">
+                <option value="芒果">芒果</option>
+                <option value="水稻">水稻</option>
+                <option value="鳳梨">鳳梨</option>
+                <option value="茶樹">茶樹</option>
+                <option value="番茄">番茄</option>
+                <option value="葉菜類">葉菜類</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="stage">目前農事階段</label>
+              <select id="stage">
+                <option value="育苗期">育苗期</option>
+                <option value="生長期">生長期</option>
+                <option value="開花期">開花期</option>
+                <option value="結果期">結果期</option>
+                <option value="採收前">採收前</option>
+                <option value="採收後管理">採收後管理</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="task">目前想判斷的農事</label>
+              <select id="task">
+                <option value="是否適合施肥">是否適合施肥</option>
+                <option value="是否需要灌溉">是否需要灌溉</option>
+                <option value="是否適合採收">是否適合採收</option>
+                <option value="病蟲害風險">病蟲害風險</option>
+                <option value="豪雨防災準備">豪雨防災準備</option>
+                <option value="高溫熱害預防">高溫熱害預防</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label for="note">補充說明</label>
+              <textarea id="note" placeholder="例如：最近葉片有斑點、田區排水較差、準備三天後採收、剛施肥完成等。"></textarea>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-green" onclick="generateAdvice()">🌾 產生氣象農事建議</button>
+            <button class="btn btn-light" onclick="copyPrompt()">📋 複製 AI 指令</button>
+            <button class="btn btn-light" onclick="resetForm()">🔄 清除重來</button>
+          </div>
+
+          <div class="api-note">
+            <strong>API 串接提醒：</strong>
+            正式版建議不要把農業部 API Token 直接放在 GitHub Pages 前端。
+            可使用 Google Apps Script、Cloudflare Worker 或 Firebase Functions 作為中繼 API。
+          </div>
+        </div>
+
+        <div class="result-card">
+          <h2>🤖 AI判讀結果</h2>
+
+          <div class="weather-status">
+            <div class="status-box">
+              <strong id="resultTitle">等待輸入農業情境</strong>
+              <span id="resultSubtitle">請選擇地區、作物與農事需求後，按下產生建議。</span>
+            </div>
+
+            <div class="metric-grid">
+              <div class="metric">
+                <span>氣溫</span>
+                <b id="tempValue">-- ℃</b>
+              </div>
+              <div class="metric">
+                <span>相對濕度</span>
+                <b id="humidityValue">-- %</b>
+              </div>
+              <div class="metric">
+                <span>降雨風險</span>
+                <b id="rainValue">--</b>
+              </div>
+              <div class="metric">
+                <span>風速風險</span>
+                <b id="windValue">--</b>
+              </div>
+            </div>
+
+            <div class="status-box">
+              <strong>🌱 農事建議</strong>
+              <ul class="advice-list" id="adviceList">
+                <li>目前尚未產生建議。</li>
+              </ul>
+            </div>
+
+            <div class="status-box">
+              <strong>🦠 病蟲害與災害提醒</strong>
+              <ul class="advice-list" id="riskList">
+                <li>目前尚未產生風險提醒。</li>
+              </ul>
+            </div>
+
+            <div class="prompt-box" id="promptBox">AI 指令將顯示在這裡。</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="flow">
+      <div class="section-title">
+        <div class="eyebrow">TEACHING FLOW</div>
+        <h2>建議教學流程</h2>
+        <p>
+          讓學生從觀察資料、提出判斷，到完成農事決策，形成完整的 AI 推演式學習歷程。
+        </p>
+      </div>
+
+      <div class="learning-flow">
+        <article class="flow-step">
+          <div class="step-num">1</div>
+          <h3>讀取氣象</h3>
+          <p>觀察地區氣溫、濕度、雨量與風速。</p>
+        </article>
+
+        <article class="flow-step">
+          <div class="step-num">2</div>
+          <h3>連結作物</h3>
+          <p>判斷目前作物階段與氣象條件的關係。</p>
+        </article>
+
+        <article class="flow-step">
+          <div class="step-num">3</div>
+          <h3>分析風險</h3>
+          <p>推估病蟲害、豪雨、熱害或倒伏風險。</p>
+        </article>
+
+        <article class="flow-step">
+          <div class="step-num">4</div>
+          <h3>做出決策</h3>
+          <p>提出灌溉、施肥、採收與防災建議。</p>
+        </article>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="https://r91628120.github.io/ai-agri-education/">🏠 回 AI農業教育平台</a>
+        <a href="https://weather.moa.gov.tw/" target="_blank" rel="noopener">🌦️ 農業部農業氣象服務網</a>
+      </div>
+      <p>
+        AI農業氣象教練 1.0｜AI農業教育平台｜教學示範用途
+      </p>
+    </footer>
+
+  </div>
+
+  <script>
+    /*
+      =====================================================
+      農業部 API 串接預留區
+      =====================================================
+
+      未來正式串接時，建議流程：
+
+      1. GitHub Pages 前端
+         ↓
+      2. Google Apps Script / Cloudflare Worker / Firebase Functions
+         ↓
+      3. 農業部農業氣象 API
+
+      請不要直接把 API Token 寫在前端。
+    */
+
+    const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbyeX5oosOVh75QHebCI_UYHieoOuw29-d0Wp6jMwGEOD90QDzgVYqHCvUVnn57KHmqx/exec";
+    // 例如未來可以放：
+    // const MOA_API_PROXY_URL = "https://script.google.com/macros/s/你的GAS網址/exec";
+
+    async function fetchMoaWeatherData(locationName) {
+      if (!MOA_API_PROXY_URL) {
+        return getDemoWeatherData(locationName);
+      }
+
+      try {
+        const url = `${MOA_API_PROXY_URL}?location=${encodeURIComponent(locationName)}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("API 回應失敗");
+        return await response.json();
+      } catch (error) {
+        console.warn("農業部 API 讀取失敗，改用示範資料：", error);
+        return getDemoWeatherData(locationName);
+      }
+    }
+
+    function getDemoWeatherData(locationName) {
+      const demo = {
+        "屏東縣 枋山鄉": { temp: 31, humidity: 78, rain: "中", wind: "低", condition: "午後局部雷陣雨" },
+        "高雄市 美濃區": { temp: 32, humidity: 72, rain: "中", wind: "低", condition: "高溫悶熱" },
+        "臺南市 關廟區": { temp: 33, humidity: 68, rain: "低", wind: "低", condition: "晴時多雲" },
+        "嘉義縣 阿里山鄉": { temp: 22, humidity: 86, rain: "中", wind: "中", condition: "山區雲霧多" },
+        "花蓮縣 玉里鎮": { temp: 30, humidity: 76, rain: "中", wind: "低", condition: "午後降雨機率提高" },
+        "臺東縣 池上鄉": { temp: 31, humidity: 74, rain: "低", wind: "中", condition: "晴朗偏熱" }
+      };
+
+      return demo[locationName] || { temp: 30, humidity: 75, rain: "中", wind: "低", condition: "多雲時晴" };
+    }
+
+    async function generateAdvice() {
+      const county = document.getElementById("county").value;
+      const crop = document.getElementById("crop").value;
+      const stage = document.getElementById("stage").value;
+      const task = document.getElementById("task").value;
+      const note = document.getElementById("note").value.trim();
+
+      const weather = await fetchMoaWeatherData(county);
+       
+       if (!weather || !weather.temp) {
+           alert("氣象資料格式不正確，請檢查 GAS 回傳欄位是否包含 temp、humidity、rain、wind、condition。");
+           console.log("GAS 回傳資料：", weather);
+           return;
+       }
+
+
+      document.getElementById("resultTitle").textContent = `${county}｜${crop}｜${stage}`;
+      document.getElementById("resultSubtitle").textContent = `目前天氣情境：${weather.condition}，判斷重點：${task}`;
+      document.getElementById("tempValue").textContent = `${weather.temp} ℃`;
+      document.getElementById("humidityValue").textContent = `${weather.humidity} %`;
+      document.getElementById("rainValue").textContent = weather.rain;
+      document.getElementById("windValue").textContent = weather.wind;
+
+      const advice = buildAdvice(crop, stage, task, weather);
+      const risks = buildRisks(crop, weather);
+
+      renderList("adviceList", advice);
+      renderList("riskList", risks);
+
+      const prompt = buildPrompt(county, crop, stage, task, note, weather);
+      document.getElementById("promptBox").textContent = prompt;
+    }
+
+    function buildAdvice(crop, stage, task, weather) {
+      const list = [];
+
+      if (task.includes("施肥")) {
+        if (weather.rain === "中" || weather.rain === "高") {
+          list.push("未來有降雨風險，建議暫緩施肥，避免肥分流失。");
+        } else {
+          list.push("降雨風險較低，可評估少量分次施肥，並配合土壤濕度調整。");
+        }
+      }
+
+      if (task.includes("灌溉")) {
+        if (weather.temp >= 32 && weather.humidity < 75) {
+          list.push("氣溫偏高，建議清晨或傍晚補充灌溉，避免中午高溫澆水。");
+        } else {
+          list.push("目前水分壓力不明顯，建議先檢查土壤含水狀態再決定。");
+        }
+      }
+
+      if (task.includes("採收")) {
+        if (weather.rain === "中" || weather.rain === "高") {
+          list.push("若作物已接近成熟，建議評估提前採收，降低裂果、落果或品質下降風險。");
+        } else {
+          list.push("天氣條件相對穩定，可依成熟度安排分批採收。");
+        }
+      }
+
+      if (task.includes("病蟲害")) {
+        list.push("請觀察葉片、果實與田間通風狀況，並記錄病斑是否擴大。");
+      }
+
+      if (task.includes("豪雨")) {
+        list.push("建議提前清理排水溝、檢查田區低窪處，避免積水造成根系受損。");
+      }
+
+      if (task.includes("高溫")) {
+        list.push("建議注意遮陰、補水與田間覆蓋，降低高溫逆境。");
+      }
+
+      list.push(`${crop}目前處於${stage}，應將氣象條件與作物敏感期一起判斷。`);
+
+      return list;
+    }
+
+    function buildRisks(crop, weather) {
+      const list = [];
+
+      if (weather.humidity >= 80) {
+        list.push("濕度偏高，病害發生風險提高，請加強通風與田間巡查。");
+      }
+
+      if (weather.temp >= 32) {
+        list.push("氣溫偏高，需注意熱害、蒸散量增加與植株水分壓力。");
+      }
+
+      if (weather.rain === "中" || weather.rain === "高") {
+        list.push("降雨風險提高，請注意排水、落果、裂果與病害擴散。");
+      }
+
+      if (weather.wind === "中" || weather.wind === "高") {
+        list.push("風速風險提高，請注意支架、倒伏與果樹枝條損傷。");
+      }
+
+      if (crop === "水稻" && weather.humidity >= 78) {
+        list.push("水稻在高濕環境下，需留意稻熱病與紋枯病風險。");
+      }
+
+      if (crop === "芒果" && weather.rain !== "低") {
+        list.push("芒果遇降雨需注意炭疽病、裂果與採收品質下降。");
+      }
+
+      if (list.length === 0) {
+        list.push("目前未出現明顯高風險訊號，但仍建議每日巡田觀察。");
+      }
+
+      return list;
+    }
+
+    function renderList(id, items) {
+      const ul = document.getElementById(id);
+      ul.innerHTML = "";
+      items.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        ul.appendChild(li);
+      });
+    }
+
+    function buildPrompt(county, crop, stage, task, note, weather) {
+      return `你是「AI農業氣象教練、作物栽培顧問與智慧農業決策教練」。
+
+請根據以下農業情境，協助學生進行氣象判讀與農事決策推演。
+
+【地區】
+${county}
+
+【作物】
+${crop}
+
+【目前農事階段】
+${stage}
+
+【想判斷的農事】
+${task}
+
+【目前氣象資料】
+氣溫：${weather.temp}℃
+相對濕度：${weather.humidity}%
+降雨風險：${weather.rain}
+風速風險：${weather.wind}
+天氣概況：${weather.condition}
+
+【補充說明】
+${note || "無"}
+
+請輸出：
+1. 氣象資料判讀
+2. 對作物可能造成的影響
+3. 病蟲害或災害風險
+4. 今日農事建議
+5. 未來三天注意事項
+6. 適合高中職學生理解的教學說明
+
+請用條列式、清楚、實用、適合農業教育平台呈現的方式回答。`;
+    }
+
+    async function copyPrompt() {
+      const prompt = document.getElementById("promptBox").textContent;
+
+      if (!prompt || prompt.includes("AI 指令將顯示")) {
+        alert("請先產生 AI 指令。");
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(prompt);
+        alert("已複製 AI 指令！");
+      } catch (error) {
+        alert("複製失敗，請手動選取文字複製。");
+      }
+    }
+
+    function resetForm() {
+      document.getElementById("note").value = "";
+      document.getElementById("resultTitle").textContent = "等待輸入農業情境";
+      document.getElementById("resultSubtitle").textContent = "請選擇地區、作物與農事需求後，按下產生建議。";
+      document.getElementById("tempValue").textContent = "-- ℃";
+      document.getElementById("humidityValue").textContent = "-- %";
+      document.getElementById("rainValue").textContent = "--";
+      document.getElementById("windValue").textContent = "--";
+      document.getElementById("adviceList").innerHTML = "<li>目前尚未產生建議。</li>";
+      document.getElementById("riskList").innerHTML = "<li>目前尚未產生風險提醒。</li>";
+      document.getElementById("promptBox").textContent = "AI 指令將顯示在這裡。";
+    }
+  </script>
+</body>
+</html>
