@@ -4,8 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>AI農業氣象教練 2.0｜AI農業教育平台</title>
-  <meta name="description" content="AI農業氣象教練 2.0，導入真實農業氣象資料，協助學生學習氣象判讀、農事決策、病蟲害風險與智慧農業推演。">
+  <title>AI農業氣象教練 4.0｜農業氣象判讀、農事決策與農場經營日誌</title>
+  <meta name="description" content="AI農業氣象教練 4.0，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
+  <meta name="keywords" content="AI農業氣象教練,農業氣象,智慧農業,農場經營日誌,農事決策,病蟲害風險,農業教育平台,農業氣象站,農業防災">
+  <meta name="author" content="AI農業教育平台">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="zh_TW">
+  <meta property="og:title" content="AI農業氣象教練 4.0｜把天氣資料變成農業決策能力">
+  <meta property="og:description" content="依縣市鄉鎮自動尋找最近農業氣象站，協助學生與農友進行氣象判讀、農事建議、風險燈號、三天天氣推估與農場經營日誌分享。">
+  <meta property="og:url" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/">
+  <meta property="og:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AI農業氣象教練 4.0">
+  <meta name="twitter:description" content="農業氣象判讀、農事決策、風險燈號與AI農場經營日誌分享工具。">
+  <meta name="twitter:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
+
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="favicon-180.png">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
   <style>
     :root {
@@ -597,6 +617,128 @@
       }
     }
 
+
+
+    .log-action-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .btn-mini {
+      padding: 8px 12px;
+      font-size: 0.86rem;
+      border-radius: 999px;
+    }
+
+    .log-weather {
+      margin-top: 8px;
+      padding: 10px;
+      border-radius: 12px;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #14532d;
+      font-size: 0.9rem;
+    }
+
+    .share-card-preview {
+      position: fixed;
+      left: -9999px;
+      top: 0;
+      width: 900px;
+      padding: 42px;
+      border-radius: 30px;
+      background: linear-gradient(135deg, #ecfccb 0%, #e0f2fe 100%);
+      color: #14532d;
+      font-family: "Noto Sans TC", "Microsoft JhengHei", system-ui, sans-serif;
+    }
+
+    .share-card-inner {
+      background: rgba(255, 255, 255, 0.94);
+      border: 2px solid #bbf7d0;
+      border-radius: 26px;
+      padding: 34px;
+      box-shadow: 0 18px 45px rgba(20, 83, 45, 0.16);
+    }
+
+    .share-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .share-card-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 950;
+      font-size: 1.15rem;
+      color: #14532d;
+    }
+
+    .share-card-title {
+      margin: 16px 0 6px;
+      font-size: 2.2rem;
+      line-height: 1.25;
+      font-weight: 950;
+      color: #14532d;
+    }
+
+    .share-card-subtitle {
+      color: #047857;
+      font-weight: 900;
+      font-size: 1.05rem;
+    }
+
+    .share-card-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin: 22px 0;
+    }
+
+    .share-card-box {
+      padding: 14px 16px;
+      border-radius: 16px;
+      background: #f8fafc;
+      border: 1px solid #d1fae5;
+      font-weight: 800;
+    }
+
+    .share-card-note {
+      padding: 18px;
+      border-radius: 18px;
+      background: #111827;
+      color: #d1fae5;
+      white-space: pre-wrap;
+      min-height: 110px;
+      line-height: 1.7;
+    }
+
+    .share-card-footer {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      color: #6b7280;
+      font-weight: 800;
+      font-size: 0.95rem;
+    }
+
+    @media print {
+      body * { visibility: hidden; }
+      #printArea, #printArea * { visibility: visible; }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+      }
+    }
+
     @media (max-width: 640px) {
       .topbar {
         align-items: flex-start;
@@ -632,7 +774,7 @@
     <header class="topbar">
       <a class="brand" href="#">
         <span class="brand-icon">🌦️</span>
-        <span>AI農業氣象教練 2.0</span>
+        <span>AI農業氣象教練 4.0</span>
       </a>
 
       <nav class="nav-links">
@@ -646,7 +788,7 @@
     <section class="hero">
       <div class="hero-content">
         <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
-        <h1>AI農業氣象教練 2.0</h1>
+        <h1>AI農業氣象教練 4.0</h1>
         <p class="hero-subtitle">
           導入農業部農業氣象資料，協助學生從「看天氣」進一步學會
           氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
@@ -906,6 +1048,8 @@
 
         <div class="action-row">
           <button class="btn btn-green" onclick="saveFarmLog()">💾 儲存日誌</button>
+          <button class="btn btn-light" onclick="exportLatestLogImage()">🖼️ 匯出最新日誌圖片</button>
+          <button class="btn btn-light" onclick="exportLatestLogPdf()">📄 匯出最新日誌 PDF</button>
           <button class="btn btn-light" onclick="clearFarmLogs()">🗑 清除日誌</button>
         </div>
 
@@ -919,6 +1063,9 @@
       </div>
     </section>
 
+
+    <div id="shareCardMount" aria-hidden="true"></div>
+    <div id="printArea" style="display:none;"></div>
 
     <section class="section" id="flow">
       <div class="section-title">
@@ -959,10 +1106,10 @@
     <footer class="footer">
       <div class="footer-links">
         <a href="https://r91628120.github.io/ai-agri-education/">🏠 回 AI農業教育平台</a>
-        <a href="https://weather.moa.gov.tw/" target="_blank" rel="noopener">🌦️ 農業部農業氣象服務網</a>
+        <a href="https://agr.cwa.gov.tw/" target="_blank" rel="noopener">🌦️ 農業氣象觀測網</a>
       </div>
       <p>
-        AI農業氣象教練 2.0｜AI農業教育平台｜教學示範用途
+        AI農業氣象教練 4.0｜AI農業教育平台｜教學示範用途
       </p>
     </footer>
 
@@ -982,6 +1129,11 @@
     */
 
     const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbw7zj9FmzzzciRlE2oGmrHsJhx5WjOFzjzwUvZXBocKnyFMF4o9YacQAZTwVUfit_Kh/exec";
+
+    // 建立好 GPT 後，請把網址貼在下方雙引號內。
+    const GPT_COACH_URL = "請貼上您的AI農業氣象教練GPT網址";
+
+    let latestWeatherSnapshot = null;
 
     // 請把下方文字換成您的 Google Geocoding API Key，勿貼到對話中。
     const GOOGLE_GEOCODING_API_KEY = "請填入你的_GOOGLE_GEOCODING_API_KEY";
@@ -1282,6 +1434,21 @@
       document.getElementById("resultSubtitle").textContent =
         `最近測站：${stationName}（${stationId}${distanceText}），觀測時間：${weather.obsTime || "未提供"}，判斷重點：${task}`;
 
+      latestWeatherSnapshot = {
+        stationName,
+        stationId,
+        distanceText,
+        obsTime: weather.obsTime || "未提供",
+        temp: showValue(weather.temp),
+        humidity: showValue(weather.humidity),
+        rain: weather.rain || "--",
+        rainMm: showValue(weather.rainMm),
+        wind: weather.wind || "--",
+        windSpeed: showValue(weather.windSpeed),
+        sunshine: showValue(weather.sunshine),
+        soil10: showValue(weather.soil10)
+      };
+
       document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
       document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
       document.getElementById("rainValue").textContent = weather.rain || "--";
@@ -1568,11 +1735,13 @@ ${note || "無"}
 
   const logs = getFarmLogs();
   logs.unshift({
+    id: Date.now(),
     date,
     location: `${county}${town}`,
     crop,
     work: work || "未填寫工作",
-    note: note || "無補充內容"
+    note: note || "無補充內容",
+    weather: latestWeatherSnapshot ? { ...latestWeatherSnapshot } : null
   });
 
   localStorage.setItem("farmLogs", JSON.stringify(logs));
@@ -1596,13 +1765,27 @@ ${note || "無"}
     return;
   }
 
-  list.innerHTML = logs.map(log => `
-    <div class="log-item">
-      <strong>${log.date}｜${log.crop}｜${log.work}</strong><br>
-      <span>${log.location}</span><br>
-      <small>${log.note}</small>
-    </div>
-  `).join("");
+  list.innerHTML = logs.map((log, index) => {
+    const weatherHtml = log.weather ? `
+      <div class="log-weather">
+        🌦️ ${log.weather.stationName || "最近測站"}｜${log.weather.obsTime || "未提供"}<br>
+        氣溫 ${log.weather.temp}℃｜濕度 ${log.weather.humidity}%｜雨量 ${log.weather.rainMm}mm｜風速 ${log.weather.windSpeed}m/s
+      </div>
+    ` : `<div class="log-weather">尚未附加氣象資料。請先產生氣象農事建議，再儲存日誌。</div>`;
+
+    return `
+      <div class="log-item">
+        <strong>${log.date}｜${log.crop}｜${log.work}</strong><br>
+        <span>${log.location}</span><br>
+        <small>${log.note}</small>
+        ${weatherHtml}
+        <div class="log-action-row">
+          <button class="btn btn-light btn-mini" onclick="exportFarmLogImage(${index})">🖼️ 圖片</button>
+          <button class="btn btn-light btn-mini" onclick="exportFarmLogPdf(${index})">📄 PDF</button>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
   function clearFarmLogs() {
@@ -1611,6 +1794,254 @@ ${note || "無"}
      renderFarmLogs();
 }
 
+
+
+
+
+  function openGptCoach() {
+    if (!GPT_COACH_URL || GPT_COACH_URL.includes("請貼上")) {
+      alert("請先建立 AI農業氣象教練 GPT，並把 GPT 網址貼到程式碼中的 GPT_COACH_URL。");
+      return;
+    }
+    window.open(GPT_COACH_URL, "_blank", "noopener");
+  }
+
+  function exportLatestLogImage() {
+    const logs = getFarmLogs();
+    if (logs.length === 0) {
+      alert("目前沒有日誌可匯出，請先儲存一筆日誌。");
+      return;
+    }
+    exportFarmLogImage(0);
+  }
+
+  function exportLatestLogPdf() {
+    const logs = getFarmLogs();
+    if (logs.length === 0) {
+      alert("目前沒有日誌可匯出，請先儲存一筆日誌。");
+      return;
+    }
+    exportFarmLogPdf(0);
+  }
+
+  function buildShareCardHtml(log) {
+    const weather = log.weather || {};
+    const weatherText = log.weather
+      ? `氣溫 ${weather.temp}℃｜濕度 ${weather.humidity}%｜雨量 ${weather.rainMm}mm｜風速 ${weather.windSpeed}m/s`
+      : "尚未附加氣象資料";
+
+    return `
+      <div class="share-card-preview" id="activeShareCard">
+        <div class="share-card-inner">
+          <div class="share-card-header">
+            <div>
+              <div class="share-card-logo">🌦️ AI農業氣象教練</div>
+              <div class="share-card-title">AI農場經營日誌</div>
+              <div class="share-card-subtitle">把氣象資料變成農業決策紀錄</div>
+            </div>
+            <div style="text-align:right;font-weight:900;color:#047857;">
+              ${escapeHtml(log.date)}<br>
+              <span style="font-size:0.95rem;color:#6b7280;">教學分享卡</span>
+            </div>
+          </div>
+
+          <div class="share-card-grid">
+            <div class="share-card-box">📍 地點：${escapeHtml(log.location)}</div>
+            <div class="share-card-box">🌱 作物：${escapeHtml(log.crop)}</div>
+            <div class="share-card-box">🧑‍🌾 農事：${escapeHtml(log.work)}</div>
+            <div class="share-card-box">🌦️ 測站：${escapeHtml(weather.stationName || "未提供")}</div>
+            <div class="share-card-box">🌡️ 氣溫：${escapeHtml(String(weather.temp || "--"))} ℃</div>
+            <div class="share-card-box">💧 濕度：${escapeHtml(String(weather.humidity || "--"))} %</div>
+            <div class="share-card-box">☔ 雨量：${escapeHtml(String(weather.rainMm || "--"))} mm</div>
+            <div class="share-card-box">💨 風速：${escapeHtml(String(weather.windSpeed || "--"))} m/s</div>
+          </div>
+
+          <div class="share-card-note">${escapeHtml(log.note)}</div>
+
+          <div class="share-card-footer">
+            <span>${escapeHtml(weatherText)}</span>
+            <span>AI農業教育平台</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function exportFarmLogImage(index) {
+    const logs = getFarmLogs();
+    const log = logs[index];
+    if (!log) return;
+
+    const mount = document.getElementById("shareCardMount");
+    mount.innerHTML = buildShareCardHtml(log);
+    const card = document.getElementById("activeShareCard");
+
+    const canvas = await renderShareCardToCanvas(card, log);
+    const link = document.createElement("a");
+    link.download = `AI農場經營日誌_${log.date}_${log.crop}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    mount.innerHTML = "";
+  }
+
+  async function exportFarmLogPdf(index) {
+    const logs = getFarmLogs();
+    const log = logs[index];
+    if (!log) return;
+
+    const mount = document.getElementById("shareCardMount");
+    mount.innerHTML = buildShareCardHtml(log);
+    const card = document.getElementById("activeShareCard");
+    const canvas = await renderShareCardToCanvas(card, log);
+
+    if (window.jspdf && window.jspdf.jsPDF) {
+      const pdf = new window.jspdf.jsPDF({ orientation: "landscape", unit: "px", format: [canvas.width, canvas.height] });
+      pdf.addImage(canvas.toDataURL("image/png"), "PNG", 0, 0, canvas.width, canvas.height);
+      pdf.save(`AI農場經營日誌_${log.date}_${log.crop}.pdf`);
+    } else {
+      const printArea = document.getElementById("printArea");
+      printArea.style.display = "block";
+      printArea.innerHTML = buildShareCardHtml(log).replace("share-card-preview", "share-card-preview print-card");
+      alert("PDF 套件尚未載入，接下來會開啟列印視窗，請選擇『另存為 PDF』。");
+      window.print();
+      printArea.style.display = "none";
+      printArea.innerHTML = "";
+    }
+
+    mount.innerHTML = "";
+  }
+
+  async function renderShareCardToCanvas(card, log) {
+    await new Promise(resolve => setTimeout(resolve, 120));
+
+    const canvas = document.createElement("canvas");
+    const width = 900;
+    const height = 560;
+    const dpr = Math.max(1, Math.min(window.devicePixelRatio || 1, 2));
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = `${width}px`;
+    canvas.style.height = `${height}px`;
+    const ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    const gradient = ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, "#ecfccb");
+    gradient.addColorStop(1, "#e0f2fe");
+    ctx.fillStyle = gradient;
+    roundRect(ctx, 0, 0, width, height, 30);
+    ctx.fill();
+
+    ctx.fillStyle = "rgba(255,255,255,0.94)";
+    roundRect(ctx, 36, 36, width - 72, height - 72, 26);
+    ctx.fill();
+    ctx.strokeStyle = "#bbf7d0";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillStyle = "#14532d";
+    ctx.font = "900 28px Microsoft JhengHei, sans-serif";
+    ctx.fillText("🌦️ AI農業氣象教練", 70, 82);
+    ctx.font = "900 46px Microsoft JhengHei, sans-serif";
+    ctx.fillText("AI農場經營日誌", 70, 140);
+    ctx.font = "700 20px Microsoft JhengHei, sans-serif";
+    ctx.fillStyle = "#047857";
+    ctx.fillText("把氣象資料變成農業決策紀錄", 70, 174);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#047857";
+    ctx.font = "900 22px Microsoft JhengHei, sans-serif";
+    ctx.fillText(log.date, width - 70, 84);
+    ctx.font = "700 16px Microsoft JhengHei, sans-serif";
+    ctx.fillStyle = "#6b7280";
+    ctx.fillText("教學分享卡", width - 70, 112);
+    ctx.textAlign = "left";
+
+    const weather = log.weather || {};
+    const boxes = [
+      [`📍 地點：${log.location}`, `🌱 作物：${log.crop}`],
+      [`🧑‍🌾 農事：${log.work}`, `🌦️ 測站：${weather.stationName || "未提供"}`],
+      [`🌡️ 氣溫：${weather.temp || "--"} ℃`, `💧 濕度：${weather.humidity || "--"} %`],
+      [`☔ 雨量：${weather.rainMm || "--"} mm`, `💨 風速：${weather.windSpeed || "--"} m/s`]
+    ].flat();
+
+    ctx.font = "800 19px Microsoft JhengHei, sans-serif";
+    boxes.forEach((text, i) => {
+      const col = i % 2;
+      const row = Math.floor(i / 2);
+      const x = 70 + col * 390;
+      const y = 206 + row * 54;
+      ctx.fillStyle = "#f8fafc";
+      roundRect(ctx, x, y, 360, 40, 14);
+      ctx.fill();
+      ctx.strokeStyle = "#d1fae5";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.fillStyle = "#14532d";
+      ctx.fillText(text.slice(0, 28), x + 14, y + 27);
+    });
+
+    ctx.fillStyle = "#111827";
+    roundRect(ctx, 70, 430, 760, 76, 18);
+    ctx.fill();
+    ctx.fillStyle = "#d1fae5";
+    ctx.font = "700 18px Microsoft JhengHei, sans-serif";
+    wrapText(ctx, log.note || "無補充內容", 92, 460, 720, 26, 2);
+
+    ctx.fillStyle = "#6b7280";
+    ctx.font = "800 16px Microsoft JhengHei, sans-serif";
+    const footerWeather = log.weather
+      ? `觀測：${weather.obsTime || "未提供"}｜${weather.rain || "--"}｜${weather.wind || "--"}`
+      : "尚未附加氣象資料";
+    ctx.fillText(footerWeather, 70, 532);
+    ctx.textAlign = "right";
+    ctx.fillText("AI農業教育平台", width - 70, 532);
+    ctx.textAlign = "left";
+
+    return canvas;
+  }
+
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+  }
+
+  function wrapText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 3) {
+    const chars = String(text).split("");
+    let line = "";
+    let lines = 0;
+    for (let i = 0; i < chars.length; i++) {
+      const testLine = line + chars[i];
+      if (ctx.measureText(testLine).width > maxWidth && i > 0) {
+        ctx.fillText(line, x, y);
+        line = chars[i];
+        y += lineHeight;
+        lines++;
+        if (lines >= maxLines - 1) break;
+      } else {
+        line = testLine;
+      }
+    }
+    if (line) ctx.fillText(line.length > 52 ? line.slice(0, 52) + "…" : line, x, y);
+  }
+
+  function escapeHtml(text) {
+    return String(text)
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 
 
     function resetForm() {
@@ -1629,6 +2060,7 @@ ${note || "無"}
       document.getElementById("adviceList").innerHTML = "<li>目前尚未產生建議。</li>";
       document.getElementById("riskList").innerHTML = "<li>目前尚未產生風險提醒。</li>";
       document.getElementById("promptBox").textContent = "AI 指令將顯示在這裡。";
+      latestWeatherSnapshot = null;
     }
 
   </script>

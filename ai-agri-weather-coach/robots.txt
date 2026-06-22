@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/sitemap.xml
