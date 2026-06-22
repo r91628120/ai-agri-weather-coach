@@ -611,15 +611,13 @@
             </div>
 
             <div>
-              <label for="crop">作物</label>
-              <select id="crop">
-                <option value="芒果">芒果</option>
-                <option value="水稻">水稻</option>
-                <option value="鳳梨">鳳梨</option>
-                <option value="茶樹">茶樹</option>
-                <option value="番茄">番茄</option>
-                <option value="葉菜類">葉菜類</option>
-              </select>
+              <label for="crop">作物名稱</label>
+
+               <input
+                     id="crop"
+                     type="text"
+                     placeholder="例如：芒果、蓮霧、番石榴、木瓜、水稻"
+                     />
             </div>
 
             <div>
@@ -858,21 +856,28 @@ document.addEventListener("DOMContentLoaded", initTownshipSelector);
 
 
 
-    async function fetchMoaWeatherData(locationName) {
-      if (!MOA_API_PROXY_URL) {
-        return getDemoWeatherData(locationName);
-      }
+    async function fetchMoaWeatherData(stationId) {
 
-      try {
-        const url = `${MOA_API_PROXY_URL}?location=${encodeURIComponent(locationName)}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("API 回應失敗");
-        return await response.json();
-      } catch (error) {
-        console.warn("農業部 API 讀取失敗，改用示範資料：", error);
-        return getDemoWeatherData(locationName);
-      }
+  try {
+
+    const url =
+      `${MOA_API_PROXY_URL}?location=${encodeURIComponent(stationId)}`;
+
+    const response = await fetch(url);
+
+    if (!response.ok) {
+      throw new Error("API 回應失敗");
     }
+
+    return await response.json();
+
+  } catch (error) {
+
+    console.error(error);
+
+    return null;
+  }
+}
 
     function getDemoWeatherData(locationName) {
       const demo = {
@@ -887,6 +892,15 @@ document.addEventListener("DOMContentLoaded", initTownshipSelector);
       return demo[locationName] || { temp: 30, humidity: 75, rain: "中", wind: "低", condition: "多雲時晴" };
     }
 
+    const county = document.getElementById("county").value;
+    const town = document.getElementById("town").value;
+
+    const locationName = `${county} ${town}`;
+
+    const stationId = currentStation.id;
+    const stationName = currentStation.name; 
+
+
     async function generateAdvice() {
       const county = document.getElementById("county").value;
       const crop = document.getElementById("crop").value;
@@ -894,9 +908,16 @@ document.addEventListener("DOMContentLoaded", initTownshipSelector);
       const task = document.getElementById("task").value;
       const note = document.getElementById("note").value.trim();
 
+      const county = document.getElementById("county").value;
+      const town = document.getElementById("town").value;
+
+      const locationName = `${county} ${town}`;
+      const stationId = currentStation.id;
+      const stationName = currentStation.name;
+
       const weather = await fetchMoaWeatherData(stationId);
        
-       if (!weather || !weather.temp) {
+       if (!weather || weather.success !== true);
            alert("氣象資料格式不正確，請檢查 GAS 回傳欄位是否包含 temp、humidity、rain、wind、condition。");
            console.log("GAS 回傳資料：", weather);
            return;
