@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>AI農業氣象教練 1.0｜AI農業教育平台</title>
-  <meta name="description" content="AI農業氣象教練 1.0，導入真實農業氣象資料，協助學生學習氣象判讀、農事決策、病蟲害風險與智慧農業推演。">
+  <title>AI農業氣象教練 2.0｜AI農業教育平台</title>
+  <meta name="description" content="AI農業氣象教練 2.0，導入真實農業氣象資料，協助學生學習氣象判讀、農事決策、病蟲害風險與智慧農業推演。">
 
   <style>
     :root {
@@ -472,6 +472,25 @@
       border: 1px solid rgba(22, 163, 74, 0.15);
     }
 
+
+    .station-note {
+      margin-top: 8px;
+      color: var(--text-soft);
+      font-size: 0.88rem;
+    }
+
+    .distance-badge {
+      display: inline-flex;
+      margin-top: 6px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #ecfeff;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      font-size: 0.85rem;
+      font-weight: 800;
+    }
+
     @media (max-width: 960px) {
       .feature-grid,
       .learning-flow {
@@ -518,7 +537,7 @@
     <header class="topbar">
       <a class="brand" href="#">
         <span class="brand-icon">🌦️</span>
-        <span>AI農業氣象教練 1.0</span>
+        <span>AI農業氣象教練 2.0</span>
       </a>
 
       <nav class="nav-links">
@@ -532,7 +551,7 @@
     <section class="hero">
       <div class="hero-content">
         <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
-        <h1>AI農業氣象教練 1.0</h1>
+        <h1>AI農業氣象教練 2.0</h1>
         <p class="hero-subtitle">
           導入農業部農業氣象資料，協助學生從「看天氣」進一步學會
           氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
@@ -588,7 +607,7 @@
         <div class="eyebrow">AI SIMULATION</div>
         <h2>AI農業氣象判讀模擬器</h2>
         <p>
-          已串接農業氣象站資料，使用者選擇縣市鄉鎮後，系統自動對應附近代表測站並帶入即時觀測資料。
+          已串接農業氣象站資料，使用者選擇縣市鄉鎮後，系統會將鄉鎮轉成座標，自動尋找最近農業氣象站並帶入即時觀測資料。
         </p>
       </div>
 
@@ -606,20 +625,17 @@
               <label for="town">鄉鎮市區</label>
               <select id="town" onchange="updateMatchedStation()"></select>
               <small id="stationHint" style="display:block;margin-top:6px;color:#6b7280;">
-                   系統會自動對應附近農業氣象站
+                   系統會自動尋找最近農業氣象站
               </small>
             </div>
 
             <div>
-              <label for="crop">作物</label>
-              <select id="crop">
-                <option value="芒果">芒果</option>
-                <option value="水稻">水稻</option>
-                <option value="鳳梨">鳳梨</option>
-                <option value="茶樹">茶樹</option>
-                <option value="番茄">番茄</option>
-                <option value="葉菜類">葉菜類</option>
-              </select>
+              <label for="crop">作物名稱</label>
+              <input
+                id="crop"
+                type="text"
+                placeholder="例如：芒果、水稻、鳳梨、蓮霧、咖啡"
+              />
             </div>
 
             <div>
@@ -654,6 +670,7 @@
 
           <div class="action-row">
             <button class="btn btn-green" onclick="generateAdvice()">🌾 產生氣象農事建議</button>
+            <button class="btn btn-light" onclick="locateMeAndFillTown()">📍 取得我的位置</button>
             <button class="btn btn-light" onclick="copyPrompt()">📋 複製 AI 指令</button>
             <button class="btn btn-light" onclick="resetForm()">🔄 清除重來</button>
           </div>
@@ -771,7 +788,7 @@
         <a href="https://weather.moa.gov.tw/" target="_blank" rel="noopener">🌦️ 農業部農業氣象服務網</a>
       </div>
       <p>
-        AI農業氣象教練 1.0｜AI農業教育平台｜教學示範用途
+        AI農業氣象教練 2.0｜AI農業教育平台｜教學示範用途
       </p>
     </footer>
 
@@ -780,135 +797,94 @@
   <script>
     /*
       =====================================================
-      農業部 API 串接預留區
+      AI農業氣象教練 V2.0
+      鄉鎮 → Google Geocoding → 最近農業氣象站 → GAS → 農業氣象資料
       =====================================================
 
-      未來正式串接時，建議流程：
-
-      1. GitHub Pages 前端
-         ↓
-      2. Google Apps Script / Cloudflare Worker / Firebase Functions
-         ↓
-      3. 農業部農業氣象 API
-
-      請不要直接把 API Token 寫在前端。
+      使用方式：
+      1. 將 GOOGLE_GEOCODING_API_KEY 換成您的 Google API Key。
+      2. GAS 中繼網址 MOA_API_PROXY_URL 保持為目前已部署的網址。
+      3. 若 Google Key 暫時未填，系統會先用內建縣市代表座標做備援。
     */
 
     const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbw7zj9FmzzzciRlE2oGmrHsJhx5WjOFzjzwUvZXBocKnyFMF4o9YacQAZTwVUfit_Kh/exec";
 
+    // 請把下方文字換成您的 Google Geocoding API Key，勿貼到對話中。
+    const GOOGLE_GEOCODING_API_KEY = "請填入你的_GOOGLE_GEOCODING_API_KEY";
+
     let townshipData = {};
     let currentStation = {
       id: "C2R970",
-      name: "屏科大"
+      name: "屏科大",
+      lat: 22.6408,
+      lng: 120.5960,
+      distanceKm: null
     };
 
     /*
-      第一版採用「鄉鎮 → 代表農業氣象站」。
-      使用者不用知道測站位置，只要選自己的縣市與鄉鎮。
-      未列入 STATION_BY_TOWN 的鄉鎮，會回到縣市代表站 STATION_BY_COUNTY。
+      代表性農業氣象站座標。
+      這一版先建立教學常用站點，未來可持續擴充 stations.json。
+      系統會用鄉鎮座標計算最近測站，不再只靠手動對照表。
     */
-    const STATION_BY_COUNTY = {
-      "臺北市": { id: "C2A880", name: "臺北代表站" },
-      "新北市": { id: "C2A880", name: "北部代表站" },
-      "基隆市": { id: "C2A880", name: "北部代表站" },
-      "桃園市": { id: "72C440", name: "桃園農改" },
-      "新竹市": { id: "72D680", name: "桃改新埔分場" },
-      "新竹縣": { id: "72D680", name: "桃改新埔分場" },
-      "苗栗縣": { id: "K2E360", name: "苗栗農改" },
-      "臺中市": { id: "72G600", name: "臺中農改" },
-      "彰化縣": { id: "72G600", name: "臺中農改" },
-      "南投縣": { id: "72HA00", name: "中改埔里分場" },
-      "雲林縣": { id: "A2K630", name: "臺大雲林校區" },
-      "嘉義市": { id: "C2M910", name: "嘉義大學" },
-      "嘉義縣": { id: "G2L020", name: "農試嘉義分所" },
-      "臺南市": { id: "72N100", name: "臺南農改" },
-      "高雄市": { id: "72Q010", name: "高雄農改" },
-      "屏東縣": { id: "C2R970", name: "屏科大" },
-      "宜蘭縣": { id: "72U480", name: "花改蘭陽分場" },
-      "花蓮縣": { id: "72T250", name: "花蓮農改" },
-      "臺東縣": { id: "72S590", name: "東改賓朗果園" },
-      "澎湖縣": { id: "C2W230", name: "畜試所澎湖" },
-      "金門縣": { id: "C2W030", name: "金門農試所" },
-      "連江縣": { id: "72S590", name: "東改賓朗果園" }
-    };
+    const AGRI_STATIONS = [
+      { id: "72C440", name: "桃園農改", county: "桃園市", lat: 24.9500, lng: 121.0300 },
+      { id: "72D680", name: "桃改新埔分場", county: "新竹縣", lat: 24.8300, lng: 121.0700 },
+      { id: "K2E360", name: "苗栗農改", county: "苗栗縣", lat: 24.5600, lng: 120.8200 },
+      { id: "72G600", name: "臺中農改", county: "臺中市", lat: 24.0000, lng: 120.5300 },
+      { id: "72HA00", name: "中改埔里分場", county: "南投縣", lat: 23.9700, lng: 120.9700 },
+      { id: "A2K630", name: "臺大雲林校區", county: "雲林縣", lat: 23.7000, lng: 120.5300 },
+      { id: "C2M910", name: "嘉義大學", county: "嘉義市", lat: 23.4630, lng: 120.4840 },
+      { id: "G2L020", name: "農試嘉義分所", county: "嘉義縣", lat: 23.5000, lng: 120.4500 },
+      { id: "72N100", name: "臺南農改", county: "臺南市", lat: 23.0500, lng: 120.3300 },
+      { id: "A2N290", name: "臺南蘭花園區", county: "臺南市", lat: 23.3400, lng: 120.3200 },
+      { id: "72Q010", name: "高雄農改", county: "高雄市", lat: 22.9000, lng: 120.5300 },
+      { id: "72V140", name: "高改旗南分場", county: "高雄市", lat: 22.8800, lng: 120.6400 },
+      { id: "C2R970", name: "屏科大", county: "屏東縣", lat: 22.6408, lng: 120.5960 },
+      { id: "72S590", name: "東改賓朗果園", county: "臺東縣", lat: 22.7900, lng: 121.0900 },
+      { id: "72S200", name: "東改班鳩分場", county: "臺東縣", lat: 23.1000, lng: 121.2000 },
+      { id: "72T250", name: "花蓮農改", county: "花蓮縣", lat: 23.9700, lng: 121.5900 },
+      { id: "72U480", name: "花改蘭陽分場", county: "宜蘭縣", lat: 24.7500, lng: 121.7500 },
+      { id: "82C160", name: "茶改場", county: "桃園市", lat: 24.9000, lng: 121.1800 },
+      { id: "82A750", name: "茶改北部分場", county: "新北市", lat: 24.9100, lng: 121.7000 },
+      { id: "82H320", name: "茶改中部分場", county: "南投縣", lat: 23.8400, lng: 120.9000 },
+      { id: "82H840", name: "茶改南部分場", county: "嘉義縣", lat: 23.5100, lng: 120.7000 },
+      { id: "G2F820", name: "農業試驗所", county: "臺中市", lat: 24.0300, lng: 120.6900 },
+      { id: "G2P820", name: "農試鳳山分所", county: "高雄市", lat: 22.6300, lng: 120.3500 },
+      { id: "B2N890", name: "畜試所", county: "臺南市", lat: 23.1100, lng: 120.3000 },
+      { id: "B2Q810", name: "畜試南區分所", county: "屏東縣", lat: 22.5400, lng: 120.5300 },
+      { id: "B2U990", name: "畜試東區分所", county: "花蓮縣", lat: 23.8200, lng: 121.4300 },
+      { id: "C2W230", name: "畜試所澎湖", county: "澎湖縣", lat: 23.5700, lng: 119.5800 },
+      { id: "C2W030", name: "金門農試所", county: "金門縣", lat: 24.4400, lng: 118.3200 },
+      { id: "C2C410", name: "中央大學", county: "桃園市", lat: 24.9680, lng: 121.1950 },
+      { id: "U2H480", name: "臺大溪頭", county: "南投縣", lat: 23.6740, lng: 120.7950 },
+      { id: "U2HA30", name: "臺大和社", county: "南投縣", lat: 23.5900, lng: 120.8800 },
+      { id: "U2HA40", name: "臺大內茅埔", county: "南投縣", lat: 23.7600, lng: 120.7200 },
+      { id: "U2HA50", name: "臺大竹山", county: "南投縣", lat: 23.7600, lng: 120.6800 }
+    ];
 
-    const STATION_BY_TOWN = {
-      "屏東縣": {
-        "屏東市": { id: "C2R970", name: "屏科大" },
-        "長治鄉": { id: "C2R970", name: "屏科大" },
-        "麟洛鄉": { id: "C2R970", name: "屏科大" },
-        "內埔鄉": { id: "C2R970", name: "屏科大" },
-        "萬丹鄉": { id: "C2R970", name: "屏科大" },
-        "潮州鎮": { id: "C2R970", name: "屏科大" },
-        "高樹鄉": { id: "C2R970", name: "屏科大" },
-        "枋寮鄉": { id: "72Q010", name: "高雄農改" },
-        "枋山鄉": { id: "72S590", name: "東改賓朗果園" },
-        "獅子鄉": { id: "72S590", name: "東改賓朗果園" },
-        "春日鄉": { id: "72S590", name: "東改賓朗果園" },
-        "恆春鎮": { id: "72S590", name: "東改賓朗果園" },
-        "車城鄉": { id: "72S590", name: "東改賓朗果園" },
-        "滿州鄉": { id: "72S590", name: "東改賓朗果園" },
-        "牡丹鄉": { id: "72S590", name: "東改賓朗果園" }
-      },
-      "高雄市": {
-        "美濃區": { id: "72Q010", name: "高雄農改" },
-        "旗山區": { id: "72Q010", name: "高雄農改" },
-        "杉林區": { id: "72Q010", name: "高雄農改" },
-        "內門區": { id: "72Q010", name: "高雄農改" },
-        "六龜區": { id: "72V140", name: "高改旗南分場" },
-        "甲仙區": { id: "72V140", name: "高改旗南分場" },
-        "桃源區": { id: "72V140", name: "高改旗南分場" },
-        "那瑪夏區": { id: "72V140", name: "高改旗南分場" }
-      },
-      "臺南市": {
-        "關廟區": { id: "72N100", name: "臺南農改" },
-        "新化區": { id: "72N100", name: "臺南農改" },
-        "玉井區": { id: "72N100", name: "臺南農改" },
-        "楠西區": { id: "72N100", name: "臺南農改" },
-        "麻豆區": { id: "72N100", name: "臺南農改" },
-        "官田區": { id: "72N100", name: "臺南農改" }
-      },
-      "嘉義縣": {
-        "阿里山鄉": { id: "82H840", name: "茶改南部分場" },
-        "梅山鄉": { id: "82H840", name: "茶改南部分場" },
-        "竹崎鄉": { id: "G2L020", name: "農試嘉義分所" },
-        "民雄鄉": { id: "G2L020", name: "農試嘉義分所" }
-      },
-      "嘉義市": {
-        "東區": { id: "C2M910", name: "嘉義大學" },
-        "西區": { id: "C2M910", name: "嘉義大學" }
-      },
-      "雲林縣": {
-        "斗六市": { id: "A2K630", name: "臺大雲林校區" },
-        "虎尾鎮": { id: "A2K630", name: "臺大雲林校區" },
-        "西螺鎮": { id: "A2K630", name: "臺大雲林校區" },
-        "古坑鄉": { id: "A2K630", name: "臺大雲林校區" }
-      },
-      "南投縣": {
-        "埔里鎮": { id: "72HA00", name: "中改埔里分場" },
-        "魚池鄉": { id: "72HA00", name: "中改埔里分場" },
-        "仁愛鄉": { id: "72HA00", name: "中改埔里分場" },
-        "鹿谷鄉": { id: "U2H480", name: "臺大溪頭" },
-        "竹山鎮": { id: "U2HA50", name: "臺大竹山" }
-      },
-      "臺東縣": {
-        "臺東市": { id: "72S590", name: "東改賓朗果園" },
-        "卑南鄉": { id: "72S590", name: "東改賓朗果園" },
-        "鹿野鄉": { id: "72S590", name: "東改賓朗果園" },
-        "關山鎮": { id: "72S590", name: "東改賓朗果園" },
-        "池上鄉": { id: "72S590", name: "東改賓朗果園" },
-        "太麻里鄉": { id: "72S590", name: "東改賓朗果園" },
-        "大武鄉": { id: "72S590", name: "東改賓朗果園" }
-      },
-      "花蓮縣": {
-        "花蓮市": { id: "72T250", name: "花蓮農改" },
-        "吉安鄉": { id: "72T250", name: "花蓮農改" },
-        "壽豐鄉": { id: "72T250", name: "花蓮農改" },
-        "鳳林鎮": { id: "72T250", name: "花蓮農改" },
-        "瑞穗鄉": { id: "72T250", name: "花蓮農改" },
-        "玉里鎮": { id: "72T250", name: "花蓮農改" },
-        "富里鄉": { id: "72T250", name: "花蓮農改" }
-      }
+    const COUNTY_FALLBACK_COORDS = {
+      "臺北市": { lat: 25.0330, lng: 121.5654 },
+      "新北市": { lat: 25.0169, lng: 121.4628 },
+      "基隆市": { lat: 25.1276, lng: 121.7392 },
+      "桃園市": { lat: 24.9936, lng: 121.3010 },
+      "新竹市": { lat: 24.8138, lng: 120.9675 },
+      "新竹縣": { lat: 24.8387, lng: 121.0177 },
+      "苗栗縣": { lat: 24.5602, lng: 120.8214 },
+      "臺中市": { lat: 24.1477, lng: 120.6736 },
+      "彰化縣": { lat: 24.0518, lng: 120.5161 },
+      "南投縣": { lat: 23.9609, lng: 120.9719 },
+      "雲林縣": { lat: 23.7092, lng: 120.4313 },
+      "嘉義市": { lat: 23.4801, lng: 120.4491 },
+      "嘉義縣": { lat: 23.4518, lng: 120.2555 },
+      "臺南市": { lat: 22.9999, lng: 120.2270 },
+      "高雄市": { lat: 22.6273, lng: 120.3014 },
+      "屏東縣": { lat: 22.5519, lng: 120.5488 },
+      "宜蘭縣": { lat: 24.7021, lng: 121.7378 },
+      "花蓮縣": { lat: 23.9872, lng: 121.6015 },
+      "臺東縣": { lat: 22.7972, lng: 121.0714 },
+      "澎湖縣": { lat: 23.5711, lng: 119.5793 },
+      "金門縣": { lat: 24.4321, lng: 118.3171 },
+      "連江縣": { lat: 26.1602, lng: 119.9517 }
     };
 
     async function initTownshipSelector() {
@@ -919,9 +895,11 @@
         console.error("townships.json 讀取失敗：", error);
         townshipData = {
           "屏東縣": ["屏東市", "內埔鄉", "枋山鄉", "恆春鎮"],
-          "高雄市": ["美濃區", "旗山區"],
-          "臺南市": ["關廟區", "玉井區"],
-          "臺東縣": ["臺東市", "池上鄉"]
+          "高雄市": ["美濃區", "旗山區", "六龜區"],
+          "臺南市": ["關廟區", "玉井區", "新化區"],
+          "臺東縣": ["臺東市", "池上鄉", "關山鎮"],
+          "嘉義縣": ["阿里山鄉", "梅山鄉", "民雄鄉"],
+          "南投縣": ["埔里鎮", "鹿谷鄉", "竹山鎮"]
         };
       }
 
@@ -939,12 +917,17 @@
       updateTownSelect("屏東市");
     }
 
+    function normalizeTownName(town) {
+      if (typeof town === "string") return town;
+      return town.name || town.town || town.township || town.value || String(town);
+    }
+
     function updateTownSelect(preferredTown) {
       const county = document.getElementById("county").value;
       const townSelect = document.getElementById("town");
       townSelect.innerHTML = "";
 
-      const towns = townshipData[county] || [];
+      const towns = (townshipData[county] || []).map(normalizeTownName);
       towns.forEach(town => {
         const option = document.createElement("option");
         option.value = town;
@@ -959,20 +942,113 @@
       updateMatchedStation();
     }
 
-    function updateMatchedStation() {
+    async function updateMatchedStation() {
       const county = document.getElementById("county").value;
       const town = document.getElementById("town").value;
-      const townStation =
-        STATION_BY_TOWN[county] &&
-        STATION_BY_TOWN[county][town];
-
-      currentStation =
-        townStation ||
-        STATION_BY_COUNTY[county] ||
-        { id: "72S590", name: "東改賓朗果園" };
 
       document.getElementById("stationHint").textContent =
-        `目前對應測站：${currentStation.name}（${currentStation.id}）`;
+        `正在依 ${county}${town} 尋找最近農業氣象站……`;
+
+      const position = await getTownLatLng(county, town);
+      const nearest = findNearestStation(position.lat, position.lng);
+
+      currentStation = nearest;
+
+      const distText = nearest.distanceKm !== null
+        ? `，距離約 ${nearest.distanceKm.toFixed(1)} 公里`
+        : "";
+
+      document.getElementById("stationHint").innerHTML =
+        `目前最近測站：${nearest.name}（${nearest.id}）<span class="distance-badge">${distText || "系統推估"}</span>`;
+    }
+
+    async function getTownLatLng(county, town) {
+      const address = `${county}${town}`;
+
+      if (
+        GOOGLE_GEOCODING_API_KEY &&
+        !GOOGLE_GEOCODING_API_KEY.includes("請填入")
+      ) {
+        try {
+          const url =
+            "https://maps.googleapis.com/maps/api/geocode/json" +
+            `?address=${encodeURIComponent(address)}` +
+            `&region=tw&language=zh-TW&key=${encodeURIComponent(GOOGLE_GEOCODING_API_KEY)}`;
+
+          const response = await fetch(url);
+          const data = await response.json();
+
+          if (data.status === "OK" && data.results && data.results[0]) {
+            return data.results[0].geometry.location;
+          }
+
+          console.warn("Google Geocoding 未取得結果：", data.status, data.error_message || "");
+        } catch (error) {
+          console.error("Google Geocoding 失敗：", error);
+        }
+      }
+
+      return COUNTY_FALLBACK_COORDS[county] || { lat: 23.6978, lng: 120.9605 };
+    }
+
+    function findNearestStation(lat, lng) {
+      let best = null;
+
+      AGRI_STATIONS.forEach(station => {
+        const distanceKm = getDistanceKm(lat, lng, station.lat, station.lng);
+        if (!best || distanceKm < best.distanceKm) {
+          best = { ...station, distanceKm };
+        }
+      });
+
+      return best || { id: "72S590", name: "東改賓朗果園", lat: 22.7900, lng: 121.0900, distanceKm: null };
+    }
+
+    function getDistanceKm(lat1, lng1, lat2, lng2) {
+      const R = 6371;
+      const dLat = toRad(lat2 - lat1);
+      const dLng = toRad(lng2 - lng1);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLng / 2) * Math.sin(dLng / 2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      return R * c;
+    }
+
+    function toRad(value) {
+      return value * Math.PI / 180;
+    }
+
+    async function locateMeAndFillTown() {
+      if (!navigator.geolocation) {
+        alert("您的瀏覽器不支援定位功能。");
+        return;
+      }
+
+      document.getElementById("stationHint").textContent = "正在取得您的位置……";
+
+      navigator.geolocation.getCurrentPosition(
+        async position => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+
+          const nearest = findNearestStation(lat, lng);
+          currentStation = nearest;
+
+          document.getElementById("stationHint").innerHTML =
+            `已依目前位置找到最近測站：${nearest.name}（${nearest.id}）<span class="distance-badge">距離約 ${nearest.distanceKm.toFixed(1)} 公里</span>`;
+
+          document.getElementById("resultSubtitle").textContent =
+            "已完成定位，您可以輸入作物與農事需求後產生建議。";
+        },
+        error => {
+          alert("無法取得定位，請確認瀏覽器定位權限已開啟。");
+          console.error(error);
+          updateMatchedStation();
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
+      );
     }
 
     document.addEventListener("DOMContentLoaded", initTownshipSelector);
@@ -995,8 +1071,14 @@
       const county = document.getElementById("county").value;
       const town = document.getElementById("town").value;
       const locationName = `${county} ${town}`;
+
+      await updateMatchedStation();
+
       const stationId = currentStation.id;
       const stationName = currentStation.name;
+      const distanceText = currentStation.distanceKm !== null
+        ? `，距離約 ${currentStation.distanceKm.toFixed(1)} 公里`
+        : "";
 
       const crop = document.getElementById("crop").value.trim() || "未填寫作物";
       const stage = document.getElementById("stage").value;
@@ -1005,7 +1087,7 @@
 
       document.getElementById("resultTitle").textContent = `${locationName}｜${crop}｜${stage}`;
       document.getElementById("resultSubtitle").textContent =
-        `正在讀取 ${stationName}（${stationId}）即時農業氣象資料……`;
+        `正在讀取最近測站 ${stationName}（${stationId}${distanceText}）即時農業氣象資料……`;
 
       const weather = await fetchMoaWeatherData(stationId);
 
@@ -1018,7 +1100,7 @@
       }
 
       document.getElementById("resultSubtitle").textContent =
-        `參考測站：${stationName}（${stationId}），觀測時間：${weather.obsTime || "未提供"}，判斷重點：${task}`;
+        `最近測站：${stationName}（${stationId}${distanceText}），觀測時間：${weather.obsTime || "未提供"}，判斷重點：${task}`;
 
       document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
       document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
@@ -1034,7 +1116,7 @@
       renderList("adviceList", advice);
       renderList("riskList", risks);
 
-      const prompt = buildPrompt(locationName, crop, stage, task, note, weather, stationName, stationId);
+      const prompt = buildPrompt(locationName, crop, stage, task, note, weather, stationName, stationId, distanceText);
       document.getElementById("promptBox").textContent = prompt;
     }
 
@@ -1148,7 +1230,7 @@
       });
     }
 
-    function buildPrompt(locationName, crop, stage, task, note, weather, stationName, stationId) {
+    function buildPrompt(locationName, crop, stage, task, note, weather, stationName, stationId, distanceText) {
       return `你是「AI農業氣象教練、作物栽培顧問與智慧農業決策教練」。
 
 請根據以下農業情境，協助學生進行氣象判讀與農事決策推演。
@@ -1156,8 +1238,8 @@
 【地區】
 ${locationName}
 
-【參考農業氣象站】
-${stationName}（${stationId}）
+【最近農業氣象站】
+${stationName}（${stationId}${distanceText || ""}）
 
 【作物】
 ${crop}
