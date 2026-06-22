@@ -765,6 +765,130 @@
         padding: 22px;
       }
     }
+
+    .footer{
+  margin-top:80px;
+  padding:50px 25px;
+  text-align:center;
+  background:#ffffff;
+  border-radius:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,.08);
+}
+
+.footer h3{
+  color:#14532d;
+  margin-bottom:10px;
+}
+
+.footer p{
+  color:#6b7280;
+  max-width:800px;
+  margin:auto;
+}
+
+.footer-stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:15px;
+  margin-top:30px;
+}
+
+.footer-box{
+  background:#f0fdf4;
+  border:1px solid #bbf7d0;
+  border-radius:18px;
+  padding:15px;
+  font-weight:700;
+  color:#14532d;
+}
+
+.footer-copy{
+  margin-top:30px;
+  font-size:.9rem;
+  color:#9ca3af;
+}
+
+@media(max-width:768px){
+  .footer-stats{
+    grid-template-columns:1fr 1fr;
+  }
+}
+
+.ecosystem-footer{
+  margin-top:80px;
+  background:linear-gradient(135deg,#064e3b,#14532d);
+  color:#fff;
+  border-radius:30px;
+  overflow:hidden;
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
+}
+
+.ecosystem-top{
+  padding:50px 40px;
+}
+
+.ecosystem-top h2{
+  margin:0 0 15px;
+  font-size:2rem;
+  color:#dcfce7;
+}
+
+.ecosystem-top p{
+  max-width:900px;
+  color:#d1fae5;
+  line-height:1.8;
+}
+
+.ecosystem-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+  margin-top:30px;
+}
+
+.ecosystem-card{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:20px;
+  padding:18px;
+  backdrop-filter:blur(10px);
+}
+
+.ecosystem-card h4{
+  margin:0 0 10px;
+  color:#fff;
+}
+
+.ecosystem-card p{
+  margin:0;
+  font-size:.9rem;
+  color:#d1fae5;
+}
+
+.ecosystem-links{
+  background:rgba(0,0,0,.15);
+  padding:25px;
+  text-align:center;
+}
+
+.ecosystem-links a{
+  display:inline-block;
+  margin:8px;
+  padding:10px 18px;
+  border-radius:999px;
+  background:#22c55e;
+  color:#fff;
+  font-weight:700;
+}
+
+.ecosystem-copy{
+  margin-top:20px;
+  color:#bbf7d0;
+  font-size:.9rem;
+}
+
+
+
   </style>
 </head>
 
@@ -1120,15 +1244,82 @@
       </div>
     </section>
 
-    <footer class="footer">
-      <div class="footer-links">
-        <a href="https://r91628120.github.io/ai-agri-education/">🏠 回 AI農業教育平台</a>
-        <a href="https://agr.cwa.gov.tw/" target="_blank" rel="noopener">🌦️ 農業氣象觀測網</a>
+  <footer class="ecosystem-footer">
+
+  <div class="ecosystem-top">
+
+    <h2>🌱 AI農業教育生態系</h2>
+
+    <p>
+      AI農業氣象教練屬於 AI農業教育平台生態系的一環，
+      透過氣象判讀、農事決策、防災管理與農場經營日誌，
+      協助學生建立從氣候觀察到農業經營的完整能力。
+    </p>
+
+    <div class="ecosystem-grid">
+
+      <div class="ecosystem-card">
+        <h4>🌿 AI植物探索王</h4>
+        <p>植物辨識、競賽挑戰與校際排行榜。</p>
       </div>
-      <p>
-        AI農業氣象教練 4.0｜AI農業教育平台｜教學示範用途
-      </p>
-    </footer>
+
+      <div class="ecosystem-card">
+        <h4>🌡️ AI農業氣象教練</h4>
+        <p>氣象判讀、農事決策與農業防災。</p>
+      </div>
+
+      <div class="ecosystem-card">
+        <h4>🩺 AI植物診療師</h4>
+        <p>病蟲害診斷與作物健康分析。</p>
+      </div>
+
+      <div class="ecosystem-card">
+        <h4>📊 AI農產品大數據</h4>
+        <p>市場行情、價格分析與經營推演。</p>
+      </div>
+
+      <div class="ecosystem-card">
+        <h4>🚀 AI農創品牌實驗室</h4>
+        <p>品牌故事、包裝設計與農產品行銷。</p>
+      </div>
+
+      <div class="ecosystem-card">
+        <h4>♻️ AI永續農業碳管理</h4>
+        <p>ESG、SDGs、碳排放與碳匯教育。</p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="ecosystem-links">
+
+    <a href="https://r91628120.github.io/ai-agri-education/">
+      🏠 AI農業教育平台
+    </a>
+
+    <a href="https://r91628120.github.io/ai-agri-education/founder.html">
+      📖 平台創辦故事
+    </a>
+
+    <a href="https://agr.cwa.gov.tw/" target="_blank">
+      🌦️ 農業氣象服務網
+    </a>
+
+    <a href="https://chatgpt.com/g/g-6a391cc88d8c8191a7985d213e03a9f6-ainong-ye-qi-xiang-jiao-lian"
+       target="_blank">
+      🤖 AI農業氣象教練 GPT
+    </a>
+
+    <div class="ecosystem-copy">
+      © 2026 AI農業教育平台｜
+      AI農業氣象教練 4.0｜
+      AI Agricultural Education Ecosystem
+    </div>
+
+  </div>
+
+</footer>
 
   </div>
 
