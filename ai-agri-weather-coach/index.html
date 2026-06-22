@@ -588,7 +588,7 @@
         <div class="eyebrow">AI SIMULATION</div>
         <h2>AI農業氣象判讀模擬器</h2>
         <p>
-          第一版先以教學模擬為主，未來可正式串接農業部 API，自動帶入真實農業氣象資料。
+          已串接農業氣象站資料，使用者選擇縣市鄉鎮後，系統自動對應附近代表測站並帶入即時觀測資料。
         </p>
       </div>
 
@@ -611,13 +611,15 @@
             </div>
 
             <div>
-              <label for="crop">作物名稱</label>
-
-               <input
-                     id="crop"
-                     type="text"
-                     placeholder="例如：芒果、蓮霧、番石榴、木瓜、水稻"
-                     />
+              <label for="crop">作物</label>
+              <select id="crop">
+                <option value="芒果">芒果</option>
+                <option value="水稻">水稻</option>
+                <option value="鳳梨">鳳梨</option>
+                <option value="茶樹">茶樹</option>
+                <option value="番茄">番茄</option>
+                <option value="葉菜類">葉菜類</option>
+              </select>
             </div>
 
             <div>
@@ -688,6 +690,22 @@
               <div class="metric">
                 <span>風速風險</span>
                 <b id="windValue">--</b>
+              </div>
+              <div class="metric">
+                <span>實測雨量</span>
+                <b id="rainMmValue">-- mm</b>
+              </div>
+              <div class="metric">
+                <span>實測風速</span>
+                <b id="windSpeedValue">-- m/s</b>
+              </div>
+              <div class="metric">
+                <span>日照時數</span>
+                <b id="sunshineValue">-- hr</b>
+              </div>
+              <div class="metric">
+                <span>土壤溫度10cm</span>
+                <b id="soil10Value">-- ℃</b>
               </div>
             </div>
 
@@ -777,198 +795,286 @@
     */
 
     const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbw7zj9FmzzzciRlE2oGmrHsJhx5WjOFzjzwUvZXBocKnyFMF4o9YacQAZTwVUfit_Kh/exec";
-    // 例如未來可以放：
-    // const MOA_API_PROXY_URL = "https://script.google.com/macros/s/你的GAS網址/exec";
-     
-     let townshipData = {};
-let currentStation = {
-  id: "72S590",
-  name: "東改賓朗果園"
-};
 
-const STATION_BY_COUNTY = {
-  "桃園市": { id: "72C440", name: "桃園農改" },
-  "新竹縣": { id: "72D680", name: "桃改新埔分場" },
-  "苗栗縣": { id: "K2E360", name: "苗栗農改" },
-  "臺中市": { id: "72G600", name: "臺中農改" },
-  "南投縣": { id: "72HA00", name: "中改埔里分場" },
-  "雲林縣": { id: "A2K630", name: "臺大雲林校區" },
-  "嘉義縣": { id: "G2L020", name: "農試嘉義分所" },
-  "嘉義市": { id: "C2M910", name: "嘉義大學" },
-  "臺南市": { id: "72N100", name: "臺南農改" },
-  "高雄市": { id: "72Q010", name: "高雄農改" },
-  "屏東縣": { id: "C2R970", name: "屏科大" },
-  "宜蘭縣": { id: "72U480", name: "花改蘭陽分場" },
-  "花蓮縣": { id: "72T250", name: "花蓮農改" },
-  "臺東縣": { id: "72S590", name: "東改賓朗果園" },
-  "澎湖縣": { id: "C2W230", name: "畜試所澎湖" },
-  "金門縣": { id: "C2W030", name: "金門農試所" }
-};
+    let townshipData = {};
+    let currentStation = {
+      id: "C2R970",
+      name: "屏科大"
+    };
 
-async function initTownshipSelector() {
-  const res = await fetch("townships.json");
-  townshipData = await res.json();
+    /*
+      第一版採用「鄉鎮 → 代表農業氣象站」。
+      使用者不用知道測站位置，只要選自己的縣市與鄉鎮。
+      未列入 STATION_BY_TOWN 的鄉鎮，會回到縣市代表站 STATION_BY_COUNTY。
+    */
+    const STATION_BY_COUNTY = {
+      "臺北市": { id: "C2A880", name: "臺北代表站" },
+      "新北市": { id: "C2A880", name: "北部代表站" },
+      "基隆市": { id: "C2A880", name: "北部代表站" },
+      "桃園市": { id: "72C440", name: "桃園農改" },
+      "新竹市": { id: "72D680", name: "桃改新埔分場" },
+      "新竹縣": { id: "72D680", name: "桃改新埔分場" },
+      "苗栗縣": { id: "K2E360", name: "苗栗農改" },
+      "臺中市": { id: "72G600", name: "臺中農改" },
+      "彰化縣": { id: "72G600", name: "臺中農改" },
+      "南投縣": { id: "72HA00", name: "中改埔里分場" },
+      "雲林縣": { id: "A2K630", name: "臺大雲林校區" },
+      "嘉義市": { id: "C2M910", name: "嘉義大學" },
+      "嘉義縣": { id: "G2L020", name: "農試嘉義分所" },
+      "臺南市": { id: "72N100", name: "臺南農改" },
+      "高雄市": { id: "72Q010", name: "高雄農改" },
+      "屏東縣": { id: "C2R970", name: "屏科大" },
+      "宜蘭縣": { id: "72U480", name: "花改蘭陽分場" },
+      "花蓮縣": { id: "72T250", name: "花蓮農改" },
+      "臺東縣": { id: "72S590", name: "東改賓朗果園" },
+      "澎湖縣": { id: "C2W230", name: "畜試所澎湖" },
+      "金門縣": { id: "C2W030", name: "金門農試所" },
+      "連江縣": { id: "72S590", name: "東改賓朗果園" }
+    };
 
-  const countySelect = document.getElementById("county");
-  countySelect.innerHTML = "";
+    const STATION_BY_TOWN = {
+      "屏東縣": {
+        "屏東市": { id: "C2R970", name: "屏科大" },
+        "長治鄉": { id: "C2R970", name: "屏科大" },
+        "麟洛鄉": { id: "C2R970", name: "屏科大" },
+        "內埔鄉": { id: "C2R970", name: "屏科大" },
+        "萬丹鄉": { id: "C2R970", name: "屏科大" },
+        "潮州鎮": { id: "C2R970", name: "屏科大" },
+        "高樹鄉": { id: "C2R970", name: "屏科大" },
+        "枋寮鄉": { id: "72Q010", name: "高雄農改" },
+        "枋山鄉": { id: "72S590", name: "東改賓朗果園" },
+        "獅子鄉": { id: "72S590", name: "東改賓朗果園" },
+        "春日鄉": { id: "72S590", name: "東改賓朗果園" },
+        "恆春鎮": { id: "72S590", name: "東改賓朗果園" },
+        "車城鄉": { id: "72S590", name: "東改賓朗果園" },
+        "滿州鄉": { id: "72S590", name: "東改賓朗果園" },
+        "牡丹鄉": { id: "72S590", name: "東改賓朗果園" }
+      },
+      "高雄市": {
+        "美濃區": { id: "72Q010", name: "高雄農改" },
+        "旗山區": { id: "72Q010", name: "高雄農改" },
+        "杉林區": { id: "72Q010", name: "高雄農改" },
+        "內門區": { id: "72Q010", name: "高雄農改" },
+        "六龜區": { id: "72V140", name: "高改旗南分場" },
+        "甲仙區": { id: "72V140", name: "高改旗南分場" },
+        "桃源區": { id: "72V140", name: "高改旗南分場" },
+        "那瑪夏區": { id: "72V140", name: "高改旗南分場" }
+      },
+      "臺南市": {
+        "關廟區": { id: "72N100", name: "臺南農改" },
+        "新化區": { id: "72N100", name: "臺南農改" },
+        "玉井區": { id: "72N100", name: "臺南農改" },
+        "楠西區": { id: "72N100", name: "臺南農改" },
+        "麻豆區": { id: "72N100", name: "臺南農改" },
+        "官田區": { id: "72N100", name: "臺南農改" }
+      },
+      "嘉義縣": {
+        "阿里山鄉": { id: "82H840", name: "茶改南部分場" },
+        "梅山鄉": { id: "82H840", name: "茶改南部分場" },
+        "竹崎鄉": { id: "G2L020", name: "農試嘉義分所" },
+        "民雄鄉": { id: "G2L020", name: "農試嘉義分所" }
+      },
+      "嘉義市": {
+        "東區": { id: "C2M910", name: "嘉義大學" },
+        "西區": { id: "C2M910", name: "嘉義大學" }
+      },
+      "雲林縣": {
+        "斗六市": { id: "A2K630", name: "臺大雲林校區" },
+        "虎尾鎮": { id: "A2K630", name: "臺大雲林校區" },
+        "西螺鎮": { id: "A2K630", name: "臺大雲林校區" },
+        "古坑鄉": { id: "A2K630", name: "臺大雲林校區" }
+      },
+      "南投縣": {
+        "埔里鎮": { id: "72HA00", name: "中改埔里分場" },
+        "魚池鄉": { id: "72HA00", name: "中改埔里分場" },
+        "仁愛鄉": { id: "72HA00", name: "中改埔里分場" },
+        "鹿谷鄉": { id: "U2H480", name: "臺大溪頭" },
+        "竹山鎮": { id: "U2HA50", name: "臺大竹山" }
+      },
+      "臺東縣": {
+        "臺東市": { id: "72S590", name: "東改賓朗果園" },
+        "卑南鄉": { id: "72S590", name: "東改賓朗果園" },
+        "鹿野鄉": { id: "72S590", name: "東改賓朗果園" },
+        "關山鎮": { id: "72S590", name: "東改賓朗果園" },
+        "池上鄉": { id: "72S590", name: "東改賓朗果園" },
+        "太麻里鄉": { id: "72S590", name: "東改賓朗果園" },
+        "大武鄉": { id: "72S590", name: "東改賓朗果園" }
+      },
+      "花蓮縣": {
+        "花蓮市": { id: "72T250", name: "花蓮農改" },
+        "吉安鄉": { id: "72T250", name: "花蓮農改" },
+        "壽豐鄉": { id: "72T250", name: "花蓮農改" },
+        "鳳林鎮": { id: "72T250", name: "花蓮農改" },
+        "瑞穗鄉": { id: "72T250", name: "花蓮農改" },
+        "玉里鎮": { id: "72T250", name: "花蓮農改" },
+        "富里鄉": { id: "72T250", name: "花蓮農改" }
+      }
+    };
 
-  Object.keys(townshipData).forEach(county => {
-    const option = document.createElement("option");
-    option.value = county;
-    option.textContent = county;
-    countySelect.appendChild(option);
-  });
+    async function initTownshipSelector() {
+      try {
+        const res = await fetch("townships.json");
+        townshipData = await res.json();
+      } catch (error) {
+        console.error("townships.json 讀取失敗：", error);
+        townshipData = {
+          "屏東縣": ["屏東市", "內埔鄉", "枋山鄉", "恆春鎮"],
+          "高雄市": ["美濃區", "旗山區"],
+          "臺南市": ["關廟區", "玉井區"],
+          "臺東縣": ["臺東市", "池上鄉"]
+        };
+      }
 
-  countySelect.value = "屏東縣";
-  updateTownSelect();
-}
+      const countySelect = document.getElementById("county");
+      countySelect.innerHTML = "";
 
-function updateTownSelect() {
-  const county = document.getElementById("county").value;
-  const town = document.getElementById("town").value;
-  const locationName = `${county} ${town}`;
-  const stationId = currentStation.id;
-  const stationName = currentStation.name;
-  const townSelect = document.getElementById("town");
-  townSelect.innerHTML = "";
+      Object.keys(townshipData).forEach(county => {
+        const option = document.createElement("option");
+        option.value = county;
+        option.textContent = county;
+        countySelect.appendChild(option);
+      });
 
-  townshipData[county].forEach(town => {
-    const option = document.createElement("option");
-    option.value = town;
-    option.textContent = town;
-    townSelect.appendChild(option);
-  });
+      countySelect.value = townshipData["屏東縣"] ? "屏東縣" : Object.keys(townshipData)[0];
+      updateTownSelect("屏東市");
+    }
 
-  updateMatchedStation();
-}
+    function updateTownSelect(preferredTown) {
+      const county = document.getElementById("county").value;
+      const townSelect = document.getElementById("town");
+      townSelect.innerHTML = "";
 
-function updateMatchedStation() {
-  const county = document.getElementById("county").value;
-  currentStation = STATION_BY_COUNTY[county] || { id: "72S590", name: "東改賓朗果園" };
+      const towns = townshipData[county] || [];
+      towns.forEach(town => {
+        const option = document.createElement("option");
+        option.value = town;
+        option.textContent = town;
+        townSelect.appendChild(option);
+      });
 
-  document.getElementById("stationHint").textContent =
-    `目前對應測站：${currentStation.name}（${currentStation.id}）`;
-}
+      if (preferredTown && towns.includes(preferredTown)) {
+        townSelect.value = preferredTown;
+      }
 
-document.addEventListener("DOMContentLoaded", initTownshipSelector);
+      updateMatchedStation();
+    }
 
+    function updateMatchedStation() {
+      const county = document.getElementById("county").value;
+      const town = document.getElementById("town").value;
+      const townStation =
+        STATION_BY_TOWN[county] &&
+        STATION_BY_TOWN[county][town];
 
+      currentStation =
+        townStation ||
+        STATION_BY_COUNTY[county] ||
+        { id: "72S590", name: "東改賓朗果園" };
 
+      document.getElementById("stationHint").textContent =
+        `目前對應測站：${currentStation.name}（${currentStation.id}）`;
+    }
 
+    document.addEventListener("DOMContentLoaded", initTownshipSelector);
 
     async function fetchMoaWeatherData(stationId) {
+      if (!MOA_API_PROXY_URL) return null;
 
-  try {
-
-    const url =
-      `${MOA_API_PROXY_URL}?location=${encodeURIComponent(stationId)}`;
-
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error("API 回應失敗");
+      try {
+        const url = `${MOA_API_PROXY_URL}?location=${encodeURIComponent(stationId)}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("API 回應失敗");
+        return await response.json();
+      } catch (error) {
+        console.error("農業氣象 API 讀取失敗：", error);
+        return null;
+      }
     }
-
-    return await response.json();
-
-  } catch (error) {
-
-    console.error(error);
-
-    return null;
-  }
-}
-
-    function getDemoWeatherData(locationName) {
-      const demo = {
-        "屏東縣 枋山鄉": { temp: 31, humidity: 78, rain: "中", wind: "低", condition: "午後局部雷陣雨" },
-        "高雄市 美濃區": { temp: 32, humidity: 72, rain: "中", wind: "低", condition: "高溫悶熱" },
-        "臺南市 關廟區": { temp: 33, humidity: 68, rain: "低", wind: "低", condition: "晴時多雲" },
-        "嘉義縣 阿里山鄉": { temp: 22, humidity: 86, rain: "中", wind: "中", condition: "山區雲霧多" },
-        "花蓮縣 玉里鎮": { temp: 30, humidity: 76, rain: "中", wind: "低", condition: "午後降雨機率提高" },
-        "臺東縣 池上鄉": { temp: 31, humidity: 74, rain: "低", wind: "中", condition: "晴朗偏熱" }
-      };
-
-      return demo[locationName] || { temp: 30, humidity: 75, rain: "中", wind: "低", condition: "多雲時晴" };
-    }
-
-    const county = document.getElementById("county").value;
-    const town = document.getElementById("town").value;
-
-    const locationName = `${county} ${town}`;
-
-    const stationId = currentStation.id;
-    const stationName = currentStation.name; 
-
 
     async function generateAdvice() {
       const county = document.getElementById("county").value;
-      const crop = document.getElementById("crop").value;
-      const stage = document.getElementById("stage").value;
-      const task = document.getElementById("task").value;
-      const note = document.getElementById("note").value.trim();
-
-      const county = document.getElementById("county").value;
       const town = document.getElementById("town").value;
-
       const locationName = `${county} ${town}`;
       const stationId = currentStation.id;
       const stationName = currentStation.name;
 
+      const crop = document.getElementById("crop").value.trim() || "未填寫作物";
+      const stage = document.getElementById("stage").value;
+      const task = document.getElementById("task").value;
+      const note = document.getElementById("note").value.trim();
+
+      document.getElementById("resultTitle").textContent = `${locationName}｜${crop}｜${stage}`;
+      document.getElementById("resultSubtitle").textContent =
+        `正在讀取 ${stationName}（${stationId}）即時農業氣象資料……`;
+
       const weather = await fetchMoaWeatherData(stationId);
-       
-       if (!weather || weather.success !== true);
-           alert("氣象資料格式不正確，請檢查 GAS 回傳欄位是否包含 temp、humidity、rain、wind、condition。");
-           console.log("GAS 回傳資料：", weather);
-           return;
-       }
 
-
-      document.getElementById("resultTitle").textContent =
-      `${locationName}｜${crop}｜${stage}`;
+      if (!weather || weather.success !== true) {
+        const message = weather && weather.message ? weather.message : "目前無法取得農業氣象資料";
+        document.getElementById("resultSubtitle").textContent =
+          `資料讀取失敗：${message}。請稍後再試，或檢查 GAS 部署版本。`;
+        console.log("GAS 回傳資料：", weather);
+        return;
+      }
 
       document.getElementById("resultSubtitle").textContent =
-      `參考測站：${stationName}（${stationId}），目前天氣情境：${weather.condition}，判斷重點：${task}`;
-      
-      document.getElementById("tempValue").textContent = `${weather.temp} ℃`;
-      document.getElementById("humidityValue").textContent = `${weather.humidity} %`;
-      document.getElementById("rainValue").textContent = weather.rain;
-      document.getElementById("windValue").textContent = weather.wind;
+        `參考測站：${stationName}（${stationId}），觀測時間：${weather.obsTime || "未提供"}，判斷重點：${task}`;
+
+      document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
+      document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
+      document.getElementById("rainValue").textContent = weather.rain || "--";
+      document.getElementById("windValue").textContent = weather.wind || "--";
+      document.getElementById("rainMmValue").textContent = `${showValue(weather.rainMm)} mm`;
+      document.getElementById("windSpeedValue").textContent = `${showValue(weather.windSpeed)} m/s`;
+      document.getElementById("sunshineValue").textContent = `${showValue(weather.sunshine)} hr`;
+      document.getElementById("soil10Value").textContent = `${showValue(weather.soil10)} ℃`;
 
       const advice = buildAdvice(crop, stage, task, weather);
       const risks = buildRisks(crop, weather);
-
       renderList("adviceList", advice);
       renderList("riskList", risks);
 
-      const prompt = buildPrompt(county, crop, stage, task, note, weather);
+      const prompt = buildPrompt(locationName, crop, stage, task, note, weather, stationName, stationId);
       document.getElementById("promptBox").textContent = prompt;
+    }
+
+    function showValue(value) {
+      if (value === null || value === undefined || value === "" || value === "--") return "--";
+      return value;
     }
 
     function buildAdvice(crop, stage, task, weather) {
       const list = [];
 
+      const temp = Number(weather.temp);
+      const humidity = Number(weather.humidity);
+      const rainMm = Number(weather.rainMm);
+      const windSpeed = Number(weather.windSpeed);
+      const soil10 = Number(weather.soil10);
+
       if (task.includes("施肥")) {
-        if (weather.rain === "中" || weather.rain === "高") {
-          list.push("未來有降雨風險，建議暫緩施肥，避免肥分流失。");
+        if (rainMm >= 5 || weather.rain === "中" || weather.rain === "高") {
+          list.push("目前或近期雨量風險較高，建議暫緩施肥，避免肥分流失。");
         } else {
-          list.push("降雨風險較低，可評估少量分次施肥，並配合土壤濕度調整。");
+          list.push("目前降雨風險較低，可評估少量分次施肥，並配合土壤濕度與作物生長勢調整。");
         }
       }
 
       if (task.includes("灌溉")) {
-        if (weather.temp >= 32 && weather.humidity < 75) {
-          list.push("氣溫偏高，建議清晨或傍晚補充灌溉，避免中午高溫澆水。");
+        if (temp >= 32 || soil10 >= 30) {
+          list.push("氣溫或表層土壤溫度偏高，建議清晨或傍晚補充灌溉，避免中午高溫灌溉造成逆境。");
+        } else if (rainMm > 0) {
+          list.push("目前已有降雨紀錄，建議先檢查田間土壤含水與排水狀況，再決定是否灌溉。");
         } else {
-          list.push("目前水分壓力不明顯，建議先檢查土壤含水狀態再決定。");
+          list.push("目前水分壓力不明顯，建議以土壤實際濕度與作物葉片狀態作為灌溉依據。");
         }
       }
 
       if (task.includes("採收")) {
-        if (weather.rain === "中" || weather.rain === "高") {
-          list.push("若作物已接近成熟，建議評估提前採收，降低裂果、落果或品質下降風險。");
+        if (rainMm >= 5 || humidity >= 85) {
+          list.push("高濕或降雨可能影響採收品質，若已接近成熟，建議評估提前或分批採收。");
         } else {
-          list.push("天氣條件相對穩定，可依成熟度安排分批採收。");
+          list.push("目前氣象條件相對穩定，可依成熟度安排分批採收。");
         }
       }
 
@@ -977,14 +1083,18 @@ document.addEventListener("DOMContentLoaded", initTownshipSelector);
       }
 
       if (task.includes("豪雨")) {
-        list.push("建議提前清理排水溝、檢查田區低窪處，避免積水造成根系受損。");
+        list.push("請提前清理排水溝、檢查田區低窪處，避免積水造成根系受損。");
       }
 
       if (task.includes("高溫")) {
-        list.push("建議注意遮陰、補水與田間覆蓋，降低高溫逆境。");
+        list.push("請注意遮陰、補水、田間覆蓋與作業時間調整，降低高溫逆境。");
       }
 
-      list.push(`${crop}目前處於${stage}，應將氣象條件與作物敏感期一起判斷。`);
+      if (windSpeed >= 4) {
+        list.push("目前風速偏高，請注意支架、網室、果樹枝條與倒伏風險。");
+      }
+
+      list.push(`${crop}目前處於${stage}，建議將即時氣象、田間觀察與作物敏感期一起判斷。`);
 
       return list;
     }
@@ -992,28 +1102,33 @@ document.addEventListener("DOMContentLoaded", initTownshipSelector);
     function buildRisks(crop, weather) {
       const list = [];
 
-      if (weather.humidity >= 80) {
-        list.push("濕度偏高，病害發生風險提高，請加強通風與田間巡查。");
+      const temp = Number(weather.temp);
+      const humidity = Number(weather.humidity);
+      const rainMm = Number(weather.rainMm);
+      const windSpeed = Number(weather.windSpeed);
+
+      if (humidity >= 80) {
+        list.push("相對濕度偏高，病害發生風險提高，請加強通風與田間巡查。");
       }
 
-      if (weather.temp >= 32) {
+      if (temp >= 32) {
         list.push("氣溫偏高，需注意熱害、蒸散量增加與植株水分壓力。");
       }
 
-      if (weather.rain === "中" || weather.rain === "高") {
+      if (rainMm >= 5 || weather.rain === "中" || weather.rain === "高") {
         list.push("降雨風險提高，請注意排水、落果、裂果與病害擴散。");
       }
 
-      if (weather.wind === "中" || weather.wind === "高") {
+      if (windSpeed >= 4 || weather.wind === "中" || weather.wind === "高") {
         list.push("風速風險提高，請注意支架、倒伏與果樹枝條損傷。");
       }
 
-      if (crop === "水稻" && weather.humidity >= 78) {
-        list.push("水稻在高濕環境下，需留意稻熱病與紋枯病風險。");
+      if (crop.includes("水稻") && humidity >= 78) {
+        list.push("水稻在高濕環境下，需留意稻熱病、紋枯病、褐飛蝨、螟蟲與稻苞蟲風險。");
       }
 
-      if (crop === "芒果" && weather.rain !== "低") {
-        list.push("芒果遇降雨需注意炭疽病、裂果與採收品質下降。");
+      if ((crop.includes("芒果") || crop.includes("蓮霧") || crop.includes("番石榴")) && (rainMm > 0 || humidity >= 80)) {
+        list.push("果樹在高濕或降雨後，需注意炭疽病、果實病斑、裂果與採收品質下降。");
       }
 
       if (list.length === 0) {
@@ -1033,13 +1148,16 @@ document.addEventListener("DOMContentLoaded", initTownshipSelector);
       });
     }
 
-    function buildPrompt(county, crop, stage, task, note, weather) {
+    function buildPrompt(locationName, crop, stage, task, note, weather, stationName, stationId) {
       return `你是「AI農業氣象教練、作物栽培顧問與智慧農業決策教練」。
 
 請根據以下農業情境，協助學生進行氣象判讀與農事決策推演。
 
 【地區】
-${county}
+${locationName}
+
+【參考農業氣象站】
+${stationName}（${stationId}）
 
 【作物】
 ${crop}
@@ -1050,12 +1168,16 @@ ${stage}
 【想判斷的農事】
 ${task}
 
-【目前氣象資料】
-氣溫：${weather.temp}℃
-相對濕度：${weather.humidity}%
-降雨風險：${weather.rain}
-風速風險：${weather.wind}
-天氣概況：${weather.condition}
+【目前農業氣象資料】
+觀測時間：${weather.obsTime || "未提供"}
+氣溫：${showValue(weather.temp)}℃
+相對濕度：${showValue(weather.humidity)}%
+降雨風險：${weather.rain || "--"}
+實測雨量：${showValue(weather.rainMm)} mm
+風速風險：${weather.wind || "--"}
+實測風速：${showValue(weather.windSpeed)} m/s
+日照時數：${showValue(weather.sunshine)} hr
+土壤溫度10cm：${showValue(weather.soil10)}℃
 
 【補充說明】
 ${note || "無"}
@@ -1089,16 +1211,22 @@ ${note || "無"}
 
     function resetForm() {
       document.getElementById("note").value = "";
+      document.getElementById("crop").value = "";
       document.getElementById("resultTitle").textContent = "等待輸入農業情境";
       document.getElementById("resultSubtitle").textContent = "請選擇地區、作物與農事需求後，按下產生建議。";
       document.getElementById("tempValue").textContent = "-- ℃";
       document.getElementById("humidityValue").textContent = "-- %";
       document.getElementById("rainValue").textContent = "--";
       document.getElementById("windValue").textContent = "--";
+      document.getElementById("rainMmValue").textContent = "-- mm";
+      document.getElementById("windSpeedValue").textContent = "-- m/s";
+      document.getElementById("sunshineValue").textContent = "-- hr";
+      document.getElementById("soil10Value").textContent = "-- ℃";
       document.getElementById("adviceList").innerHTML = "<li>目前尚未產生建議。</li>";
       document.getElementById("riskList").innerHTML = "<li>目前尚未產生風險提醒。</li>";
       document.getElementById("promptBox").textContent = "AI 指令將顯示在這裡。";
     }
+
   </script>
 </body>
 </html>
