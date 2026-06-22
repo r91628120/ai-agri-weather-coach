@@ -598,15 +598,16 @@
 
           <div class="form-grid">
             <div>
-              <label for="county">地區</label>
-              <select id="county">
-                <option value="屏東縣 枋山鄉">屏東縣 枋山鄉</option>
-                <option value="高雄市 美濃區">高雄市 美濃區</option>
-                <option value="臺南市 關廟區">臺南市 關廟區</option>
-                <option value="嘉義縣 阿里山鄉">嘉義縣 阿里山鄉</option>
-                <option value="花蓮縣 玉里鎮">花蓮縣 玉里鎮</option>
-                <option value="臺東縣 池上鄉">臺東縣 池上鄉</option>
-              </select>
+              <label for="county">縣市</label>
+              <select id="county" onchange="updateTownSelect()"></select>
+            </div>
+
+            <div>
+              <label for="town">鄉鎮市區</label>
+              <select id="town" onchange="updateMatchedStation()"></select>
+              <small id="stationHint" style="display:block;margin-top:6px;color:#6b7280;">
+                   系統會自動對應附近農業氣象站
+              </small>
             </div>
 
             <div>
@@ -777,9 +778,85 @@
       請不要直接把 API Token 寫在前端。
     */
 
-    const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbyeX5oosOVh75QHebCI_UYHieoOuw29-d0Wp6jMwGEOD90QDzgVYqHCvUVnn57KHmqx/exec";
+    const MOA_API_PROXY_URL = "https://script.google.com/macros/s/AKfycbw7zj9FmzzzciRlE2oGmrHsJhx5WjOFzjzwUvZXBocKnyFMF4o9YacQAZTwVUfit_Kh/exec";
     // 例如未來可以放：
     // const MOA_API_PROXY_URL = "https://script.google.com/macros/s/你的GAS網址/exec";
+     
+     let townshipData = {};
+let currentStation = {
+  id: "72S590",
+  name: "東改賓朗果園"
+};
+
+const STATION_BY_COUNTY = {
+  "桃園市": { id: "72C440", name: "桃園農改" },
+  "新竹縣": { id: "72D680", name: "桃改新埔分場" },
+  "苗栗縣": { id: "K2E360", name: "苗栗農改" },
+  "臺中市": { id: "72G600", name: "臺中農改" },
+  "南投縣": { id: "72HA00", name: "中改埔里分場" },
+  "雲林縣": { id: "A2K630", name: "臺大雲林校區" },
+  "嘉義縣": { id: "G2L020", name: "農試嘉義分所" },
+  "嘉義市": { id: "C2M910", name: "嘉義大學" },
+  "臺南市": { id: "72N100", name: "臺南農改" },
+  "高雄市": { id: "72Q010", name: "高雄農改" },
+  "屏東縣": { id: "C2R970", name: "屏科大" },
+  "宜蘭縣": { id: "72U480", name: "花改蘭陽分場" },
+  "花蓮縣": { id: "72T250", name: "花蓮農改" },
+  "臺東縣": { id: "72S590", name: "東改賓朗果園" },
+  "澎湖縣": { id: "C2W230", name: "畜試所澎湖" },
+  "金門縣": { id: "C2W030", name: "金門農試所" }
+};
+
+async function initTownshipSelector() {
+  const res = await fetch("townships.json");
+  townshipData = await res.json();
+
+  const countySelect = document.getElementById("county");
+  countySelect.innerHTML = "";
+
+  Object.keys(townshipData).forEach(county => {
+    const option = document.createElement("option");
+    option.value = county;
+    option.textContent = county;
+    countySelect.appendChild(option);
+  });
+
+  countySelect.value = "屏東縣";
+  updateTownSelect();
+}
+
+function updateTownSelect() {
+  const county = document.getElementById("county").value;
+  const town = document.getElementById("town").value;
+  const locationName = `${county} ${town}`;
+  const stationId = currentStation.id;
+  const stationName = currentStation.name;
+  const townSelect = document.getElementById("town");
+  townSelect.innerHTML = "";
+
+  townshipData[county].forEach(town => {
+    const option = document.createElement("option");
+    option.value = town;
+    option.textContent = town;
+    townSelect.appendChild(option);
+  });
+
+  updateMatchedStation();
+}
+
+function updateMatchedStation() {
+  const county = document.getElementById("county").value;
+  currentStation = STATION_BY_COUNTY[county] || { id: "72S590", name: "東改賓朗果園" };
+
+  document.getElementById("stationHint").textContent =
+    `目前對應測站：${currentStation.name}（${currentStation.id}）`;
+}
+
+document.addEventListener("DOMContentLoaded", initTownshipSelector);
+
+
+
+
 
     async function fetchMoaWeatherData(locationName) {
       if (!MOA_API_PROXY_URL) {
@@ -817,7 +894,7 @@
       const task = document.getElementById("task").value;
       const note = document.getElementById("note").value.trim();
 
-      const weather = await fetchMoaWeatherData(county);
+      const weather = await fetchMoaWeatherData(stationId);
        
        if (!weather || !weather.temp) {
            alert("氣象資料格式不正確，請檢查 GAS 回傳欄位是否包含 temp、humidity、rain、wind、condition。");
@@ -826,8 +903,12 @@
        }
 
 
-      document.getElementById("resultTitle").textContent = `${county}｜${crop}｜${stage}`;
-      document.getElementById("resultSubtitle").textContent = `目前天氣情境：${weather.condition}，判斷重點：${task}`;
+      document.getElementById("resultTitle").textContent =
+      `${locationName}｜${crop}｜${stage}`;
+
+      document.getElementById("resultSubtitle").textContent =
+      `參考測站：${stationName}（${stationId}），目前天氣情境：${weather.condition}，判斷重點：${task}`;
+      
       document.getElementById("tempValue").textContent = `${weather.temp} ℃`;
       document.getElementById("humidityValue").textContent = `${weather.humidity} %`;
       document.getElementById("rainValue").textContent = weather.rain;
