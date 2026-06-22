@@ -796,7 +796,7 @@
 
         <div class="hero-actions">
           <a class="btn btn-primary" href="#coach">🚀 開始氣象判讀</a>
-          <a class="btn btn-secondary" href="https://weather.moa.gov.tw/" target="_blank" rel="noopener">
+          <a class="btn btn-secondary" href="https://agr.cwa.gov.tw/" target="_blank" rel="noopener">
             🌦️ 農業部農業氣象服務網
           </a>
         </div>
@@ -921,13 +921,30 @@
             <button class="btn btn-green" onclick="generateAdvice()">🌾 產生氣象農事建議</button>
             <button class="btn btn-light" onclick="locateMeAndFillTown()">📍 取得我的位置</button>
             <button class="btn btn-light" onclick="copyPrompt()">📋 複製 AI 指令</button>
+            <a
+              id="gptCoachLink"
+              href="請貼上您的AI農業氣象教練GPT網址"
+              target="_blank"
+              rel="noopener"
+              class="btn btn-green"
+              onclick="return openGptCoachLink(event)">
+              🤖 開啟 AI農業氣象教練 GPT
+            </a>
             <button class="btn btn-light" onclick="resetForm()">🔄 清除重來</button>
           </div>
 
           <div class="api-note">
-            <strong>API 串接提醒：</strong>
-            正式版建議不要把農業部 API Token 直接放在 GitHub Pages 前端。
-            可使用 Google Apps Script、Cloudflare Worker 或 Firebase Functions 作為中繼 API。
+            <strong>📖 操作順序說明</strong>
+            <ol style="margin:10px 0 0 22px; padding:0;">
+              <li>選擇縣市與鄉鎮市區。</li>
+              <li>輸入作物名稱。</li>
+              <li>選擇目前農事階段。</li>
+              <li>選擇想判斷的農事工作。</li>
+              <li>勾選可能面臨的災害風險。</li>
+              <li>點選「產生氣象農事建議」。</li>
+              <li>閱讀 AI 判讀結果。</li>
+              <li>將結果貼至 AI農業氣象教練 GPT 進行進一步分析。</li>
+            </ol>
           </div>
         </div>
 
@@ -1380,6 +1397,10 @@
     document.addEventListener("DOMContentLoaded", () => {
         initTownshipSelector();
         renderFarmLogs();
+        const gptLink = document.getElementById("gptCoachLink");
+        if (gptLink && GPT_COACH_URL && !GPT_COACH_URL.includes("請貼上")) {
+          gptLink.href = GPT_COACH_URL;
+        }
     });
 
     async function fetchMoaWeatherData(stationId) {
@@ -1804,6 +1825,18 @@ ${note || "無"}
       return;
     }
     window.open(GPT_COACH_URL, "_blank", "noopener");
+  }
+
+  function openGptCoachLink(event) {
+    if (!GPT_COACH_URL || GPT_COACH_URL.includes("請貼上")) {
+      event.preventDefault();
+      alert("請先建立 AI農業氣象教練 GPT，並把 GPT 網址貼到程式碼中的 GPT_COACH_URL。");
+      return false;
+    }
+
+    const link = document.getElementById("gptCoachLink");
+    if (link) link.href = GPT_COACH_URL;
+    return true;
   }
 
   function exportLatestLogImage() {
