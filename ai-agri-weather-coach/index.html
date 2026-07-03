@@ -2605,12 +2605,8 @@ async function updateMatchedStation() {
   const nearestStations = findNearestStations(position.lat, position.lng, 3);
   currentStation = nearestStations[0];
 
-  document.getElementById("stationHint").innerHTML = `
-    系統已依「${county}${town}」找到最近三個農業氣象站：<br>
-    ① ${nearestStations[0]?.name || "--"}（${nearestStations[0]?.id || "--"}，約 ${nearestStations[0]?.distanceKm.toFixed(1)} km）<br>
-    ② ${nearestStations[1]?.name || "--"}（${nearestStations[1]?.id || "--"}，約 ${nearestStations[1]?.distanceKm.toFixed(1)} km）<br>
-    ③ ${nearestStations[2]?.name || "--"}（${nearestStations[2]?.id || "--"}，約 ${nearestStations[2]?.distanceKm.toFixed(1)} km）
-  `;
+  document.getElementById("stationHint").textContent =
+  "已選擇地區，系統將於產生建議時自動進行 AIAKOS 三站融合分析。";
 }
 
 async function fetchThreeStationWeather(stations) {
@@ -2928,12 +2924,8 @@ function locateMeAndFillTown() {
 
       currentStation = nearestStations[0];
 
-      document.getElementById("stationHint").innerHTML = `
-        已依目前位置找到最近三個農業氣象站：<br>
-        ① ${nearestStations[0]?.name || "--"}（${nearestStations[0]?.id || "--"}，約 ${nearestStations[0]?.distanceKm.toFixed(1)} km）<br>
-        ② ${nearestStations[1]?.name || "--"}（${nearestStations[1]?.id || "--"}，約 ${nearestStations[1]?.distanceKm.toFixed(1)} km）<br>
-        ③ ${nearestStations[2]?.name || "--"}（${nearestStations[2]?.id || "--"}，約 ${nearestStations[2]?.distanceKm.toFixed(1)} km）
-      `;
+      document.getElementById("stationHint").textContent =
+        "已取得目前位置，系統將於產生建議時自動進行 AIAKOS 三站融合分析。";
 
       document.getElementById("resultSubtitle").textContent =
         "已完成定位。接下來可輸入作物與農事需求後，產生三站融合建議。";
