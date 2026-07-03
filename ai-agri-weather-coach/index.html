@@ -1404,6 +1404,23 @@
 
   </div>
 
+     <script src="https://r91628120.github.io/ai-agriculture-core/services/WeatherAPI.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/services/StationService.js?v=20260703"></script>
+
+     <script src="https://r91628120.github.io/ai-agriculture-core/engine/EventBus.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/engine/WeatherFusionEngine.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/engine/WeatherEngine.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/engine/CropEngine.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/engine/DiseaseEngine.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/engine/DecisionEngine.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/engine/PromptEngine.js?v=20260703"></script>
+
+     <script src="https://r91628120.github.io/ai-agriculture-core/modules/WeatherDashboardModule.js?v=20260703"></script>
+     <script src="https://r91628120.github.io/ai-agriculture-core/modules/AnalysisModule.js?v=20260703"></script>
+
+     <script src="https://r91628120.github.io/ai-agriculture-core/AIAKOS.js?v=20260703"></script>
+
+
   <script>
     /*
       =====================================================
@@ -1423,6 +1440,8 @@
     const GPT_COACH_URL = "https://chatgpt.com/g/g-6a391cc88d8c8191a7985d213e03a9f6-ainong-ye-qi-xiang-jiao-lian";
 
     let latestWeatherSnapshot = null;
+
+    let AIAKOS_APP = null;
 
     // 請把下方文字換成您的 Google Geocoding API Key，勿貼到對話中。
     const GOOGLE_GEOCODING_API_KEY = "請填入你的_GOOGLE_GEOCODING_API_KEY";
@@ -1666,14 +1685,36 @@
       );
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        initTownshipSelector();
-        renderFarmLogs();
+    document.addEventListener("DOMContentLoaded", async () => {
+          await initAIAKOSCore();
+          await initTownshipSelector();
+          renderFarmLogs();
+
         const gptLink = document.getElementById("gptCoachLink");
-        if (gptLink && GPT_COACH_URL && !GPT_COACH_URL.includes("請貼上")) {
-          gptLink.href = GPT_COACH_URL;
+           if (gptLink && GPT_COACH_URL && !GPT_COACH_URL.includes("請貼上")) {
+           gptLink.href = GPT_COACH_URL;
         }
     });
+
+      async function initAIAKOSCore() {
+       try {
+          AIAKOS_APP = new AIAgricultureApp();
+
+         await AIAKOS_APP.init({
+           weatherApi: MOA_API_PROXY_URL,
+           stationJson: "https://r91628120.github.io/ai-agriculture-core/data/stations.json?v=20260703",
+           cropJson: "https://r91628120.github.io/ai-agriculture-core/data/crops.json?v=20260703",
+           diseaseJson: "https://r91628120.github.io/ai-agriculture-core/data/diseases.json?v=20260703"
+      });
+
+      console.log("AIAKOS Core 已成功接入 AI農業氣象教練");
+      } catch (error) {
+      console.error("AIAKOS Core 初始化失敗：", error);
+      }
+    } 
+
+
+
 
     async function fetchMoaWeatherData(stationId) {
       if (!MOA_API_PROXY_URL) return null;
@@ -2725,28 +2766,43 @@ async function generateAdvice() {
     `${locationName}｜${crop}｜${stage}`;
 
   document.getElementById("resultSubtitle").textContent =
-    "正在依縣市與鄉鎮尋找最近三個農業氣象站，並進行三站融合分析……";
+    "正在呼叫 AIAKOS Core，進行最近三站融合分析……";
 
-  const position = selectedGeoPosition || await getTownLatLng(county, town);
-  const nearestStations = findNearestStations(position.lat, position.lng, 3);
-
-  const stationWeatherList = await fetchThreeStationWeather(nearestStations);
-
-  if (stationWeatherList.length === 0) {
+  if (!AIAKOS_APP) {
     document.getElementById("resultSubtitle").textContent =
-      "目前無法取得最近三站氣象資料，請稍後再試或檢查 GAS 服務。";
+      "AIAKOS Core 尚未初始化完成，請稍候再試。";
     return;
   }
 
-  const fusion = buildFusionWeather(stationWeatherList);
+  const position = selectedGeoPosition || await getTownLatLng(county, town);
+
+  const response = await AIAKOS_APP.analyzeFarmDecision({
+    cropName: crop,
+    stage,
+    county,
+    township: town,
+    lat: position.lat,
+    lng: position.lng
+  });
+
+  if (!response.success || !response.result || response.result.success !== true) {
+    document.getElementById("resultSubtitle").textContent =
+      response.error || "AIAKOS Core 分析失敗，請檢查 Core 檔案是否正常載入。";
+    console.log(response);
+    return;
+  }
+
+  const result = response.result;
+  const weather = result.weather || {};
+  const fusion = result.fusion || {};
+  const stations = fusion.stations || [];
+
   latestFusionResult = fusion;
 
-  const weather = fusion.fused;
-
   latestWeatherSnapshot = {
-    stationName: "三站融合",
-    stationId: stationWeatherList.map(item => item.id).join(" / "),
-    distanceText: `融合測站數：${fusion.stationCount} 站`,
+    stationName: "AIAKOS 三站融合",
+    stationId: stations.map(s => s.id || s.stationId).join(" / "),
+    distanceText: `融合測站數：${fusion.stationCount || stations.length} 站`,
     obsTime: weather.obsTime || "未提供",
     temp: showValue(weather.temp),
     humidity: showValue(weather.humidity),
@@ -2756,11 +2812,11 @@ async function generateAdvice() {
     windSpeed: showValue(weather.windSpeed),
     sunshine: showValue(weather.sunshine),
     soil10: showValue(weather.soil10),
-    confidence: fusion.confidence
+    confidence: fusion.quality?.confidence || "--"
   };
 
   document.getElementById("resultSubtitle").textContent =
-    `已完成最近 ${fusion.stationCount} 站融合分析｜AI可信度：${fusion.confidence}%｜判斷重點：${task}`;
+    `AIAKOS Core 已完成最近 ${fusion.stationCount || stations.length} 站融合分析｜AI可信度：${fusion.quality?.confidence || "--"}%｜判斷重點：${task}`;
 
   document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
   document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
@@ -2773,8 +2829,8 @@ async function generateAdvice() {
 
   updateRiskLights(weather);
   updateForecastDemo(weather);
-  updateStationMapBoxV51(stationWeatherList);
-  renderV5FusionPanel(stationWeatherList, fusion);
+  updateStationMapBoxAIAKOS(stations);
+  renderAIAKOSFusionPanel(fusion);
 
   const advice = buildAdvice(crop, stage, task, weather, disasters);
   const risks = buildRisks(crop, weather);
@@ -2782,28 +2838,68 @@ async function generateAdvice() {
   renderList("adviceList", advice);
   renderList("riskList", risks);
 
-  const prompt = buildPrompt(
-    locationName,
-    crop,
-    stage,
-    task,
-    note,
-    weather,
-    "三站融合分析",
-    stationWeatherList.map(item => `${item.name}（${item.id}）`).join("、"),
-    `｜AI可信度：${fusion.confidence}%`
-  );
-
   document.getElementById("promptBox").textContent =
-`${prompt}
+    result.prompt || buildPrompt(locationName, crop, stage, task, note, weather, "AIAKOS 三站融合", stations.map(s => s.name).join("、"), "");
+}
 
-【三站融合資料】
-融合測站數：${fusion.stationCount} 站
-AI可信度：${fusion.confidence}%
-最近三站：
-${stationWeatherList.map((item, index) =>
-`${index + 1}. ${item.name}（${item.id}），距離約 ${item.distanceKm.toFixed(1)} 公里`
-).join("\n")}`;
+function updateStationMapBoxAIAKOS(stations = []) {
+  const stationMap = document.getElementById("stationMap");
+
+  if (!stations.length) {
+    stationMap.innerHTML = "目前沒有取得測站資料。";
+    return;
+  }
+
+  stationMap.innerHTML = stations.map((item, index) => `
+    📍 第 ${index + 1} 站：${item.name || item.stationName || "--"}（${item.id || item.stationId || "--"}）<br>
+    距離：約 ${Number(item.distanceKm || 0).toFixed(1)} 公里
+  `).join("<br><br>");
+}
+
+function renderAIAKOSFusionPanel(fusion) {
+  const panel = ensureFusionPanel();
+  const stations = fusion.stations || [];
+  const fused = fusion.fused || {};
+  const confidence = fusion.quality?.confidence || "--";
+
+  panel.innerHTML = `
+    <strong>🔄 AIAKOS Core 三站融合分析</strong>
+
+    ${stations.map((item, index) => `
+      <div style="
+        padding:14px;
+        border-radius:16px;
+        background:#ffffff;
+        border:1px solid #bbf7d0;
+        margin-top:10px;
+      ">
+        <strong>第 ${index + 1} 站｜${item.name || item.stationName || "--"}（${item.id || item.stationId || "--"}）</strong><br>
+        距離：約 ${Number(item.distanceKm || 0).toFixed(1)} km<br>
+        氣溫：${showValue(item.temp)} ℃｜
+        濕度：${showValue(item.humidity)} %｜
+        雨量：${showValue(item.rainMm)} mm｜
+        風速：${showValue(item.windSpeed)} m/s｜
+        日照：${showValue(item.sunshine)} hr
+      </div>
+    `).join("")}
+
+    <div style="
+      margin-top:14px;
+      padding:16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,#ecfccb,#e0f2fe);
+      border:1px solid #bbf7d0;
+    ">
+      <strong>🌾 AIAKOS 融合後平均氣象資料</strong><br>
+      融合測站數：${fusion.stationCount || stations.length} 站<br>
+      AI可信度：${confidence}%<br>
+      氣溫：${showValue(fused.temp)} ℃｜
+      濕度：${showValue(fused.humidity)} %｜
+      雨量：${showValue(fused.rainMm)} mm｜
+      風速：${showValue(fused.windSpeed)} m/s｜
+      日照：${showValue(fused.sunshine)} hr
+    </div>
+  `;
 }
 
 
