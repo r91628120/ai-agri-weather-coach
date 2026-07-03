@@ -1091,22 +1091,33 @@
             </div>
 
           <div class="full map-url-row">
-             <div>
-                <label for="googleMapUrl">🌍 Google Maps 位置網址（選填｜進階定位）</label>
-                    <input
-                       id="googleMapUrl"
-                       type="url"
-                       placeholder="選填：若農地位置與鄉鎮中心相差很遠，可貼上 Google Maps 分享網址"
-                    >
-                     <small style="display:block;margin-top:6px;color:#6b7280;">
-                        一般教學建議直接使用「縣市＋鄉鎮市區」即可；Google Maps 為進階輔助功能。
-                     </small>
-                 
 
-                <button class="btn btn-light" type="button" onclick="parseGoogleMapUrl()">
-                     🔎 解析地圖網址
-                </button>
-          </div>
+            <div>
+
+               <label for="googleMapUrl">
+                 🌍 Google Maps 位置網址（選填｜進階定位）
+               </label>
+
+                <input
+                   id="googleMapUrl"
+                   type="url"
+                   placeholder="選填：若農地位置與鄉鎮中心相差很遠，可貼上 Google Maps 分享網址">
+
+               <small>
+                    一般教學建議直接使用「縣市＋鄉鎮市區」即可；
+                    Google Maps 為進階輔助功能。
+               </small>
+
+            </div>
+
+            <button
+                class="btn btn-light"
+                type="button"
+                onclick="parseGoogleMapUrl()">
+                 🔎 解析地圖網址
+            </button>
+
+          </div>   <!-- ← 少了這個 -->
 
           <div class="action-row">
             <button class="btn btn-light" onclick="locateMeAndFillTown()">📍 取得我的位置</button>
