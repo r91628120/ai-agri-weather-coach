@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="wLQnbGi0252et4Q2FGCubos4FZW1tLeOlk8eGrW8YYI" />
 
-  <title>AI農業氣象教練 4.0｜農業氣象判讀、農事決策與農場經營日誌</title>
-  <meta name="description" content="AI農業氣象教練 4.0，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
+  <title>AI農業氣象教練 AIAKOS V5.0｜農業氣象判讀、農事決策與農場經營日誌</title>
+  <meta name="description" content="AI農業氣象教練 AIAKOS V5.0，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
   <meta name="keywords" content="AI農業氣象教練,農業氣象,智慧農業,農場經營日誌,農事決策,病蟲害風險,農業教育平台,農業氣象站,農業防災">
   <meta name="author" content="AI農業教育平台">
   <meta name="robots" content="index, follow">
@@ -14,13 +14,13 @@
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
-  <meta property="og:title" content="AI農業氣象教練 4.0｜把天氣資料變成農業決策能力">
+  <meta property="og:title" content="AI農業氣象教練 AIAKOS V5.0｜把天氣資料變成農業決策能力">
   <meta property="og:description" content="依縣市鄉鎮自動尋找最近農業氣象站，協助學生與農友進行氣象判讀、農事建議、風險燈號、三天天氣推估與農場經營日誌分享。">
   <meta property="og:url" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/">
   <meta property="og:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AI農業氣象教練 4.0">
+  <meta name="twitter:title" content="AI農業氣象教練 AIAKOS V5.0">
   <meta name="twitter:description" content="農業氣象判讀、農事決策、風險燈號與AI農場經營日誌分享工具。">
   <meta name="twitter:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
@@ -888,6 +888,56 @@
   font-size:.9rem;
 }
 
+/* AIAKOS V5.0 農業 AI Agent */
+.map-url-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: end;
+  margin-top: 16px;
+}
+
+.agent-card {
+  margin-top: 22px;
+  padding: 22px;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #ecfccb, #e0f2fe);
+  border: 1px solid #bbf7d0;
+}
+
+.agent-card h3 {
+  margin: 0 0 12px;
+  color: #14532d;
+}
+
+.agent-quick {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.agent-quick button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #14532d;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.agent-answer {
+  margin-top: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #111827;
+  color: #d1fae5;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+
 
 
   </style>
@@ -899,7 +949,7 @@
     <header class="topbar">
       <a class="brand" href="#">
         <span class="brand-icon">🌦️</span>
-        <span>AI農業氣象教練 4.0</span>
+        <span>AI農業氣象教練 AIAKOS V5.0</span>
       </a>
 
       <nav class="nav-links">
@@ -913,7 +963,7 @@
     <section class="hero">
       <div class="hero-content">
         <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
-        <h1>AI農業氣象教練 4.0</h1>
+        <h1>AI農業氣象教練 AIAKOS V5.0</h1>
         <p class="hero-subtitle">
           導入農業部農業氣象資料，協助學生從「看天氣」進一步學會
           氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
@@ -1040,12 +1090,28 @@
               </div>
             </div>
 
+          <div class="full map-url-row">
+             <div>
+                <label for="googleMapUrl">🌍 Google Maps 位置網址</label>
+                  <input
+                     id="googleMapUrl"
+                     type="url"
+                     placeholder="貼上 Google Maps 分享網址，例如：https://maps.app.goo.gl/..."
+                  >
+             </div>
 
+                <button class="btn btn-light" type="button" onclick="parseGoogleMapUrl()">
+                     🔎 解析地圖網址
+                </button>
+          </div>
 
           <div class="action-row">
-            <button class="btn btn-green" onclick="generateAdvice()">🌾 產生氣象農事建議</button>
             <button class="btn btn-light" onclick="locateMeAndFillTown()">📍 取得我的位置</button>
+            
+            <button class="btn btn-green" onclick="generateAdvice()">🌾 產生氣象農事建議</button>
+            
             <button class="btn btn-light" onclick="copyPrompt()">📋 複製 AI 指令</button>
+            
             <a
               id="gptCoachLink"
               href="https://chatgpt.com/g/g-6a391cc88d8c8191a7985d213e03a9f6-ainong-ye-qi-xiang-jiao-lian"
@@ -1131,8 +1197,35 @@
               </ul>
             </div>
 
-            <div class="prompt-box" id="promptBox">AI 指令將顯示在這裡。</div>
-              
+        <div class="prompt-box" id="promptBox">AI 指令將顯示在這裡。</div>
+             
+           <div class="agent-card">
+            <h3>🤖 AIAKOS 農業 AI Agent</h3>
+               <p>可直接詢問目前氣象條件下的農事決策。</p>
+
+           <div class="agent-quick">
+             <button onclick="fillAgentQuestion('今天適合施肥嗎？')">今天適合施肥嗎？</button>
+             <button onclick="fillAgentQuestion('今天適合灌溉嗎？')">今天適合灌溉嗎？</button>
+             <button onclick="fillAgentQuestion('今天適合採收嗎？')">今天適合採收嗎？</button>
+             <button onclick="fillAgentQuestion('今天病害風險高嗎？')">病害風險高嗎？</button>
+             <button onclick="fillAgentQuestion('颱風來前要先做什麼？')">颱風前準備</button>
+           </div>
+
+             <textarea
+               id="agentQuestion"
+               placeholder="例如：今天適合採收芒果嗎？如果明天下雨，我現在要先做什麼？"
+             ></textarea>
+
+           <div class="action-row">
+             <button class="btn btn-green" onclick="askAIAgent()">🧠 問 AIAKOS</button>
+             <button class="btn btn-light" onclick="clearAgent()">清除問答</button>
+           </div>
+
+           <div class="agent-answer" id="agentAnswer">
+              請先產生氣象農事建議，再向 AIAKOS 提問。
+           </div>
+        </div>
+
             <div class="risk-dashboard">
                 <strong>🚦 AI農事風險燈號</strong>
                   <div class="risk-light-grid">
@@ -1314,7 +1407,7 @@
 
     <div class="ecosystem-copy">
       © 2026 AI農業教育平台｜
-      AI農業氣象教練 4.0｜
+      AI農業氣象教練 AIAKOS V5.0｜
       AI Agricultural Education Ecosystem
     </div>
 
@@ -2285,8 +2378,158 @@ ${note || "無"}
       document.getElementById("adviceList").innerHTML = "<li>目前尚未產生建議。</li>";
       document.getElementById("riskList").innerHTML = "<li>目前尚未產生風險提醒。</li>";
       document.getElementById("promptBox").textContent = "AI 指令將顯示在這裡。";
+      
+      const agentQuestion = document.getElementById("agentQuestion");
+      const agentAnswer = document.getElementById("agentAnswer");
+      const googleMapUrl = document.getElementById("googleMapUrl");
+
+      if (agentQuestion) agentQuestion.value = "";
+      if (agentAnswer) agentAnswer.textContent = "請先產生氣象農事建議，再向 AIAKOS 提問。";
+      if (googleMapUrl) googleMapUrl.value = "";
+      
+      
+      
       latestWeatherSnapshot = null;
     }
+
+
+    /* =========================
+        AIAKOS V5.0 農業 AI Agent
+     ========================= */
+
+function parseGoogleMapUrl() {
+  const url = document.getElementById("googleMapUrl").value.trim();
+
+  if (!url) {
+    alert("請先貼上 Google Maps 分享網址。");
+    return;
+  }
+
+  document.getElementById("stationHint").innerHTML =
+    `已收到 Google Maps 網址。<br>
+    目前 V5.0 前端版會先提示：短網址需要後端解析或 Google Maps API 才能取得精準經緯度。<br>
+    請先使用「📍 取得我的位置」或縣市鄉鎮模式進行分析。`;
+
+  document.getElementById("resultSubtitle").textContent =
+    "Google Maps 網址已填入。下一階段將接入後端解析短網址並自動取得經緯度。";
+}
+
+function fillAgentQuestion(question) {
+  const input = document.getElementById("agentQuestion");
+  if (input) input.value = question;
+}
+
+function askAIAgent() {
+  const question = document.getElementById("agentQuestion").value.trim();
+  const answerBox = document.getElementById("agentAnswer");
+
+  if (!question) {
+    alert("請先輸入想詢問 AIAKOS 的問題。");
+    return;
+  }
+
+  if (!latestWeatherSnapshot) {
+    answerBox.textContent =
+      "請先按下「產生氣象農事建議」，取得目前氣象資料後，AIAKOS 才能根據真實資料回答。";
+    return;
+  }
+
+  const crop = document.getElementById("crop").value.trim() || "目前作物";
+  const stage = document.getElementById("stage").value;
+  const task = document.getElementById("task").value;
+  const note = document.getElementById("note").value.trim();
+
+  const temp = Number(latestWeatherSnapshot.temp);
+  const humidity = Number(latestWeatherSnapshot.humidity);
+  const rainMm = Number(latestWeatherSnapshot.rainMm);
+  const windSpeed = Number(latestWeatherSnapshot.windSpeed);
+
+  let decision = [];
+  let risk = [];
+
+  if (question.includes("施肥")) {
+    if (rainMm >= 5 || latestWeatherSnapshot.rain === "中" || latestWeatherSnapshot.rain === "高") {
+      decision.push("不建議現在施肥，因為目前降雨或雨量風險偏高，肥分可能流失。");
+    } else {
+      decision.push("可評估少量分次施肥，建議避開高溫時段，並觀察土壤濕度。");
+    }
+  }
+
+  if (question.includes("灌溉")) {
+    if (temp >= 32) {
+      decision.push("建議清晨或傍晚補充灌溉，避免中午高溫灌溉造成作物逆境。");
+    } else if (rainMm > 0) {
+      decision.push("目前已有雨量紀錄，建議先檢查土壤實際濕度，再決定是否灌溉。");
+    } else {
+      decision.push("可依土壤濕度與葉片狀態評估是否灌溉。");
+    }
+  }
+
+  if (question.includes("採收")) {
+    if (humidity >= 85 || rainMm >= 5) {
+      decision.push("採收風險偏高，若已成熟可考慮分批或提前採收，採後需快速降溫與通風。");
+    } else {
+      decision.push("目前氣象條件相對穩定，可依成熟度安排採收。");
+    }
+  }
+
+  if (question.includes("病害") || question.includes("病蟲害")) {
+    if (humidity >= 80 || rainMm > 0) {
+      risk.push("濕度或雨量條件提高病害風險，需加強巡田、通風與葉片病斑觀察。");
+    } else {
+      risk.push("目前病害風險不算高，但仍需每日觀察葉片與果實狀況。");
+    }
+  }
+
+  if (question.includes("颱風") || question.includes("豪雨")) {
+    decision.push("請優先清理排水溝、固定支架與網室、提前採收成熟果實，並避免施肥與噴藥。");
+  }
+
+  if (decision.length === 0 && risk.length === 0) {
+    decision.push("AIAKOS 建議先從氣溫、濕度、雨量、風速與作物生育期一起判斷，再決定今日農事。");
+  }
+
+  answerBox.textContent =
+`🌦 AIAKOS V5.0 農業 AI Agent 回覆
+
+【你的問題】
+${question}
+
+【目前情境】
+作物：${crop}
+階段：${stage}
+判斷農事：${task}
+測站：${latestWeatherSnapshot.stationName}（${latestWeatherSnapshot.stationId}）
+觀測時間：${latestWeatherSnapshot.obsTime}
+
+【目前氣象】
+氣溫：${latestWeatherSnapshot.temp} ℃
+濕度：${latestWeatherSnapshot.humidity} %
+雨量：${latestWeatherSnapshot.rainMm} mm
+風速：${latestWeatherSnapshot.windSpeed} m/s
+日照：${latestWeatherSnapshot.sunshine} hr
+
+【AI決策建議】
+${decision.map(item => "・" + item).join("\n")}
+
+【風險提醒】
+${risk.length ? risk.map(item => "・" + item).join("\n") : "・目前未出現明顯高風險，但仍建議持續巡田觀察。"}
+
+【教學提醒】
+這個判斷是依目前農業氣象資料進行推演，實際決策仍需結合田間觀察、作物品種、生育期與在地經驗。
+
+【補充說明】
+${note || "無"}`;
+}
+
+function clearAgent() {
+  document.getElementById("agentQuestion").value = "";
+  document.getElementById("agentAnswer").textContent =
+    "請先產生氣象農事建議，再向 AIAKOS 提問。";
+}
+
+
+
 
   </script>
 
