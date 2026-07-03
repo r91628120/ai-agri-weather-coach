@@ -1785,8 +1785,14 @@
 
       document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
       document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
-      document.getElementById("rainValue").textContent = weather.rain || "--";
-      document.getElementById("windValue").textContent = weather.wind || "--";
+      const rainRisk = weather.rain || getRainRiskLevel(weather.rainMm);
+      const windRisk = weather.wind || getWindRiskLevel(weather.windSpeed);
+
+      document.getElementById("rainValue").textContent =
+       `${rainRisk}｜${showValue(weather.rainMm)} mm`;
+
+      document.getElementById("windValue").textContent =
+       `${windRisk}｜${showValue(weather.windSpeed)} m/s`;
       document.getElementById("rainMmValue").textContent = `${showValue(weather.rainMm)} mm`;
       document.getElementById("windSpeedValue").textContent = `${showValue(weather.windSpeed)} m/s`;
       document.getElementById("sunshineValue").textContent = `${showValue(weather.sunshine)} hr`;
@@ -2937,6 +2943,22 @@ function locateMeAndFillTown() {
     },
     { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
   );
+}
+
+function getRainRiskLevel(rainMm) {
+  const n = Number(rainMm);
+  if (Number.isNaN(n)) return "--";
+  if (n >= 20) return "高";
+  if (n >= 5) return "中";
+  return "低";
+}
+
+function getWindRiskLevel(windSpeed) {
+  const n = Number(windSpeed);
+  if (Number.isNaN(n)) return "--";
+  if (n >= 8) return "高";
+  if (n >= 4) return "中";
+  return "低";
 }
 
 
