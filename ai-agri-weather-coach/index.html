@@ -2374,9 +2374,41 @@ ${note || "無"}
       if (agentAnswer) agentAnswer.textContent = "請先產生氣象農事建議，再向 AIAKOS 提問。";
       if (googleMapUrl) googleMapUrl.value = "";
       
-      
-      
-      latestWeatherSnapshot = null;
+      // 清除防災勾選
+        document.querySelectorAll(".disaster-options input").forEach(input => {
+        input.checked = false;
+        });
+
+      // 重設 AI農事風險燈號
+        document.getElementById("rainLight").textContent = "🟢 降雨低";
+        document.getElementById("diseaseLight").textContent = "🟢 病害低";
+        document.getElementById("heatLight").textContent = "🟢 熱害低";
+
+        document.getElementById("rainLight").className = "risk-light risk-low";
+        document.getElementById("diseaseLight").className = "risk-light risk-low";
+        document.getElementById("heatLight").className = "risk-light risk-low";
+
+      // 重設未來三天天氣預報
+        document.getElementById("forecastGrid").innerHTML = `
+          <div class="forecast-day">明天<br>-- ℃<br>☔ --</div>
+          <div class="forecast-day">後天<br>-- ℃<br>☔ --</div>
+          <div class="forecast-day">第3天<br>-- ℃<br>☔ --</div>
+       `;
+
+      // 重設最近農業氣象站位置示意
+        document.getElementById("stationMap").innerHTML =
+          "產生建議後，這裡會顯示最近農業氣象站資訊。";
+
+      // 清除三站融合分析
+         const fusionPanel = document.getElementById("v5FusionPanel");
+         if (fusionPanel) {
+         fusionPanel.remove();
+         }
+
+         latestFusionResult = null;
+         selectedGeoPosition = null;
+   
+         latestWeatherSnapshot = null;
     }
 
 
