@@ -937,7 +937,43 @@
   line-height: 1.8;
 }
 
+/* AIAKOS V5.2 風險儀表板 */
+.metric-risk {
+  display: grid;
+  gap: 6px;
+}
 
+.risk-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 900;
+}
+
+.risk-pill.low {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.risk-pill.medium {
+  background: #fef9c3;
+  color: #a16207;
+}
+
+.risk-pill.high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.risk-data {
+  color: #14532d;
+  font-size: 1.35rem;
+  font-weight: 950;
+}
 
 
   </style>
@@ -1146,11 +1182,21 @@
               </div>
               <div class="metric">
                 <span>降雨風險</span>
-                <b id="rainValue">--</b>
+                 <b id="rainValue">
+                  <span class="metric-risk">
+                  <span class="risk-pill low">🟢 低</span>
+                  <span class="risk-data">-- mm</span>
+                 </span>
+                </b>
               </div>
               <div class="metric">
                 <span>風速風險</span>
-                <b id="windValue">--</b>
+                 <b id="windValue">
+                  <span class="metric-risk">
+                  <span class="risk-pill low">🟢 低</span>
+                  <span class="risk-data">-- m/s</span>
+                </span>
+              </b>
               </div>
               <div class="metric">
                 <span>實測雨量</span>
@@ -2820,14 +2866,25 @@ async function generateAdvice() {
   document.getElementById("resultSubtitle").textContent =
     `AIAKOS Core 已完成最近 ${fusion.stationCount || stations.length} 站融合分析｜AI可信度：${fusion.quality?.confidence || "--"}%｜判斷重點：${task}`;
 
-  document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
-  document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
-  document.getElementById("rainValue").textContent = weather.rain || "--";
-  document.getElementById("windValue").textContent = weather.wind || "--";
-  document.getElementById("rainMmValue").textContent = `${showValue(weather.rainMm)} mm`;
-  document.getElementById("windSpeedValue").textContent = `${showValue(weather.windSpeed)} m/s`;
-  document.getElementById("sunshineValue").textContent = `${showValue(weather.sunshine)} hr`;
-  document.getElementById("soil10Value").textContent = `${showValue(weather.soil10)} ℃`;
+  const rainRisk =
+    weather.rain || getRainRiskLevel(weather.rainMm);
+
+const windRisk =
+    weather.wind || getWindRiskLevel(weather.windSpeed);
+
+     document.getElementById("tempValue").textContent =
+      `${showValue(weather.temp)} ℃`;
+
+     document.getElementById("humidityValue").textContent =
+      `${showValue(weather.humidity)} %`;
+
+     renderRiskMetric("rainValue", rainRisk, weather.rainMm, "mm");
+     renderRiskMetric("windValue", windRisk, weather.windSpeed, "m/s");
+
+     document.getElementById("rainMmValue").textContent = `${showValue(weather.rainMm)} mm`;
+     document.getElementById("windSpeedValue").textContent = `${showValue(weather.windSpeed)} m/s`;
+     document.getElementById("sunshineValue").textContent = `${showValue(weather.sunshine)} hr`;
+     document.getElementById("soil10Value").textContent = `${showValue(weather.soil10)} ℃`;
 
   updateRiskLights(weather);
   updateForecastDemo(weather);
@@ -2960,6 +3017,35 @@ function getWindRiskLevel(windSpeed) {
   if (n >= 4) return "中";
   return "低";
 }
+
+function getRiskIcon(level) {
+  if (level === "高") return "🔴";
+  if (level === "中") return "🟡";
+  if (level === "低") return "🟢";
+  return "⚪";
+}
+
+function getRiskClass(level) {
+  if (level === "高") return "high";
+  if (level === "中") return "medium";
+  if (level === "低") return "low";
+  return "low";
+}
+
+function renderRiskMetric(targetId, level, value, unit) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+
+  el.innerHTML = `
+    <span class="metric-risk">
+      <span class="risk-pill ${getRiskClass(level)}">
+        ${getRiskIcon(level)} ${level}
+      </span>
+      <span class="risk-data">${showValue(value)} ${unit}</span>
+    </span>
+  `;
+}
+
 
 
   </script>
