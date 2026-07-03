@@ -1092,13 +1092,16 @@
 
           <div class="full map-url-row">
              <div>
-                <label for="googleMapUrl">🌍 Google Maps 位置網址</label>
-                  <input
-                     id="googleMapUrl"
-                     type="url"
-                     placeholder="貼上 Google Maps 分享網址，例如：https://maps.app.goo.gl/..."
-                  >
-             </div>
+                <label for="googleMapUrl">🌍 Google Maps 位置網址（選填｜進階定位）</label>
+                    <input
+                       id="googleMapUrl"
+                       type="url"
+                       placeholder="選填：若農地位置與鄉鎮中心相差很遠，可貼上 Google Maps 分享網址"
+                    >
+                     <small style="display:block;margin-top:6px;color:#6b7280;">
+                        一般教學建議直接使用「縣市＋鄉鎮市區」即可；Google Maps 為進階輔助功能。
+                     </small>
+                 
 
                 <button class="btn btn-light" type="button" onclick="parseGoogleMapUrl()">
                      🔎 解析地圖網址
@@ -1133,8 +1136,9 @@
               <li>選擇想判斷的農事工作。</li>
               <li>勾選可能面臨的災害風險。</li>
               <li>點選「產生氣象農事建議」。</li>
-              <li>閱讀 AI 判讀結果。</li>
-              <li>將結果貼至 AI農業氣象教練 GPT 進行進一步分析。</li>
+              <li>系統會自動尋找最近三個農業氣象站。</li>
+              <li>系統會產生三站融合平均值、AI可信度與農事建議。</li>
+              <li>Google Maps 位置網址與「取得我的位置」屬於進階輔助功能，一般教學可不用填。</li>
             </ol>
           </div>
         </div>
@@ -2528,7 +2532,340 @@ function clearAgent() {
     "請先產生氣象農事建議，再向 AIAKOS 提問。";
 }
 
+/* =====================================================
+   AIAKOS V5.1 修正版
+   主流程：縣市＋鄉鎮 → 最近三站 → 三站融合 → AI Agent
+   Google Maps / 定位：輔助功能
+===================================================== */
 
+let latestFusionResult = null;
+let selectedGeoPosition = null;
+
+function findNearestStations(lat, lng, count = 3) {
+  return AGRI_STATIONS
+    .map(station => ({
+      ...station,
+      distanceKm: getDistanceKm(lat, lng, station.lat, station.lng)
+    }))
+    .sort((a, b) => a.distanceKm - b.distanceKm)
+    .slice(0, count);
+}
+
+async function updateMatchedStation() {
+  const county = document.getElementById("county").value;
+  const town = document.getElementById("town").value;
+
+  document.getElementById("stationHint").textContent =
+    `正在依 ${county}${town} 尋找最近三個農業氣象站……`;
+
+  const position = await getTownLatLng(county, town);
+  selectedGeoPosition = position;
+
+  const nearestStations = findNearestStations(position.lat, position.lng, 3);
+  currentStation = nearestStations[0];
+
+  document.getElementById("stationHint").innerHTML = `
+    系統已依「${county}${town}」找到最近三個農業氣象站：<br>
+    ① ${nearestStations[0]?.name || "--"}（${nearestStations[0]?.id || "--"}，約 ${nearestStations[0]?.distanceKm.toFixed(1)} km）<br>
+    ② ${nearestStations[1]?.name || "--"}（${nearestStations[1]?.id || "--"}，約 ${nearestStations[1]?.distanceKm.toFixed(1)} km）<br>
+    ③ ${nearestStations[2]?.name || "--"}（${nearestStations[2]?.id || "--"}，約 ${nearestStations[2]?.distanceKm.toFixed(1)} km）
+  `;
+}
+
+async function fetchThreeStationWeather(stations) {
+  const results = [];
+
+  for (const station of stations) {
+    const weather = await fetchMoaWeatherData(station.id);
+
+    if (weather && weather.success === true) {
+      results.push({
+        ...station,
+        weather
+      });
+    }
+  }
+
+  return results;
+}
+
+function avgNumber(items, getter) {
+  const nums = items
+    .map(getter)
+    .map(Number)
+    .filter(n => !Number.isNaN(n));
+
+  if (nums.length === 0) return "--";
+
+  return Math.round((nums.reduce((a, b) => a + b, 0) / nums.length) * 10) / 10;
+}
+
+function buildFusionWeather(stationWeatherList) {
+  const fused = {
+    temp: avgNumber(stationWeatherList, item => item.weather.temp),
+    humidity: avgNumber(stationWeatherList, item => item.weather.humidity),
+    rainMm: avgNumber(stationWeatherList, item => item.weather.rainMm),
+    windSpeed: avgNumber(stationWeatherList, item => item.weather.windSpeed),
+    sunshine: avgNumber(stationWeatherList, item => item.weather.sunshine),
+    soil10: avgNumber(stationWeatherList, item => item.weather.soil10),
+    obsTime: stationWeatherList[0]?.weather?.obsTime || "未提供"
+  };
+
+  const temp = Number(fused.temp);
+  const humidity = Number(fused.humidity);
+  const rainMm = Number(fused.rainMm);
+  const windSpeed = Number(fused.windSpeed);
+
+  fused.rain = rainMm >= 20 ? "高" : rainMm >= 5 ? "中" : "低";
+  fused.wind = windSpeed >= 8 ? "高" : windSpeed >= 4 ? "中" : "低";
+
+  let confidence = 70;
+
+  if (stationWeatherList.length >= 3) confidence = 100;
+  else if (stationWeatherList.length === 2) confidence = 94;
+  else if (stationWeatherList.length === 1) confidence = 85;
+
+  if (Number.isNaN(temp) || Number.isNaN(humidity)) confidence -= 10;
+
+  return {
+    fused,
+    confidence: Math.max(60, confidence),
+    stationCount: stationWeatherList.length
+  };
+}
+
+function ensureFusionPanel() {
+  let panel = document.getElementById("v5FusionPanel");
+
+  if (panel) return panel;
+
+  const stationMap = document.getElementById("stationMap");
+
+  panel = document.createElement("div");
+  panel.id = "v5FusionPanel";
+  panel.className = "map-card";
+  panel.innerHTML = `
+    <strong>🔄 三站融合分析</strong>
+    <div style="margin-top:10px;color:#6b7280;">
+      產生建議後，這裡會顯示最近三站資料、融合平均值與 AI 可信度。
+    </div>
+  `;
+
+  stationMap.parentElement.insertAdjacentElement("afterend", panel);
+
+  return panel;
+}
+
+function renderV5FusionPanel(stationWeatherList, fusion) {
+  const panel = ensureFusionPanel();
+
+  const cards = stationWeatherList.map((item, index) => `
+    <div style="
+      padding:14px;
+      border-radius:16px;
+      background:#ffffff;
+      border:1px solid #bbf7d0;
+      margin-top:10px;
+    ">
+      <strong>第 ${index + 1} 站｜${item.name}（${item.id}）</strong><br>
+      距離：約 ${item.distanceKm.toFixed(1)} km<br>
+      氣溫：${showValue(item.weather.temp)} ℃｜
+      濕度：${showValue(item.weather.humidity)} %｜
+      雨量：${showValue(item.weather.rainMm)} mm｜
+      風速：${showValue(item.weather.windSpeed)} m/s｜
+      日照：${showValue(item.weather.sunshine)} hr
+    </div>
+  `).join("");
+
+  panel.innerHTML = `
+    <strong>🔄 三站融合分析</strong>
+
+    ${cards}
+
+    <div style="
+      margin-top:14px;
+      padding:16px;
+      border-radius:18px;
+      background:linear-gradient(135deg,#ecfccb,#e0f2fe);
+      border:1px solid #bbf7d0;
+    ">
+      <strong>🌾 融合後平均氣象資料</strong><br>
+      融合測站數：${fusion.stationCount} 站<br>
+      AI可信度：${fusion.confidence}%<br>
+      氣溫：${showValue(fusion.fused.temp)} ℃｜
+      濕度：${showValue(fusion.fused.humidity)} %｜
+      雨量：${showValue(fusion.fused.rainMm)} mm｜
+      風速：${showValue(fusion.fused.windSpeed)} m/s｜
+      日照：${showValue(fusion.fused.sunshine)} hr
+    </div>
+  `;
+}
+
+function updateStationMapBoxV51(stationWeatherList) {
+  const stationMap = document.getElementById("stationMap");
+
+  stationMap.innerHTML = stationWeatherList.map((item, index) => `
+    📍 第 ${index + 1} 站：${item.name}（${item.id}）<br>
+    距離：約 ${item.distanceKm.toFixed(1)} 公里
+  `).join("<br><br>");
+}
+
+async function generateAdvice() {
+  const county = document.getElementById("county").value;
+  const town = document.getElementById("town").value;
+  const locationName = `${county} ${town}`;
+
+  const crop = document.getElementById("crop").value.trim() || "未填寫作物";
+  const stage = document.getElementById("stage").value;
+  const task = document.getElementById("task").value;
+  const note = document.getElementById("note").value.trim();
+  const disasters = getSelectedDisasters();
+
+  document.getElementById("resultTitle").textContent =
+    `${locationName}｜${crop}｜${stage}`;
+
+  document.getElementById("resultSubtitle").textContent =
+    "正在依縣市與鄉鎮尋找最近三個農業氣象站，並進行三站融合分析……";
+
+  const position = selectedGeoPosition || await getTownLatLng(county, town);
+  const nearestStations = findNearestStations(position.lat, position.lng, 3);
+
+  const stationWeatherList = await fetchThreeStationWeather(nearestStations);
+
+  if (stationWeatherList.length === 0) {
+    document.getElementById("resultSubtitle").textContent =
+      "目前無法取得最近三站氣象資料，請稍後再試或檢查 GAS 服務。";
+    return;
+  }
+
+  const fusion = buildFusionWeather(stationWeatherList);
+  latestFusionResult = fusion;
+
+  const weather = fusion.fused;
+
+  latestWeatherSnapshot = {
+    stationName: "三站融合",
+    stationId: stationWeatherList.map(item => item.id).join(" / "),
+    distanceText: `融合測站數：${fusion.stationCount} 站`,
+    obsTime: weather.obsTime || "未提供",
+    temp: showValue(weather.temp),
+    humidity: showValue(weather.humidity),
+    rain: weather.rain || "--",
+    rainMm: showValue(weather.rainMm),
+    wind: weather.wind || "--",
+    windSpeed: showValue(weather.windSpeed),
+    sunshine: showValue(weather.sunshine),
+    soil10: showValue(weather.soil10),
+    confidence: fusion.confidence
+  };
+
+  document.getElementById("resultSubtitle").textContent =
+    `已完成最近 ${fusion.stationCount} 站融合分析｜AI可信度：${fusion.confidence}%｜判斷重點：${task}`;
+
+  document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
+  document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
+  document.getElementById("rainValue").textContent = weather.rain || "--";
+  document.getElementById("windValue").textContent = weather.wind || "--";
+  document.getElementById("rainMmValue").textContent = `${showValue(weather.rainMm)} mm`;
+  document.getElementById("windSpeedValue").textContent = `${showValue(weather.windSpeed)} m/s`;
+  document.getElementById("sunshineValue").textContent = `${showValue(weather.sunshine)} hr`;
+  document.getElementById("soil10Value").textContent = `${showValue(weather.soil10)} ℃`;
+
+  updateRiskLights(weather);
+  updateForecastDemo(weather);
+  updateStationMapBoxV51(stationWeatherList);
+  renderV5FusionPanel(stationWeatherList, fusion);
+
+  const advice = buildAdvice(crop, stage, task, weather, disasters);
+  const risks = buildRisks(crop, weather);
+
+  renderList("adviceList", advice);
+  renderList("riskList", risks);
+
+  const prompt = buildPrompt(
+    locationName,
+    crop,
+    stage,
+    task,
+    note,
+    weather,
+    "三站融合分析",
+    stationWeatherList.map(item => `${item.name}（${item.id}）`).join("、"),
+    `｜AI可信度：${fusion.confidence}%`
+  );
+
+  document.getElementById("promptBox").textContent =
+`${prompt}
+
+【三站融合資料】
+融合測站數：${fusion.stationCount} 站
+AI可信度：${fusion.confidence}%
+最近三站：
+${stationWeatherList.map((item, index) =>
+`${index + 1}. ${item.name}（${item.id}），距離約 ${item.distanceKm.toFixed(1)} 公里`
+).join("\n")}`;
+}
+
+function parseGoogleMapUrl() {
+  const url = document.getElementById("googleMapUrl").value.trim();
+
+  if (!url) {
+    alert("請先貼上 Google Maps 分享網址。");
+    return;
+  }
+
+  document.getElementById("stationHint").innerHTML = `
+    已收到 Google Maps 網址。<br>
+    目前建議仍以「縣市＋鄉鎮市區」作為主要分析依據。<br>
+    若未來接入後端短網址解析或 Google Maps API，系統即可改用農地精準座標尋找最近三站。
+  `;
+
+  document.getElementById("resultSubtitle").textContent =
+    "Google Maps 為進階定位功能；一般教學請直接使用縣市＋鄉鎮進行三站融合分析。";
+}
+
+function locateMeAndFillTown() {
+  if (!navigator.geolocation) {
+    alert("您的瀏覽器不支援定位功能。");
+    return;
+  }
+
+  document.getElementById("stationHint").textContent =
+    "正在取得目前位置，並尋找最近三個農業氣象站……";
+
+  navigator.geolocation.getCurrentPosition(
+    async position => {
+      selectedGeoPosition = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude
+      };
+
+      const nearestStations = findNearestStations(
+        selectedGeoPosition.lat,
+        selectedGeoPosition.lng,
+        3
+      );
+
+      currentStation = nearestStations[0];
+
+      document.getElementById("stationHint").innerHTML = `
+        已依目前位置找到最近三個農業氣象站：<br>
+        ① ${nearestStations[0]?.name || "--"}（${nearestStations[0]?.id || "--"}，約 ${nearestStations[0]?.distanceKm.toFixed(1)} km）<br>
+        ② ${nearestStations[1]?.name || "--"}（${nearestStations[1]?.id || "--"}，約 ${nearestStations[1]?.distanceKm.toFixed(1)} km）<br>
+        ③ ${nearestStations[2]?.name || "--"}（${nearestStations[2]?.id || "--"}，約 ${nearestStations[2]?.distanceKm.toFixed(1)} km）
+      `;
+
+      document.getElementById("resultSubtitle").textContent =
+        "已完成定位。接下來可輸入作物與農事需求後，產生三站融合建議。";
+    },
+    error => {
+      alert("無法取得定位，請確認瀏覽器定位權限已開啟。系統將改用縣市＋鄉鎮模式。");
+      console.error(error);
+      updateMatchedStation();
+    },
+    { enableHighAccuracy: true, timeout: 10000, maximumAge: 600000 }
+  );
+}
 
 
   </script>
