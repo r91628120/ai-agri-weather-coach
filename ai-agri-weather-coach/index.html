@@ -1090,35 +1090,7 @@
               </div>
             </div>
 
-          <div class="full map-url-row">
-
-            <div>
-
-               <label for="googleMapUrl">
-                 🌍 Google Maps 位置網址（選填｜進階定位）
-               </label>
-
-                <input
-                   id="googleMapUrl"
-                   type="url"
-                   placeholder="選填：若農地位置與鄉鎮中心相差很遠，可貼上 Google Maps 分享網址">
-
-               <small>
-                    一般教學建議直接使用「縣市＋鄉鎮市區」即可；
-                    Google Maps 為進階輔助功能。
-               </small>
-
-            </div>
-
-            <button
-                class="btn btn-light"
-                type="button"
-                onclick="parseGoogleMapUrl()">
-                 🔎 解析地圖網址
-            </button>
-
-          </div>   <!-- ← 少了這個 -->
-
+          
           <div class="action-row">
             <button class="btn btn-light" onclick="locateMeAndFillTown()">📍 取得我的位置</button>
             
@@ -1149,7 +1121,7 @@
               <li>點選「產生氣象農事建議」。</li>
               <li>系統會自動尋找最近三個農業氣象站。</li>
               <li>系統會產生三站融合平均值、AI可信度與農事建議。</li>
-              <li>Google Maps 位置網址與「取得我的位置」屬於進階輔助功能，一般教學可不用填。</li>
+              <li>「取得我的位置」為輔助功能，一般教學建議以縣市與鄉鎮市區為主要分析依據。</li>
             </ol>
           </div>
         </div>
@@ -2412,22 +2384,7 @@ ${note || "無"}
         AIAKOS V5.0 農業 AI Agent
      ========================= */
 
-function parseGoogleMapUrl() {
-  const url = document.getElementById("googleMapUrl").value.trim();
 
-  if (!url) {
-    alert("請先貼上 Google Maps 分享網址。");
-    return;
-  }
-
-  document.getElementById("stationHint").innerHTML =
-    `已收到 Google Maps 網址。<br>
-    目前 V5.0 前端版會先提示：短網址需要後端解析或 Google Maps API 才能取得精準經緯度。<br>
-    請先使用「📍 取得我的位置」或縣市鄉鎮模式進行分析。`;
-
-  document.getElementById("resultSubtitle").textContent =
-    "Google Maps 網址已填入。下一階段將接入後端解析短網址並自動取得經緯度。";
-}
 
 function fillAgentQuestion(question) {
   const input = document.getElementById("agentQuestion");
@@ -2817,23 +2774,7 @@ ${stationWeatherList.map((item, index) =>
 ).join("\n")}`;
 }
 
-function parseGoogleMapUrl() {
-  const url = document.getElementById("googleMapUrl").value.trim();
 
-  if (!url) {
-    alert("請先貼上 Google Maps 分享網址。");
-    return;
-  }
-
-  document.getElementById("stationHint").innerHTML = `
-    已收到 Google Maps 網址。<br>
-    目前建議仍以「縣市＋鄉鎮市區」作為主要分析依據。<br>
-    若未來接入後端短網址解析或 Google Maps API，系統即可改用農地精準座標尋找最近三站。
-  `;
-
-  document.getElementById("resultSubtitle").textContent =
-    "Google Maps 為進階定位功能；一般教學請直接使用縣市＋鄉鎮進行三站融合分析。";
-}
 
 function locateMeAndFillTown() {
   if (!navigator.geolocation) {
