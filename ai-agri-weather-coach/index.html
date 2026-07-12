@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="wLQnbGi0252et4Q2FGCubos4FZW1tLeOlk8eGrW8YYI" />
 
-  <title>AI農業氣象教練 AIAKOS V5.5｜農業氣象判讀、農事決策與農場經營日誌</title>
-  <meta name="description" content="AI農業氣象教練 AIAKOS V5.5，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
+  <title>AI農業氣象教練 AIAKOS V5.6｜農業氣象判讀、農事決策與農場經營日誌</title>
+  <meta name="description" content="AI農業氣象教練 AIAKOS V5.6，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
   <meta name="keywords" content="AI農業氣象教練,農業氣象,智慧農業,農場經營日誌,農事決策,病蟲害風險,農業教育平台,農業氣象站,農業防災">
   <meta name="author" content="AI農業教育平台">
   <meta name="robots" content="index, follow">
@@ -14,13 +14,13 @@
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
-  <meta property="og:title" content="AI農業氣象教練 AIAKOS V5.5｜把天氣資料變成農業決策能力">
+  <meta property="og:title" content="AI農業氣象教練 AIAKOS V5.6｜把天氣資料變成農業決策能力">
   <meta property="og:description" content="依縣市鄉鎮自動尋找最近農業氣象站，協助學生與農友進行氣象判讀、農事建議、風險燈號、三天天氣推估與農場經營日誌分享。">
   <meta property="og:url" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/">
   <meta property="og:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AI農業氣象教練 AIAKOS V5.5">
+  <meta name="twitter:title" content="AI農業氣象教練 AIAKOS V5.6">
   <meta name="twitter:description" content="農業氣象判讀、農事決策、風險燈號與AI農場經營日誌分享工具。">
   <meta name="twitter:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
@@ -28,7 +28,7 @@
   <link rel="apple-touch-icon" href="favicon-180.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
 
-  <!-- AIAKOS V5.5 農地邊界管理中心 -->
+  <!-- AIAKOS V5.6 農地邊界管理中心 -->
   <link
     rel="stylesheet"
     href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -909,7 +909,7 @@
   font-size:.9rem;
 }
 
-/* AIAKOS V5.5 農業 AI Agent */
+/* AIAKOS V5.6 農業 AI Agent */
 .map-url-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -997,7 +997,7 @@
 }
 
 
-/* AIAKOS V5.5 Satellite NDVI Foundation */
+/* AIAKOS V5.6 Satellite NDVI Foundation */
 .ndvi-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1073,7 +1073,7 @@
 }
 
 
-/* AIAKOS V5.5 農地邊界管理中心 */
+/* AIAKOS V5.6 農地邊界管理中心 */
 .field-boundary-panel {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
@@ -1209,7 +1209,7 @@
 }
 
 
-/* AIAKOS V5.5 IoT MQTT Center */
+/* AIAKOS V5.6 IoT MQTT Center */
 .iot-grid {
   display: grid;
   grid-template-columns: minmax(320px,.72fr) minmax(0,1.28fr);
@@ -1284,13 +1284,13 @@
     <header class="topbar">
       <a class="brand" href="#">
         <span class="brand-icon">🌦️</span>
-        <span>AI農業氣象教練 AIAKOS V5.5</span>
+        <span>AI農業氣象教練 AIAKOS V5.6</span>
       </a>
 
       <nav class="nav-links">
         <a href="#coach">開始判讀</a>
         <a href="#features">核心功能</a>
-        <a href="#fieldBoundary">農地邊界</a>
+        <a href="#fieldBoundary">農地管理中心</a>
         <a href="#satellite">衛星 NDVI</a>
         <a href="#iotCenter">IoT 感測中心</a>
         <a href="#farmLog">Farm Memory</a>
@@ -1302,7 +1302,7 @@
     <section class="hero">
       <div class="hero-content">
         <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
-        <h1>AI農業氣象教練 AIAKOS V5.5</h1>
+        <h1>AI農業氣象教練 AIAKOS V5.6</h1>
         <p class="hero-subtitle">
           導入農業部農業氣象資料，協助學生從「看天氣」進一步學會
           氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
@@ -1606,56 +1606,106 @@
 
 
 
+
     <section class="section" id="fieldBoundary">
       <div class="section-title">
-        <div class="eyebrow">FIELD BOUNDARY CENTER</div>
-        <h2>🗺️ 農地邊界管理中心</h2>
+        <div class="eyebrow">FIELD MANAGEMENT CENTER</div>
+        <h2>🌾 農地管理中心</h2>
         <p>
-          在地圖上繪製農地範圍，自動計算面積與中心座標，
-          並將 GeoJSON 儲存至 AIAKOS Farm Memory，作為未來 Sentinel-2 NDVI 分析範圍。
+          Google Maps 網址只負責找到農地附近位置；真正用於衛星 NDVI、氣象與 Farm Memory 的核心資料，
+          是農民沿著實際田區畫出的完整邊界。
         </p>
+      </div>
+
+      <div class="field-workflow" aria-label="建立農地流程">
+        <div class="field-workflow-step active" id="fieldStep1">① 找到農地位置</div>
+        <div class="field-workflow-step" id="fieldStep2">② 畫出農地範圍</div>
+        <div class="field-workflow-step" id="fieldStep3">③ 檢查並儲存</div>
       </div>
 
       <div class="field-boundary-panel">
         <div class="field-map-card">
+          <div class="field-url-box">
+            <label for="fieldGoogleMapUrl">Google Maps 網址</label>
+            <div class="field-url-row">
+              <input id="fieldGoogleMapUrl" type="url"
+                placeholder="貼上完整 Google Maps 網址，例如含有 @23.60,120.48 的網址">
+              <button class="btn btn-green" type="button" onclick="parseFieldGoogleMapUrl()">🔎 解析並定位</button>
+            </div>
+            <small style="display:block;margin-top:8px;color:#64748b;">
+              可解析包含 <code>@緯度,經度</code>、<code>q=緯度,經度</code>、
+              <code>query=緯度,經度</code> 或 <code>!3d緯度!4d經度</code> 的完整網址。
+              <strong>maps.app.goo.gl 短網址需要先在 Google Maps 開啟，再複製展開後的完整網址。</strong>
+            </small>
+
+            <div class="field-coordinates">
+              <div>
+                <label for="fieldLatitude">中心緯度</label>
+                <input id="fieldLatitude" type="number" step="0.000001" placeholder="例如：23.600000">
+              </div>
+              <div>
+                <label for="fieldLongitude">中心經度</label>
+                <input id="fieldLongitude" type="number" step="0.000001" placeholder="例如：120.480000">
+              </div>
+            </div>
+
+            <div class="action-row" style="margin-top:12px;">
+              <button class="btn btn-light" type="button" onclick="focusFieldMapByCoordinates()">📍 依經緯度定位</button>
+              <button class="btn btn-light" type="button" onclick="openFieldGoogleMapUrl()">↗️ 開啟 Google Maps</button>
+            </div>
+          </div>
+
           <div class="field-map-toolbar">
-            <button class="btn btn-green" type="button" onclick="focusFieldMapByTown()">📍 移到目前鄉鎮</button>
+            <button class="btn btn-green" type="button" onclick="startFieldPolygonDrawing()">✏️ 畫出農地範圍</button>
+            <button class="btn btn-light" type="button" onclick="focusFieldMapByTown()">📍 移到目前鄉鎮</button>
             <button class="btn btn-light" type="button" onclick="focusFieldMapToMyLocation()">🧭 我的目前位置</button>
             <button class="btn btn-light" type="button" onclick="fitAllSavedFields()">🗂️ 顯示全部農地</button>
-            <button class="btn btn-light" type="button" onclick="clearCurrentDrawing()">🧹 清除目前繪圖</button>
+            <button class="btn btn-light" type="button" onclick="clearCurrentDrawing()">🧹 重畫邊界</button>
           </div>
 
           <div id="fieldBoundaryMap" aria-label="農地邊界繪製地圖"></div>
 
           <div class="field-status" id="fieldMapStatus">
-            請使用地圖左側的多邊形工具，沿著農地邊界逐點點選；回到第一點或雙擊即可完成。
+            步驟一：先貼上 Google Maps 完整網址或輸入經緯度定位。<br>
+            步驟二：按「畫出農地範圍」，沿著田區四周依序點選，最後點回起點完成。
           </div>
 
           <div class="field-help">
-            <strong>操作提醒：</strong>
-            先把地圖移到農地附近，再使用多邊形工具畫出田區。
-            衛星分析使用的是完整邊界，不是單一定位點。邊界越貼近實際田區，後續 NDVI 結果越可靠。
+            <strong>為什麼一定要畫邊界？</strong><br>
+            Google Maps 圖釘只表示「這附近」，無法指出到底是哪一塊田。
+            Process API 與 Statistical API 需要完整 Polygon，才能只分析該田區的 NDVI，
+            避免把道路、水溝、池塘或鄰田一起算進去。
           </div>
         </div>
 
         <div class="field-control-card">
-          <span class="phase-badge">Phase 2A｜Field Boundary</span>
-          <h2>🌾 農地基本資料</h2>
+          <span class="phase-badge">AIAKOS V5.6｜Field Management</span>
+          <h2>🌱 農地基本資料</h2>
 
           <div class="form-grid">
             <div class="full">
-              <label for="fieldName">農地名稱</label>
-              <input id="fieldName" type="text" placeholder="例如：A區、東側水稻田、第一溫室">
+              <label for="fieldName">農地名稱 <span class="field-required">*</span></label>
+              <input id="fieldName" type="text" placeholder="例如：頂員林黑豆田">
             </div>
 
             <div>
-              <label for="fieldCrop">目前作物</label>
-              <input id="fieldCrop" type="text" placeholder="例如：水稻、芒果">
+              <label for="fieldCrop">目前作物 <span class="field-required">*</span></label>
+              <input id="fieldCrop" type="text" value="黑豆" placeholder="例如：黑豆、水稻、芒果">
             </div>
 
             <div>
               <label for="fieldVariety">品種</label>
-              <input id="fieldVariety" type="text" placeholder="例如：高雄147號">
+              <input id="fieldVariety" type="text" placeholder="例如：臺南3號">
+            </div>
+
+            <div>
+              <label for="fieldCounty">縣市</label>
+              <input id="fieldCounty" type="text" value="嘉義縣" placeholder="例如：嘉義縣">
+            </div>
+
+            <div>
+              <label for="fieldTown">鄉鎮市區</label>
+              <input id="fieldTown" type="text" value="大林鎮" placeholder="例如：大林鎮">
             </div>
 
             <div>
@@ -1663,10 +1713,12 @@
               <select id="fieldStage">
                 <option value="尚未設定">尚未設定</option>
                 <option value="整地期">整地期</option>
-                <option value="育苗期">育苗期</option>
+                <option value="播種期">播種期</option>
+                <option value="苗期">苗期</option>
                 <option value="生長期">生長期</option>
                 <option value="開花期">開花期</option>
-                <option value="結果期">結果期</option>
+                <option value="結莢期">結莢期</option>
+                <option value="成熟期">成熟期</option>
                 <option value="採收前">採收前</option>
                 <option value="休耕期">休耕期</option>
               </select>
@@ -1686,8 +1738,16 @@
             </div>
 
             <div class="full">
+              <label for="fieldMapScreenshot">Google Maps 截圖（選填，僅供人工比對）</label>
+              <input id="fieldMapScreenshot" type="file" accept="image/*" onchange="previewFieldScreenshot(event)">
+              <div class="field-screenshot-preview" id="fieldScreenshotPreview">
+                截圖不能取代 Polygon；它只用來協助農民核對位置與地形。
+              </div>
+            </div>
+
+            <div class="full">
               <label for="fieldNote">備註</label>
-              <textarea id="fieldNote" placeholder="例如：東側排水較差、鄰近道路、近期準備插秧。"></textarea>
+              <textarea id="fieldNote" placeholder="例如：頂員林埤塘附近，東側鄰接大型田區，目前種植黑豆。"></textarea>
             </div>
           </div>
 
@@ -1710,8 +1770,12 @@
             </div>
           </div>
 
+          <div class="field-boundary-warning" id="fieldBoundaryRequirement">
+            ⚠️ 尚未完成農地邊界。沒有 Polygon 就不能儲存正式農地，也不能進行 NDVI 分析。
+          </div>
+
           <div class="action-row">
-            <button class="btn btn-green" type="button" onclick="saveCurrentField()">💾 儲存農地</button>
+            <button class="btn btn-green" type="button" onclick="saveCurrentField()">💾 儲存正式農地</button>
             <button class="btn btn-light" type="button" onclick="exportFieldsGeoJson()">⬇️ 匯出 GeoJSON</button>
             <button class="btn btn-light" type="button" onclick="document.getElementById('fieldGeoJsonFile').click()">⬆️ 匯入 GeoJSON</button>
             <input id="fieldGeoJsonFile" type="file" accept=".json,.geojson,application/geo+json,application/json" hidden onchange="importFieldsGeoJson(event)">
@@ -2051,7 +2115,7 @@
 
     <div class="ecosystem-copy">
       © 2026 AI農業教育平台｜
-      AI農業氣象教練 AIAKOS V5.5｜
+      AI農業氣象教練 AIAKOS V5.6｜
       AI Agricultural Education Ecosystem
     </div>
 
@@ -2081,7 +2145,7 @@
   <script>
     /*
       =====================================================
-      AI農業氣象教練 V5.5
+      AI農業氣象教練 V5.6
       鄉鎮 → Google Geocoding → 最近農業氣象站 → GAS → 農業氣象資料
       =====================================================
 
@@ -3148,7 +3212,7 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
 
 
     /* =========================
-        AIAKOS V5.5 農業 AI Agent
+        AIAKOS V5.6 農業 AI Agent
      ========================= */
 
 
@@ -3229,7 +3293,7 @@ function askAIAgent() {
   }
 
   answerBox.textContent =
-`🌦 AIAKOS V5.5 農業 AI Agent 回覆
+`🌦 AIAKOS V5.6 農業 AI Agent 回覆
 
 【你的問題】
 ${question}
@@ -3693,9 +3757,502 @@ function renderRiskMetric(targetId, level, value, unit) {
   </script>
 
 
+
 <script>
 /* =====================================================
-   AIAKOS V5.5 Satellite NDVI Foundation
+   AIAKOS V5.6 Field Management Center
+   Google Maps URL → Center → Polygon → GeoJSON
+===================================================== */
+const FIELD_STORAGE_KEY = "aiaikosFieldsV1";
+let fieldBoundaryMap = null;
+let fieldDrawnItems = null;
+let currentFieldLayer = null;
+let currentFieldGeometry = null;
+let currentFieldScreenshotDataUrl = "";
+let fieldPolygonDrawer = null;
+
+function initFieldManagementCenter() {
+  const mapElement = document.getElementById("fieldBoundaryMap");
+  if (!mapElement || !window.L) return;
+
+  fieldBoundaryMap = L.map("fieldBoundaryMap", { zoomControl:true }).setView([23.60, 120.48], 15);
+
+  const streetLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 20,
+    attribution: "&copy; OpenStreetMap contributors"
+  });
+
+  const satelliteLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom:20, attribution:"Tiles &copy; Esri" }
+  );
+
+  satelliteLayer.addTo(fieldBoundaryMap);
+  L.control.layers(
+    { "衛星影像":satelliteLayer, "街道地圖":streetLayer },
+    null,
+    { collapsed:false }
+  ).addTo(fieldBoundaryMap);
+
+  fieldDrawnItems = new L.FeatureGroup();
+  fieldBoundaryMap.addLayer(fieldDrawnItems);
+
+  const drawControl = new L.Control.Draw({
+    position:"topleft",
+    draw:{
+      polygon:{
+        allowIntersection:false,
+        showArea:true,
+        shapeOptions:{ color:"#ef4444", weight:4, fillColor:"#22c55e", fillOpacity:0.22 }
+      },
+      rectangle:false,
+      polyline:false,
+      circle:false,
+      circlemarker:false,
+      marker:false
+    },
+    edit:{ featureGroup:fieldDrawnItems, remove:true }
+  });
+  fieldBoundaryMap.addControl(drawControl);
+
+  fieldBoundaryMap.on(L.Draw.Event.CREATED, event => {
+    setCurrentFieldLayer(event.layer);
+    updateFieldWorkflow(2);
+  });
+
+  fieldBoundaryMap.on(L.Draw.Event.EDITED, event => {
+    event.layers.eachLayer(layer => setCurrentFieldLayer(layer, false));
+  });
+
+  fieldBoundaryMap.on(L.Draw.Event.DELETED, () => {
+    currentFieldLayer = null;
+    currentFieldGeometry = null;
+    updateFieldGeometryUi();
+    updateFieldWorkflow(1);
+  });
+
+  renderSavedFields();
+  setTimeout(() => fieldBoundaryMap.invalidateSize(), 200);
+}
+
+function updateFieldWorkflow(step) {
+  [1,2,3].forEach(number => {
+    const el = document.getElementById(`fieldStep${number}`);
+    if (!el) return;
+    el.classList.remove("active","done");
+    if (number < step) el.classList.add("done");
+    if (number === step) el.classList.add("active");
+  });
+}
+
+function extractCoordinatesFromGoogleMapsUrl(rawUrl) {
+  const url = String(rawUrl || "").trim();
+  if (!url) return null;
+
+  const decoded = decodeURIComponent(url.replace(/\+/g, " "));
+  const patterns = [
+    /@(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/,
+    /[?&](?:q|query|ll|center)=(-?\d{1,2}\.\d+)\s*,\s*(-?\d{1,3}\.\d+)/i,
+    /!3d(-?\d{1,2}\.\d+)!4d(-?\d{1,3}\.\d+)/,
+    /\/place\/(-?\d{1,2}\.\d+),(-?\d{1,3}\.\d+)/
+  ];
+
+  for (const pattern of patterns) {
+    const match = decoded.match(pattern);
+    if (!match) continue;
+    const lat = Number(match[1]);
+    const lng = Number(match[2]);
+    if (Number.isFinite(lat) && Number.isFinite(lng) &&
+        lat >= -90 && lat <= 90 && lng >= -180 && lng <= 180) {
+      return { lat, lng };
+    }
+  }
+  return null;
+}
+
+function parseFieldGoogleMapUrl() {
+  const input = document.getElementById("fieldGoogleMapUrl");
+  const url = input.value.trim();
+  if (!url) {
+    alert("請先貼上 Google Maps 網址。");
+    return;
+  }
+
+  if (/maps\.app\.goo\.gl|goo\.gl\/maps/i.test(url)) {
+    document.getElementById("fieldMapStatus").textContent =
+      "這是 Google Maps 短網址。請先按「開啟 Google Maps」，等待頁面展開後，從瀏覽器網址列複製含有 @緯度,經度 的完整網址，再貼回來解析。";
+    alert("短網址本身不含經緯度，而且瀏覽器會受到跨網域限制，無法安全直接展開。請先開啟短網址，再複製展開後的完整網址。");
+    return;
+  }
+
+  const coordinates = extractCoordinatesFromGoogleMapsUrl(url);
+  if (!coordinates) {
+    document.getElementById("fieldMapStatus").textContent =
+      "目前網址中沒有找到經緯度。請使用含有 @緯度,經度 的完整 Google Maps 網址，或直接輸入經緯度。";
+    alert("無法從此網址解析經緯度。請改貼完整 Google Maps 網址，或直接輸入緯度與經度。");
+    return;
+  }
+
+  setFieldCenter(coordinates.lat, coordinates.lng, 18);
+  document.getElementById("fieldMapStatus").textContent =
+    `已定位到 ${coordinates.lat.toFixed(6)}, ${coordinates.lng.toFixed(6)}。下一步請按「畫出農地範圍」，沿著實際田界逐點繪製。`;
+  updateFieldWorkflow(2);
+}
+
+function setFieldCenter(lat, lng, zoom=18) {
+  document.getElementById("fieldLatitude").value = Number(lat).toFixed(6);
+  document.getElementById("fieldLongitude").value = Number(lng).toFixed(6);
+  if (fieldBoundaryMap) {
+    fieldBoundaryMap.setView([lat,lng],zoom);
+    if (window.fieldCenterMarker) fieldBoundaryMap.removeLayer(window.fieldCenterMarker);
+    window.fieldCenterMarker = L.marker([lat,lng]).addTo(fieldBoundaryMap)
+      .bindPopup("Google Maps／經緯度定位中心<br>請再畫出完整農地邊界")
+      .openPopup();
+  }
+}
+
+function focusFieldMapByCoordinates() {
+  const lat = Number(document.getElementById("fieldLatitude").value);
+  const lng = Number(document.getElementById("fieldLongitude").value);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) ||
+      lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+    alert("請輸入有效的緯度與經度。");
+    return;
+  }
+  setFieldCenter(lat,lng,18);
+  document.getElementById("fieldMapStatus").textContent =
+    "已依經緯度定位。下一步請畫出完整農地範圍。";
+  updateFieldWorkflow(2);
+}
+
+function openFieldGoogleMapUrl() {
+  const url = document.getElementById("fieldGoogleMapUrl").value.trim();
+  if (!url) {
+    alert("請先貼上 Google Maps 網址。");
+    return;
+  }
+  window.open(url, "_blank", "noopener");
+}
+
+function startFieldPolygonDrawing() {
+  if (!fieldBoundaryMap || !window.L || !L.Draw) return;
+  if (fieldPolygonDrawer) {
+    try { fieldPolygonDrawer.disable(); } catch (_) {}
+  }
+  fieldPolygonDrawer = new L.Draw.Polygon(fieldBoundaryMap, {
+    allowIntersection:false,
+    showArea:true,
+    shapeOptions:{ color:"#ef4444", weight:4, fillColor:"#22c55e", fillOpacity:0.22 }
+  });
+  fieldPolygonDrawer.enable();
+  document.getElementById("fieldMapStatus").textContent =
+    "請沿著農地四周依序點選。最後點回第一個點，即可完成農地邊界。";
+  updateFieldWorkflow(2);
+}
+
+function setCurrentFieldLayer(layer, replace=true) {
+  if (replace) fieldDrawnItems.clearLayers();
+  fieldDrawnItems.addLayer(layer);
+  currentFieldLayer = layer;
+  const feature = layer.toGeoJSON();
+  currentFieldGeometry = feature.geometry;
+  window.aiaikosSelectedFieldGeometry = currentFieldGeometry;
+  updateFieldGeometryUi();
+  fieldBoundaryMap.fitBounds(layer.getBounds(), { padding:[30,30] });
+}
+
+function updateFieldGeometryUi() {
+  const preview = document.getElementById("fieldGeoJsonPreview");
+  const warning = document.getElementById("fieldBoundaryRequirement");
+
+  if (!currentFieldGeometry) {
+    document.getElementById("fieldAreaValue").textContent = "-- m²";
+    document.getElementById("fieldHectareValue").textContent = "-- ha";
+    document.getElementById("fieldCenterLat").textContent = "--";
+    document.getElementById("fieldCenterLng").textContent = "--";
+    preview.textContent = "尚未繪製農地邊界。";
+    warning.textContent = "⚠️ 尚未完成農地邊界。沒有 Polygon 就不能儲存正式農地，也不能進行 NDVI 分析。";
+    warning.style.background = "#fff7ed";
+    warning.style.color = "#9a3412";
+    return;
+  }
+
+  const feature = { type:"Feature", properties:{}, geometry:currentFieldGeometry };
+  const area = window.turf ? turf.area(feature) : 0;
+  const center = window.turf ? turf.centroid(feature).geometry.coordinates : [0,0];
+
+  document.getElementById("fieldAreaValue").textContent = `${area.toLocaleString("zh-TW",{maximumFractionDigits:1})} m²`;
+  document.getElementById("fieldHectareValue").textContent = `${(area/10000).toFixed(4)} ha`;
+  document.getElementById("fieldCenterLat").textContent = Number(center[1]).toFixed(6);
+  document.getElementById("fieldCenterLng").textContent = Number(center[0]).toFixed(6);
+  document.getElementById("fieldLatitude").value = Number(center[1]).toFixed(6);
+  document.getElementById("fieldLongitude").value = Number(center[0]).toFixed(6);
+  preview.textContent = JSON.stringify(feature,null,2);
+  warning.textContent = "✅ 已完成農地邊界，可檢查基本資料後儲存正式農地。";
+  warning.style.background = "#f0fdf4";
+  warning.style.color = "#166534";
+  updateFieldWorkflow(3);
+}
+
+async function focusFieldMapByTown() {
+  if (!fieldBoundaryMap) return;
+  const county = document.getElementById("fieldCounty").value.trim() ||
+    document.getElementById("county")?.value || "嘉義縣";
+  const town = document.getElementById("fieldTown").value.trim() ||
+    document.getElementById("town")?.value || "大林鎮";
+  const position = await getTownLatLng(county,town);
+  setFieldCenter(position.lat,position.lng,14);
+  document.getElementById("fieldMapStatus").textContent =
+    `已移到 ${county}${town} 的大約位置。這只是鄉鎮中心，仍需貼上農地網址或在地圖上找到農地並畫出邊界。`;
+  updateFieldWorkflow(1);
+}
+
+function focusFieldMapToMyLocation() {
+  if (!navigator.geolocation) {
+    alert("此瀏覽器不支援定位功能。");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      setFieldCenter(position.coords.latitude,position.coords.longitude,18);
+      document.getElementById("fieldMapStatus").textContent =
+        "已移到您的目前位置。請找到實際田區後畫出完整邊界。";
+      updateFieldWorkflow(2);
+    },
+    () => alert("無法取得目前位置，請確認定位權限。"),
+    { enableHighAccuracy:true, timeout:10000, maximumAge:300000 }
+  );
+}
+
+function clearCurrentDrawing() {
+  if (fieldDrawnItems) fieldDrawnItems.clearLayers();
+  currentFieldLayer = null;
+  currentFieldGeometry = null;
+  window.aiaikosSelectedFieldGeometry = null;
+  updateFieldGeometryUi();
+  document.getElementById("fieldMapStatus").textContent =
+    "目前邊界已清除。請重新按「畫出農地範圍」。";
+  updateFieldWorkflow(2);
+}
+
+function getSavedFields() {
+  try { return JSON.parse(localStorage.getItem(FIELD_STORAGE_KEY) || "[]"); }
+  catch (_) { return []; }
+}
+
+function saveCurrentField() {
+  const name = document.getElementById("fieldName").value.trim();
+  const crop = document.getElementById("fieldCrop").value.trim();
+
+  if (!name) { alert("請填寫農地名稱。"); return; }
+  if (!crop) { alert("請填寫目前作物。"); return; }
+  if (!currentFieldGeometry || currentFieldGeometry.type !== "Polygon") {
+    alert("尚未畫出農地邊界。Google Maps 圖釘或截圖不能取代 Polygon，請先沿著實際田界完成繪製。");
+    document.getElementById("fieldBoundaryMap").scrollIntoView({behavior:"smooth",block:"center"});
+    return;
+  }
+
+  const feature = { type:"Feature", properties:{}, geometry:currentFieldGeometry };
+  const areaM2 = window.turf ? turf.area(feature) : null;
+  const centroid = window.turf ? turf.centroid(feature).geometry.coordinates : [null,null];
+  const fields = getSavedFields();
+
+  const field = {
+    id:`FIELD-${String(Date.now()).slice(-8)}`,
+    name,
+    crop,
+    variety:document.getElementById("fieldVariety").value.trim(),
+    county:document.getElementById("fieldCounty").value.trim(),
+    town:document.getElementById("fieldTown").value.trim(),
+    stage:document.getElementById("fieldStage").value,
+    irrigation:document.getElementById("fieldIrrigation").value,
+    googleMapUrl:document.getElementById("fieldGoogleMapUrl").value.trim(),
+    center:{ lat:centroid[1], lng:centroid[0] },
+    geometry:JSON.parse(JSON.stringify(currentFieldGeometry)),
+    areaM2,
+    areaHa:areaM2 ? areaM2/10000 : null,
+    note:document.getElementById("fieldNote").value.trim(),
+    screenshot:currentFieldScreenshotDataUrl || null,
+    createdAt:new Date().toISOString()
+  };
+
+  fields.unshift(field);
+  localStorage.setItem(FIELD_STORAGE_KEY,JSON.stringify(fields.slice(0,100)));
+  window.aiaikosSelectedFieldGeometry = field.geometry;
+  document.getElementById("ndviField").value = field.name;
+  renderSavedFields();
+  alert(`農地「${field.name}」已儲存。Polygon 將作為後續 Process API 與 Statistical API 的分析範圍。`);
+}
+
+function renderSavedFields() {
+  const list = document.getElementById("fieldRecordList");
+  if (!list) return;
+  const fields = getSavedFields();
+  if (!fields.length) {
+    list.innerHTML = '<div class="field-record-item">目前尚無已儲存農地。</div>';
+    return;
+  }
+  list.innerHTML = fields.map((field,index) => `
+    <div class="field-record-item">
+      <strong>${escapeHtml(field.name)}｜${escapeHtml(field.crop)}</strong>
+      <div class="field-record-meta">
+        📍 ${escapeHtml(field.county || "")}${escapeHtml(field.town || "")}<br>
+        📐 ${Number(field.areaM2 || 0).toLocaleString("zh-TW",{maximumFractionDigits:1})} m²｜
+        ${(Number(field.areaHa || 0)).toFixed(4)} ha<br>
+        🗺️ 中心：${Number(field.center?.lat || 0).toFixed(6)}, ${Number(field.center?.lng || 0).toFixed(6)}
+      </div>
+      <div class="log-action-row">
+        <button class="btn btn-light btn-mini" onclick="loadSavedField(${index})">載入地圖</button>
+        <button class="btn btn-light btn-mini" onclick="useFieldForNdvi(${index})">用於 NDVI</button>
+        <button class="btn btn-light btn-mini" onclick="deleteSavedField(${index})">刪除</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function loadSavedField(index) {
+  const field = getSavedFields()[index];
+  if (!field || !field.geometry) return;
+  document.getElementById("fieldName").value = field.name || "";
+  document.getElementById("fieldCrop").value = field.crop || "";
+  document.getElementById("fieldVariety").value = field.variety || "";
+  document.getElementById("fieldCounty").value = field.county || "";
+  document.getElementById("fieldTown").value = field.town || "";
+  document.getElementById("fieldStage").value = field.stage || "尚未設定";
+  document.getElementById("fieldIrrigation").value = field.irrigation || "未設定";
+  document.getElementById("fieldGoogleMapUrl").value = field.googleMapUrl || "";
+  document.getElementById("fieldNote").value = field.note || "";
+
+  const layer = L.geoJSON({type:"Feature",properties:{},geometry:field.geometry},{
+    style:{ color:"#ef4444", weight:4, fillColor:"#22c55e", fillOpacity:.22 }
+  }).getLayers()[0];
+  setCurrentFieldLayer(layer);
+  document.getElementById("fieldBoundary").scrollIntoView({behavior:"smooth"});
+}
+
+function useFieldForNdvi(index) {
+  const field = getSavedFields()[index];
+  if (!field) return;
+  window.aiaikosSelectedFieldGeometry = field.geometry;
+  document.getElementById("ndviField").value = field.name;
+  document.getElementById("ndviNote").value =
+    `已選用正式農地邊界：${field.name}，面積約 ${Number(field.areaHa || 0).toFixed(4)} 公頃。`;
+  document.getElementById("satellite").scrollIntoView({behavior:"smooth"});
+}
+
+function deleteSavedField(index) {
+  const fields = getSavedFields();
+  if (!fields[index]) return;
+  if (!confirm(`確定刪除農地「${fields[index].name}」嗎？`)) return;
+  fields.splice(index,1);
+  localStorage.setItem(FIELD_STORAGE_KEY,JSON.stringify(fields));
+  renderSavedFields();
+}
+
+function fitAllSavedFields() {
+  const fields = getSavedFields();
+  if (!fields.length) { alert("目前沒有已儲存農地。"); return; }
+  const group = L.featureGroup(fields.map(field => L.geoJSON(field.geometry)));
+  fieldBoundaryMap.fitBounds(group.getBounds(),{padding:[30,30]});
+}
+
+function exportFieldsGeoJson() {
+  const fields = getSavedFields();
+  if (!fields.length) { alert("目前沒有農地可匯出。"); return; }
+  const featureCollection = {
+    type:"FeatureCollection",
+    features:fields.map(field => ({
+      type:"Feature",
+      properties:{
+        id:field.id,name:field.name,crop:field.crop,variety:field.variety,
+        county:field.county,town:field.town,stage:field.stage,
+        irrigation:field.irrigation,googleMapUrl:field.googleMapUrl,
+        areaM2:field.areaM2,areaHa:field.areaHa,note:field.note,
+        createdAt:field.createdAt
+      },
+      geometry:field.geometry
+    }))
+  };
+  const blob = new Blob([JSON.stringify(featureCollection,null,2)],{type:"application/geo+json"});
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `aiaikos-fields-${new Date().toISOString().slice(0,10)}.geojson`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+async function importFieldsGeoJson(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  try {
+    const data = JSON.parse(await file.text());
+    const features = data.type === "FeatureCollection" ? data.features :
+      data.type === "Feature" ? [data] : [];
+    const valid = features.filter(feature =>
+      feature?.geometry?.type === "Polygon" || feature?.geometry?.type === "MultiPolygon"
+    );
+    if (!valid.length) throw new Error("檔案中沒有 Polygon 或 MultiPolygon。");
+
+    const fields = getSavedFields();
+    valid.forEach((feature,index) => {
+      const props = feature.properties || {};
+      const areaM2 = window.turf ? turf.area(feature) : null;
+      const centroid = window.turf ? turf.centroid(feature).geometry.coordinates : [null,null];
+      fields.unshift({
+        id:props.id || `FIELD-IMPORT-${Date.now()}-${index}`,
+        name:props.name || `匯入農地 ${index+1}`,
+        crop:props.crop || "未設定",
+        variety:props.variety || "",
+        county:props.county || "",
+        town:props.town || "",
+        stage:props.stage || "尚未設定",
+        irrigation:props.irrigation || "未設定",
+        googleMapUrl:props.googleMapUrl || "",
+        center:{lat:centroid[1],lng:centroid[0]},
+        geometry:feature.geometry,
+        areaM2,
+        areaHa:areaM2 ? areaM2/10000 : null,
+        note:props.note || "",
+        createdAt:props.createdAt || new Date().toISOString()
+      });
+    });
+    localStorage.setItem(FIELD_STORAGE_KEY,JSON.stringify(fields.slice(0,100)));
+    renderSavedFields();
+    alert(`已匯入 ${valid.length} 塊農地。`);
+  } catch (error) {
+    alert(`GeoJSON 匯入失敗：${error.message}`);
+  } finally {
+    event.target.value = "";
+  }
+}
+
+function previewFieldScreenshot(event) {
+  const file = event.target.files?.[0];
+  const preview = document.getElementById("fieldScreenshotPreview");
+  if (!file) {
+    currentFieldScreenshotDataUrl = "";
+    preview.textContent = "截圖不能取代 Polygon；它只用來協助農民核對位置與地形。";
+    return;
+  }
+  if (file.size > 2 * 1024 * 1024) {
+    alert("截圖請控制在 2MB 以下，避免 localStorage 容量不足。");
+    event.target.value = "";
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () => {
+    currentFieldScreenshotDataUrl = reader.result;
+    preview.innerHTML = `<img src="${reader.result}" alt="Google Maps 農地參考截圖">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+document.addEventListener("DOMContentLoaded", initFieldManagementCenter);
+</script>
+
+<script>
+/* =====================================================
+   AIAKOS V5.6 Satellite NDVI Foundation
    第一階段：手動輸入／教學模擬／Farm Memory
 ===================================================== */
 
@@ -3945,7 +4502,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <script>
 /* =====================================================
-   AIAKOS V5.5 IoT MQTT Center
+   AIAKOS V5.6 IoT MQTT Center
    Browser MQTT over WebSocket + Farm Memory
 ===================================================== */
 let aiaikosMqttClient = null;
