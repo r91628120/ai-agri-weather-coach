@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="wLQnbGi0252et4Q2FGCubos4FZW1tLeOlk8eGrW8YYI" />
 
-  <title>AI農業氣象教練 AIAKOS V5.0｜農業氣象判讀、農事決策與農場經營日誌</title>
-  <meta name="description" content="AI農業氣象教練 AIAKOS V5.0，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
+  <title>AI農業氣象教練 AIAKOS V5.3｜農業氣象判讀、農事決策與農場經營日誌</title>
+  <meta name="description" content="AI農業氣象教練 AIAKOS V5.3，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
   <meta name="keywords" content="AI農業氣象教練,農業氣象,智慧農業,農場經營日誌,農事決策,病蟲害風險,農業教育平台,農業氣象站,農業防災">
   <meta name="author" content="AI農業教育平台">
   <meta name="robots" content="index, follow">
@@ -14,13 +14,13 @@
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
-  <meta property="og:title" content="AI農業氣象教練 AIAKOS V5.0｜把天氣資料變成農業決策能力">
+  <meta property="og:title" content="AI農業氣象教練 AIAKOS V5.3｜把天氣資料變成農業決策能力">
   <meta property="og:description" content="依縣市鄉鎮自動尋找最近農業氣象站，協助學生與農友進行氣象判讀、農事建議、風險燈號、三天天氣推估與農場經營日誌分享。">
   <meta property="og:url" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/">
   <meta property="og:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AI農業氣象教練 AIAKOS V5.0">
+  <meta name="twitter:title" content="AI農業氣象教練 AIAKOS V5.3">
   <meta name="twitter:description" content="農業氣象判讀、農事決策、風險燈號與AI農場經營日誌分享工具。">
   <meta name="twitter:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
@@ -239,7 +239,7 @@
 
     .feature-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 18px;
     }
 
@@ -888,7 +888,7 @@
   font-size:.9rem;
 }
 
-/* AIAKOS V5.0 農業 AI Agent */
+/* AIAKOS V5.3 農業 AI Agent */
 .map-url-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -976,6 +976,81 @@
 }
 
 
+/* AIAKOS V5.3 Satellite NDVI Foundation */
+.ndvi-panel {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.ndvi-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 28px;
+  border: 1px solid rgba(14, 165, 233, 0.18);
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.ndvi-scale {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  overflow: hidden;
+  border-radius: 999px;
+  margin: 18px 0 8px;
+  border: 1px solid #d1d5db;
+}
+
+.ndvi-scale span {
+  padding: 10px 4px;
+  text-align: center;
+  font-weight: 900;
+  font-size: 0.82rem;
+}
+
+.ndvi-scale span:nth-child(1) { background:#fef2f2; color:#991b1b; }
+.ndvi-scale span:nth-child(2) { background:#ffedd5; color:#9a3412; }
+.ndvi-scale span:nth-child(3) { background:#fef9c3; color:#854d0e; }
+.ndvi-scale span:nth-child(4) { background:#dcfce7; color:#166534; }
+.ndvi-scale span:nth-child(5) { background:#bbf7d0; color:#14532d; }
+
+.ndvi-result {
+  min-height: 220px;
+  padding: 20px;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+  border: 1px solid #bae6fd;
+  white-space: pre-wrap;
+}
+
+.ndvi-record-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.ndvi-record-item {
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #bae6fd;
+}
+
+.phase-badge {
+  display: inline-flex;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 900;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 800px) {
+  .ndvi-panel {
+    grid-template-columns: 1fr;
+  }
+}
+
   </style>
 </head>
 
@@ -985,12 +1060,14 @@
     <header class="topbar">
       <a class="brand" href="#">
         <span class="brand-icon">🌦️</span>
-        <span>AI農業氣象教練 AIAKOS V5.0</span>
+        <span>AI農業氣象教練 AIAKOS V5.3</span>
       </a>
 
       <nav class="nav-links">
         <a href="#coach">開始判讀</a>
         <a href="#features">核心功能</a>
+        <a href="#satellite">衛星 NDVI</a>
+        <a href="#farmLog">Farm Memory</a>
         <a href="#flow">學習流程</a>
         <a href="https://r91628120.github.io/ai-agri-education/">回主平台</a>
       </nav>
@@ -999,7 +1076,7 @@
     <section class="hero">
       <div class="hero-content">
         <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
-        <h1>AI農業氣象教練 AIAKOS V5.0</h1>
+        <h1>AI農業氣象教練 AIAKOS V5.3</h1>
         <p class="hero-subtitle">
           導入農業部農業氣象資料，協助學生從「看天氣」進一步學會
           氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
@@ -1046,6 +1123,12 @@
           <div class="feature-icon">📅</div>
           <h3>農事曆規劃</h3>
           <p>協助學生建立作物管理時程與天氣應變策略。</p>
+        </article>
+
+        <article class="feature-card">
+          <div class="feature-icon">🛰️</div>
+          <h3>衛星 NDVI</h3>
+          <p>以植生指標觀察田區生長差異、缺水風險與巡田優先順序。</p>
         </article>
       </div>
     </section>
@@ -1289,11 +1372,90 @@
       </div>
     </section>
 
+
+    <section class="section" id="satellite">
+      <div class="section-title">
+        <div class="eyebrow">SATELLITE NDVI</div>
+        <h2>🛰️ 衛星 NDVI 田區判讀基礎版</h2>
+        <p>
+          第一階段先建立資料結構、判讀規則與 Farm Memory 紀錄。
+          本版採手動輸入或教學模擬 NDVI；後續再串接真實衛星服務。
+        </p>
+      </div>
+
+      <div class="ndvi-panel">
+        <div class="ndvi-card">
+          <span class="phase-badge">Phase 1｜NDVI Foundation</span>
+          <h2>🌾 輸入田區植生資料</h2>
+
+          <div class="form-grid">
+            <div>
+              <label for="ndviField">田區名稱</label>
+              <input id="ndviField" type="text" placeholder="例如：A區、東側田區、溫室一">
+            </div>
+
+            <div>
+              <label for="ndviDate">影像日期</label>
+              <input id="ndviDate" type="date">
+            </div>
+
+            <div>
+              <label for="ndviValue">NDVI 數值</label>
+              <input id="ndviValue" type="number" min="-1" max="1" step="0.01" placeholder="例如：0.62">
+            </div>
+
+            <div>
+              <label for="ndviSource">資料來源</label>
+              <select id="ndviSource">
+                <option value="手動輸入">手動輸入</option>
+                <option value="教學模擬">教學模擬</option>
+                <option value="衛星服務（預留）">衛星服務（預留）</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label for="ndviNote">田間補充觀察</label>
+              <textarea id="ndviNote" placeholder="例如：近期少雨、東側葉色較淡、灌溉管線可能異常。"></textarea>
+            </div>
+          </div>
+
+          <div class="ndvi-scale" aria-label="NDVI 判讀尺度">
+            <span>&lt; 0.20<br>極低</span>
+            <span>0.20–0.39<br>偏低</span>
+            <span>0.40–0.59<br>普通</span>
+            <span>0.60–0.79<br>良好</span>
+            <span>≥ 0.80<br>旺盛</span>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-green" onclick="analyzeNdvi()">🛰️ 進行 NDVI 判讀</button>
+            <button class="btn btn-light" onclick="saveNdviRecord()">💾 存入 Farm Memory</button>
+            <button class="btn btn-light" onclick="loadNdviDemo()">🎓 載入教學範例</button>
+            <button class="btn btn-light" onclick="clearNdviForm()">清除</button>
+          </div>
+
+          <div class="api-note">
+            <strong>重要限制：</strong>
+            NDVI 只能指出植生差異，不能單獨判定缺水、病害或缺肥。
+            正式決策必須結合氣象、作物生育期、土壤水分與現場巡田。
+          </div>
+        </div>
+
+        <div class="ndvi-card">
+          <h2>🤖 AIAKOS 衛星判讀結果</h2>
+          <div class="ndvi-result" id="ndviResult">等待輸入田區與 NDVI 數值。</div>
+
+          <h3 style="color:#14532d;margin-top:24px;">📚 Farm Memory｜NDVI 紀錄</h3>
+          <div class="ndvi-record-list" id="ndviRecordList"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="farmLog">
       <div class="section-title">
         <div class="eyebrow">FARM LOG</div>
          <h2>AI農場經營日誌系統</h2>
-          <p>記錄每日農事、氣象條件與管理決策，形成學生的農場經營履歷。</p>
+          <p>記錄每日農事、氣象條件、NDVI 與管理決策，逐步建立 AIAKOS Farm Memory。</p>
         </div>
 
       <div class="farm-log-card">
@@ -1440,7 +1602,7 @@
 
     <div class="ecosystem-copy">
       © 2026 AI農業教育平台｜
-      AI農業氣象教練 AIAKOS V5.0｜
+      AI農業氣象教練 AIAKOS V5.3｜
       AI Agricultural Education Ecosystem
     </div>
 
@@ -1470,7 +1632,7 @@
   <script>
     /*
       =====================================================
-      AI農業氣象教練 V2.0
+      AI農業氣象教練 V5.3
       鄉鎮 → Google Geocoding → 最近農業氣象站 → GAS → 農業氣象資料
       =====================================================
 
@@ -1486,6 +1648,7 @@
     const GPT_COACH_URL = "https://chatgpt.com/g/g-6a391cc88d8c8191a7985d213e03a9f6-ainong-ye-qi-xiang-jiao-lian";
 
     let latestWeatherSnapshot = null;
+    let latestNdviSnapshot = null;
 
     let AIAKOS_APP = null;
 
@@ -1735,6 +1898,7 @@
           await initAIAKOSCore();
           await initTownshipSelector();
           renderFarmLogs();
+          renderNdviRecords();
 
         const gptLink = document.getElementById("gptCoachLink");
            if (gptLink && GPT_COACH_URL && !GPT_COACH_URL.includes("請貼上")) {
@@ -2075,6 +2239,15 @@ ${task}
 【補充說明】
 ${note || "無"}
 
+【最近 NDVI 判讀】
+${latestNdviSnapshot
+  ? `田區：${latestNdviSnapshot.field}
+日期：${latestNdviSnapshot.date}
+NDVI：${latestNdviSnapshot.value}
+狀態：${latestNdviSnapshot.level}
+巡田優先度：${latestNdviSnapshot.priority}`
+  : "尚未提供 NDVI 資料"}
+
 請輸出：
 1. 氣象資料判讀
 2. 對作物可能造成的影響
@@ -2127,7 +2300,8 @@ ${note || "無"}
     crop,
     work: work || "未填寫工作",
     note: note || "無補充內容",
-    weather: latestWeatherSnapshot ? { ...latestWeatherSnapshot } : null
+    weather: latestWeatherSnapshot ? { ...latestWeatherSnapshot } : null,
+    ndvi: latestNdviSnapshot ? { ...latestNdviSnapshot } : null
   });
 
   localStorage.setItem("farmLogs", JSON.stringify(logs));
@@ -2159,12 +2333,20 @@ ${note || "無"}
       </div>
     ` : `<div class="log-weather">尚未附加氣象資料。請先產生氣象農事建議，再儲存日誌。</div>`;
 
+    const ndviHtml = log.ndvi ? `
+      <div class="log-weather">
+        🛰️ NDVI｜${log.ndvi.field}｜${log.ndvi.date}<br>
+        數值 ${log.ndvi.value}｜狀態 ${log.ndvi.level}｜巡田優先度 ${log.ndvi.priority}
+      </div>
+    ` : "";
+
     return `
       <div class="log-item">
         <strong>${log.date}｜${log.crop}｜${log.work}</strong><br>
         <span>${log.location}</span><br>
         <small>${log.note}</small>
         ${weatherHtml}
+        ${ndviHtml}
         <div class="log-action-row">
           <button class="btn btn-light btn-mini" onclick="exportFarmLogImage(${index})">🖼️ 圖片</button>
           <button class="btn btn-light btn-mini" onclick="exportFarmLogPdf(${index})">📄 PDF</button>
@@ -2506,7 +2688,7 @@ ${note || "無"}
 
 
     /* =========================
-        AIAKOS V5.0 農業 AI Agent
+        AIAKOS V5.3 農業 AI Agent
      ========================= */
 
 
@@ -2587,7 +2769,7 @@ function askAIAgent() {
   }
 
   answerBox.textContent =
-`🌦 AIAKOS V5.0 農業 AI Agent 回覆
+`🌦 AIAKOS V5.3 農業 AI Agent 回覆
 
 【你的問題】
 ${question}
@@ -3049,6 +3231,255 @@ function renderRiskMetric(targetId, level, value, unit) {
 
 
   </script>
+
+
+<script>
+/* =====================================================
+   AIAKOS V5.3 Satellite NDVI Foundation
+   第一階段：手動輸入／教學模擬／Farm Memory
+===================================================== */
+
+function getNdviRecords() {
+  try {
+    return JSON.parse(localStorage.getItem("aiaikosNdviRecords") || "[]");
+  } catch (error) {
+    console.error("NDVI 紀錄讀取失敗：", error);
+    return [];
+  }
+}
+
+function classifyNdvi(value) {
+  const n = Number(value);
+
+  if (Number.isNaN(n) || n < -1 || n > 1) {
+    return null;
+  }
+
+  if (n < 0.20) {
+    return {
+      level: "極低",
+      priority: "高",
+      risk: "田區植生覆蓋可能很低，或影像受裸土、水體、雲層影響。",
+      action: "優先巡田，確認是否為裸地、積水、剛整地、缺株或影像品質問題。"
+    };
+  }
+
+  if (n < 0.40) {
+    return {
+      level: "偏低",
+      priority: "高",
+      risk: "作物生長勢可能偏弱，需留意缺水、病害、缺肥或植株密度不足。",
+      action: "建議在 24 小時內巡查，並比對近期降雨、灌溉與土壤水分。"
+    };
+  }
+
+  if (n < 0.60) {
+    return {
+      level: "普通",
+      priority: "中",
+      risk: "植生狀況普通，可能處於生長初期、覆蓋度尚未完全或局部生長不均。",
+      action: "持續追蹤下一期影像，並巡查數值較低的局部區域。"
+    };
+  }
+
+  if (n < 0.80) {
+    return {
+      level: "良好",
+      priority: "低",
+      risk: "整體植生狀況良好，但仍需觀察是否有局部下降或短期劇烈變化。",
+      action: "維持正常管理，並與前一期 NDVI 比較趨勢。"
+    };
+  }
+
+  return {
+    level: "旺盛",
+    priority: "低",
+    risk: "植生反應旺盛，但高 NDVI 不代表完全沒有病害或水分問題。",
+    action: "維持巡田與田間驗證，避免只依單一指標判斷。"
+  };
+}
+
+function analyzeNdvi() {
+  const field = document.getElementById("ndviField").value.trim() || "未命名田區";
+  const date = document.getElementById("ndviDate").value || new Date().toISOString().slice(0, 10);
+  const valueRaw = document.getElementById("ndviValue").value;
+  const source = document.getElementById("ndviSource").value;
+  const note = document.getElementById("ndviNote").value.trim();
+  const resultBox = document.getElementById("ndviResult");
+
+  if (valueRaw === "") {
+    alert("請輸入 NDVI 數值。");
+    return null;
+  }
+
+  const value = Number(valueRaw);
+  const result = classifyNdvi(value);
+
+  if (!result) {
+    alert("NDVI 數值必須介於 -1 到 1 之間。");
+    return null;
+  }
+
+  const weatherText = latestWeatherSnapshot
+    ? `目前氣象：${latestWeatherSnapshot.temp}℃、濕度 ${latestWeatherSnapshot.humidity}%、雨量 ${latestWeatherSnapshot.rainMm} mm。`
+    : "目前尚未附加即時氣象資料。";
+
+  let combinedAdvice = result.action;
+
+  if (latestWeatherSnapshot) {
+    const rainMm = Number(latestWeatherSnapshot.rainMm);
+    const temp = Number(latestWeatherSnapshot.temp);
+
+    if (value < 0.40 && !Number.isNaN(rainMm) && rainMm < 1) {
+      combinedAdvice += " NDVI 偏低且近期雨量少，缺水可能性提高，但仍需以土壤水分與現場觀察確認。";
+    }
+
+    if (value < 0.40 && !Number.isNaN(temp) && temp >= 32) {
+      combinedAdvice += " 同時出現高溫條件，建議優先檢查葉片萎凋與灌溉系統。";
+    }
+  }
+
+  latestNdviSnapshot = {
+    field,
+    date,
+    value: value.toFixed(2),
+    source,
+    note: note || "無",
+    level: result.level,
+    priority: result.priority,
+    risk: result.risk,
+    action: combinedAdvice
+  };
+
+  resultBox.textContent =
+`🛰️ AIAKOS NDVI 判讀
+
+【田區】
+${field}
+
+【影像日期】
+${date}
+
+【資料來源】
+${source}
+
+【NDVI】
+${value.toFixed(2)}
+
+【植生狀態】
+${result.level}
+
+【巡田優先度】
+${result.priority}
+
+【可能意義】
+${result.risk}
+
+【氣象交叉判讀】
+${weatherText}
+
+【建議】
+${combinedAdvice}
+
+【田間補充】
+${note || "無"}
+
+⚠️ 本結果屬於教學與初步篩選，不可直接當成病害、缺肥或缺水的最終診斷。`;
+
+  return latestNdviSnapshot;
+}
+
+function saveNdviRecord() {
+  const snapshot = analyzeNdvi();
+  if (!snapshot) return;
+
+  const records = getNdviRecords();
+  records.unshift({
+    id: Date.now(),
+    ...snapshot
+  });
+
+  localStorage.setItem("aiaikosNdviRecords", JSON.stringify(records));
+  renderNdviRecords();
+  alert("NDVI 紀錄已存入本機 Farm Memory。");
+}
+
+function renderNdviRecords() {
+  const list = document.getElementById("ndviRecordList");
+  if (!list) return;
+
+  const records = getNdviRecords();
+
+  if (!records.length) {
+    list.innerHTML = '<div class="ndvi-record-item">目前尚無 NDVI 紀錄。</div>';
+    return;
+  }
+
+  list.innerHTML = records.slice(0, 10).map((record, index) => `
+    <div class="ndvi-record-item">
+      <strong>${escapeHtml(record.date)}｜${escapeHtml(record.field)}</strong><br>
+      NDVI：${escapeHtml(record.value)}｜
+      狀態：${escapeHtml(record.level)}｜
+      巡田優先度：${escapeHtml(record.priority)}<br>
+      <small>${escapeHtml(record.action)}</small>
+      <div class="log-action-row">
+        <button class="btn btn-light btn-mini" onclick="reuseNdviRecord(${index})">帶回表單</button>
+        <button class="btn btn-light btn-mini" onclick="deleteNdviRecord(${index})">刪除</button>
+      </div>
+    </div>
+  `).join("");
+}
+
+function reuseNdviRecord(index) {
+  const record = getNdviRecords()[index];
+  if (!record) return;
+
+  document.getElementById("ndviField").value = record.field || "";
+  document.getElementById("ndviDate").value = record.date || "";
+  document.getElementById("ndviValue").value = record.value || "";
+  document.getElementById("ndviSource").value = record.source || "手動輸入";
+  document.getElementById("ndviNote").value = record.note === "無" ? "" : (record.note || "");
+  analyzeNdvi();
+  document.getElementById("satellite").scrollIntoView({ behavior: "smooth" });
+}
+
+function deleteNdviRecord(index) {
+  const records = getNdviRecords();
+  if (!records[index]) return;
+  if (!confirm("確定刪除這筆 NDVI 紀錄嗎？")) return;
+
+  records.splice(index, 1);
+  localStorage.setItem("aiaikosNdviRecords", JSON.stringify(records));
+  renderNdviRecords();
+}
+
+function loadNdviDemo() {
+  document.getElementById("ndviField").value = "A區東側";
+  document.getElementById("ndviDate").value = new Date().toISOString().slice(0, 10);
+  document.getElementById("ndviValue").value = "0.34";
+  document.getElementById("ndviSource").value = "教學模擬";
+  document.getElementById("ndviNote").value = "近期降雨較少，東側葉色較淡，準備安排巡田。";
+  analyzeNdvi();
+}
+
+function clearNdviForm() {
+  document.getElementById("ndviField").value = "";
+  document.getElementById("ndviDate").value = "";
+  document.getElementById("ndviValue").value = "";
+  document.getElementById("ndviSource").value = "手動輸入";
+  document.getElementById("ndviNote").value = "";
+  document.getElementById("ndviResult").textContent = "等待輸入田區與 NDVI 數值。";
+  latestNdviSnapshot = null;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const ndviDate = document.getElementById("ndviDate");
+  if (ndviDate && !ndviDate.value) {
+    ndviDate.value = new Date().toISOString().slice(0, 10);
+  }
+  renderNdviRecords();
+});
+</script>
 
  <!-- GoatCounter -->
   <script
