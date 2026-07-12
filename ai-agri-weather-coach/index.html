@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="google-site-verification" content="wLQnbGi0252et4Q2FGCubos4FZW1tLeOlk8eGrW8YYI" />
 
-  <title>AI農業氣象教練 AIAKOS V5.3｜農業氣象判讀、農事決策與農場經營日誌</title>
-  <meta name="description" content="AI農業氣象教練 AIAKOS V5.3，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
+  <title>AI農業氣象教練 AIAKOS V5.4｜農業氣象判讀、農事決策與農場經營日誌</title>
+  <meta name="description" content="AI農業氣象教練 AIAKOS V5.4，串接農業氣象站資料，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
   <meta name="keywords" content="AI農業氣象教練,農業氣象,智慧農業,農場經營日誌,農事決策,病蟲害風險,農業教育平台,農業氣象站,農業防災">
   <meta name="author" content="AI農業教育平台">
   <meta name="robots" content="index, follow">
@@ -14,19 +14,39 @@
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
-  <meta property="og:title" content="AI農業氣象教練 AIAKOS V5.3｜把天氣資料變成農業決策能力">
+  <meta property="og:title" content="AI農業氣象教練 AIAKOS V5.4｜把天氣資料變成農業決策能力">
   <meta property="og:description" content="依縣市鄉鎮自動尋找最近農業氣象站，協助學生與農友進行氣象判讀、農事建議、風險燈號、三天天氣推估與農場經營日誌分享。">
   <meta property="og:url" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/">
   <meta property="og:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="AI農業氣象教練 AIAKOS V5.3">
+  <meta name="twitter:title" content="AI農業氣象教練 AIAKOS V5.4">
   <meta name="twitter:description" content="農業氣象判讀、農事決策、風險燈號與AI農場經營日誌分享工具。">
   <meta name="twitter:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="favicon-180.png">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+
+  <!-- AIAKOS V5.4 農地邊界管理中心 -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  >
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/leaflet-draw@1.0.4/dist/leaflet.draw.css"
+  >
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7.3.0/turf.min.js"></script>
+
 
   <style>
     :root {
@@ -888,7 +908,7 @@
   font-size:.9rem;
 }
 
-/* AIAKOS V5.3 農業 AI Agent */
+/* AIAKOS V5.4 農業 AI Agent */
 .map-url-row {
   display: grid;
   grid-template-columns: 1fr auto;
@@ -976,7 +996,7 @@
 }
 
 
-/* AIAKOS V5.3 Satellite NDVI Foundation */
+/* AIAKOS V5.4 Satellite NDVI Foundation */
 .ndvi-panel {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1051,6 +1071,142 @@
   }
 }
 
+
+/* AIAKOS V5.4 農地邊界管理中心 */
+.field-boundary-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(320px, 0.65fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.field-map-card,
+.field-control-card {
+  background: rgba(255,255,255,.96);
+  border-radius: 28px;
+  border: 1px solid rgba(22,163,74,.14);
+  box-shadow: var(--shadow);
+  padding: 24px;
+}
+
+#fieldBoundaryMap {
+  width: 100%;
+  height: 560px;
+  border-radius: 22px;
+  overflow: hidden;
+  border: 1px solid #bbf7d0;
+  background: #e5e7eb;
+}
+
+.field-map-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.field-status {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: linear-gradient(135deg,#ecfccb,#e0f2fe);
+  border: 1px solid #bbf7d0;
+  color: #14532d;
+  white-space: pre-wrap;
+}
+
+.field-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2,1fr);
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.field-summary-item {
+  padding: 13px;
+  border-radius: 15px;
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+}
+
+.field-summary-item span {
+  display: block;
+  color: #6b7280;
+  font-size: .85rem;
+}
+
+.field-summary-item strong {
+  color: #14532d;
+  font-size: 1.05rem;
+}
+
+.field-record-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  max-height: 420px;
+  overflow: auto;
+}
+
+.field-record-item {
+  padding: 14px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid #bbf7d0;
+}
+
+.field-record-item.active {
+  border: 2px solid #16a34a;
+  background: #f0fdf4;
+}
+
+.geojson-preview {
+  margin-top: 14px;
+  min-height: 130px;
+  max-height: 220px;
+  overflow: auto;
+  border-radius: 16px;
+  padding: 14px;
+  background: #111827;
+  color: #d1fae5;
+  white-space: pre-wrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: .82rem;
+}
+
+.field-help {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #fef9c3;
+  color: #713f12;
+  border: 1px solid #fde68a;
+}
+
+.leaflet-container {
+  font-family: "Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;
+}
+
+@media (max-width: 960px) {
+  .field-boundary-panel {
+    grid-template-columns: 1fr;
+  }
+
+  #fieldBoundaryMap {
+    height: 460px;
+  }
+}
+
+@media (max-width: 640px) {
+  #fieldBoundaryMap {
+    height: 390px;
+  }
+
+  .field-summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
   </style>
 </head>
 
@@ -1060,12 +1216,13 @@
     <header class="topbar">
       <a class="brand" href="#">
         <span class="brand-icon">🌦️</span>
-        <span>AI農業氣象教練 AIAKOS V5.3</span>
+        <span>AI農業氣象教練 AIAKOS V5.4</span>
       </a>
 
       <nav class="nav-links">
         <a href="#coach">開始判讀</a>
         <a href="#features">核心功能</a>
+        <a href="#fieldBoundary">農地邊界</a>
         <a href="#satellite">衛星 NDVI</a>
         <a href="#farmLog">Farm Memory</a>
         <a href="#flow">學習流程</a>
@@ -1076,7 +1233,7 @@
     <section class="hero">
       <div class="hero-content">
         <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
-        <h1>AI農業氣象教練 AIAKOS V5.3</h1>
+        <h1>AI農業氣象教練 AIAKOS V5.4</h1>
         <p class="hero-subtitle">
           導入農業部農業氣象資料，協助學生從「看天氣」進一步學會
           氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
@@ -1373,6 +1530,127 @@
     </section>
 
 
+
+    <section class="section" id="fieldBoundary">
+      <div class="section-title">
+        <div class="eyebrow">FIELD BOUNDARY CENTER</div>
+        <h2>🗺️ 農地邊界管理中心</h2>
+        <p>
+          在地圖上繪製農地範圍，自動計算面積與中心座標，
+          並將 GeoJSON 儲存至 AIAKOS Farm Memory，作為未來 Sentinel-2 NDVI 分析範圍。
+        </p>
+      </div>
+
+      <div class="field-boundary-panel">
+        <div class="field-map-card">
+          <div class="field-map-toolbar">
+            <button class="btn btn-green" type="button" onclick="focusFieldMapByTown()">📍 移到目前鄉鎮</button>
+            <button class="btn btn-light" type="button" onclick="focusFieldMapToMyLocation()">🧭 我的目前位置</button>
+            <button class="btn btn-light" type="button" onclick="fitAllSavedFields()">🗂️ 顯示全部農地</button>
+            <button class="btn btn-light" type="button" onclick="clearCurrentDrawing()">🧹 清除目前繪圖</button>
+          </div>
+
+          <div id="fieldBoundaryMap" aria-label="農地邊界繪製地圖"></div>
+
+          <div class="field-status" id="fieldMapStatus">
+            請使用地圖左側的多邊形工具，沿著農地邊界逐點點選；回到第一點或雙擊即可完成。
+          </div>
+
+          <div class="field-help">
+            <strong>操作提醒：</strong>
+            先把地圖移到農地附近，再使用多邊形工具畫出田區。
+            衛星分析使用的是完整邊界，不是單一定位點。邊界越貼近實際田區，後續 NDVI 結果越可靠。
+          </div>
+        </div>
+
+        <div class="field-control-card">
+          <span class="phase-badge">Phase 2A｜Field Boundary</span>
+          <h2>🌾 農地基本資料</h2>
+
+          <div class="form-grid">
+            <div class="full">
+              <label for="fieldName">農地名稱</label>
+              <input id="fieldName" type="text" placeholder="例如：A區、東側水稻田、第一溫室">
+            </div>
+
+            <div>
+              <label for="fieldCrop">目前作物</label>
+              <input id="fieldCrop" type="text" placeholder="例如：水稻、芒果">
+            </div>
+
+            <div>
+              <label for="fieldVariety">品種</label>
+              <input id="fieldVariety" type="text" placeholder="例如：高雄147號">
+            </div>
+
+            <div>
+              <label for="fieldStage">生育階段</label>
+              <select id="fieldStage">
+                <option value="尚未設定">尚未設定</option>
+                <option value="整地期">整地期</option>
+                <option value="育苗期">育苗期</option>
+                <option value="生長期">生長期</option>
+                <option value="開花期">開花期</option>
+                <option value="結果期">結果期</option>
+                <option value="採收前">採收前</option>
+                <option value="休耕期">休耕期</option>
+              </select>
+            </div>
+
+            <div>
+              <label for="fieldIrrigation">灌溉方式</label>
+              <select id="fieldIrrigation">
+                <option value="未設定">未設定</option>
+                <option value="溝灌">溝灌</option>
+                <option value="噴灌">噴灌</option>
+                <option value="滴灌">滴灌</option>
+                <option value="淹灌">淹灌</option>
+                <option value="人工澆灌">人工澆灌</option>
+                <option value="雨養">雨養</option>
+              </select>
+            </div>
+
+            <div class="full">
+              <label for="fieldNote">備註</label>
+              <textarea id="fieldNote" placeholder="例如：東側排水較差、鄰近道路、近期準備插秧。"></textarea>
+            </div>
+          </div>
+
+          <div class="field-summary-grid">
+            <div class="field-summary-item">
+              <span>面積</span>
+              <strong id="fieldAreaValue">-- m²</strong>
+            </div>
+            <div class="field-summary-item">
+              <span>換算公頃</span>
+              <strong id="fieldHectareValue">-- ha</strong>
+            </div>
+            <div class="field-summary-item">
+              <span>中心緯度</span>
+              <strong id="fieldCenterLat">--</strong>
+            </div>
+            <div class="field-summary-item">
+              <span>中心經度</span>
+              <strong id="fieldCenterLng">--</strong>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="btn btn-green" type="button" onclick="saveCurrentField()">💾 儲存農地</button>
+            <button class="btn btn-light" type="button" onclick="exportFieldsGeoJson()">⬇️ 匯出 GeoJSON</button>
+            <button class="btn btn-light" type="button" onclick="document.getElementById('fieldGeoJsonFile').click()">⬆️ 匯入 GeoJSON</button>
+            <input id="fieldGeoJsonFile" type="file" accept=".json,.geojson,application/geo+json,application/json" hidden onchange="importFieldsGeoJson(event)">
+          </div>
+
+          <h3 style="color:#14532d;margin-top:24px;">📐 目前 GeoJSON</h3>
+          <div class="geojson-preview" id="fieldGeoJsonPreview">尚未繪製農地邊界。</div>
+
+          <h3 style="color:#14532d;margin-top:24px;">📚 Farm Memory｜已儲存農地</h3>
+          <div class="field-record-list" id="fieldRecordList"></div>
+        </div>
+      </div>
+    </section>
+
     <section class="section" id="satellite">
       <div class="section-title">
         <div class="eyebrow">SATELLITE NDVI</div>
@@ -1602,7 +1880,7 @@
 
     <div class="ecosystem-copy">
       © 2026 AI農業教育平台｜
-      AI農業氣象教練 AIAKOS V5.3｜
+      AI農業氣象教練 AIAKOS V5.4｜
       AI Agricultural Education Ecosystem
     </div>
 
@@ -1632,7 +1910,7 @@
   <script>
     /*
       =====================================================
-      AI農業氣象教練 V5.3
+      AI農業氣象教練 V5.4
       鄉鎮 → Google Geocoding → 最近農業氣象站 → GAS → 農業氣象資料
       =====================================================
 
@@ -2688,7 +2966,7 @@ NDVI：${latestNdviSnapshot.value}
 
 
     /* =========================
-        AIAKOS V5.3 農業 AI Agent
+        AIAKOS V5.4 農業 AI Agent
      ========================= */
 
 
@@ -2769,7 +3047,7 @@ function askAIAgent() {
   }
 
   answerBox.textContent =
-`🌦 AIAKOS V5.3 農業 AI Agent 回覆
+`🌦 AIAKOS V5.4 農業 AI Agent 回覆
 
 【你的問題】
 ${question}
@@ -3235,7 +3513,7 @@ function renderRiskMetric(targetId, level, value, unit) {
 
 <script>
 /* =====================================================
-   AIAKOS V5.3 Satellite NDVI Foundation
+   AIAKOS V5.4 Satellite NDVI Foundation
    第一階段：手動輸入／教學模擬／Farm Memory
 ===================================================== */
 
@@ -3341,6 +3619,7 @@ function analyzeNdvi() {
 
   latestNdviSnapshot = {
     field,
+    fieldGeometry: window.aiaikosSelectedFieldGeometry ? { ...window.aiaikosSelectedFieldGeometry } : null,
     date,
     value: value.toFixed(2),
     source,
