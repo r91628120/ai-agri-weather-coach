@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "aiaikos-satellite-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-07-12",
+  "workers_dev": true,
+
+  "vars": {
+    "ENVIRONMENT": "development"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

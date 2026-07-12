@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+
+# Cloudflare Wrangler
+.wrangler/
+
+# Local secrets
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+.env
+.env.*
+!.env.example
+
+# Build output
+dist/
+coverage/
+
+# Editor and operating system
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
