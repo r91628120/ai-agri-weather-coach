@@ -33,6 +33,7 @@ app.get("/api/v1", (c) => {
       health: "GET /api/v1/health",
       cdseStatus: "GET /api/v1/cdse/status",
       ndviStatistics: "POST /api/v1/ndvi/statistics",
+      ndviImage: "POST /api/v1/ndvi/image",
       satelliteSearch: "POST /api/v1/satellite/search"
     }
   });

@@ -1,5 +1,14 @@
 # Changelog
 
+## NDVI Image API v1.0 / AIAKOS V6.3 - 2026-07-19
+
+- 正式實作 `POST /api/v1/ndvi/image`，呼叫 CDSE Process API 並直接回傳 `image/png` binary。
+- 以單一觀測日期、Polygon/MultiPolygon、Sentinel-2 L2A B04/B08/dataMask 產生五級 NDVI 彩色影像。
+- 無效像素透明；新增尺寸、總像素、格式限制及 PNG content/signature 驗證。
+- 前端新增觀測資訊、圖例、Blob URL 生命週期、下載、清除、Leaflet 顯示切換與透明度控制。
+- 一般 NDVI 清除保留選取農地與 Farm Memory；取消農地才同時清除影像與選取狀態。
+- NDVI History API 與 AI Analyze 仍維持 HTTP 501。
+
 ## Satellite Search API v1.0 - 2026-07-19
 
 - 新增 `POST /api/v1/satellite/search`，查詢真實 CDSE Sentinel-2 L2A Catalog/STAC 中繼資料。

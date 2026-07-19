@@ -6,8 +6,8 @@
   <meta name="google-site-verification" content="wLQnbGi0252et4Q2FGCubos4FZW1tLeOlk8eGrW8YYI" />
 
   <title>
-🛰️ AI衛星農業氣象教練 AIAKOS V6.2｜衛星判讀、農業氣象、AI決策與農場管理平台、農業氣象判讀、農事決策與農場經營日誌</title>
-  <meta name="description" content="🛰️ AI衛星農業氣象教練 AIAKOS V6.2，AI衛星農業教練 AIAKOS V6.2，整合 Sentinel-2 衛星影像、NDVI 植生分析、農業氣象、IoT 感測器與 AI 農事決策，打造每位農民專屬的智慧農場管理平台。，依縣市鄉鎮自動尋找最近測站，協助學生與農友進行氣象判讀、農事決策、病蟲害風險分析與AI農場經營日誌紀錄。">
+🛰️ AI衛星農業氣象教練 AIAKOS V6.3｜衛星判讀、農業氣象、AI決策與農場管理平台、農業氣象判讀、農事決策與農場經營日誌</title>
+  <meta name="description" content="🛰️ AI衛星農業氣象教練 AIAKOS V6.3，整合 Sentinel-2 NDVI 彩色影像、植生統計、農業氣象、IoT 感測器與 AI 農事決策。">
   <meta name="keywords" content="AI衛星農業教練,Satellite Agriculture,Sentinel-2,NDVI,智慧農業,AI農業,農場管理,IoT,農業氣象,農業教育平台,AI農業氣象教練,農業氣象,智慧農業,農場經營日誌,農事決策,病蟲害風險,農業教育平台,農業氣象站,農業防災">
   <meta name="author" content="AI農業教育平台">
   <meta name="robots" content="index, follow">
@@ -15,13 +15,13 @@
 
   <meta property="og:type" content="website">
   <meta property="og:locale" content="zh_TW">
-  <meta property="og:title" content="🛰️ AI衛星農業氣象教練 AIAKOS V6.2｜把衛星資料變成農業決策能力">
+  <meta property="og:title" content="🛰️ AI衛星農業氣象教練 AIAKOS V6.3｜把衛星資料變成農業決策能力">
   <meta property="og:description" content="依縣市鄉鎮自動尋找最近農業氣象站，協助學生與農友進行氣象判讀、農事建議、風險燈號、三天天氣推估與農場經營日誌分享。">
   <meta property="og:url" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/">
   <meta property="og:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="🛰️ AI衛星農業氣象教練 AIAKOS V6.2">
+  <meta name="twitter:title" content="🛰️ AI衛星農業氣象教練 AIAKOS V6.3">
   <meta name="twitter:description" content="農業氣象判讀、農事決策、風險燈號與AI農場經營日誌分享工具。">
   <meta name="twitter:image" content="https://r91628120.github.io/ai-agri-weather-coach/ai-agri-weather-coach/og-image.png">
 
@@ -1061,6 +1061,29 @@
 .satellite-observation-meta { color:#475569; line-height:1.7; margin:6px 0 10px; }
 .satellite-product-id { color:#64748b; font-size:.78rem; line-height:1.5; margin-top:4px; overflow-wrap:anywhere; }
 
+.ndvi-image-card { margin-top:22px; }
+.ndvi-image-layout { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr); gap:20px; align-items:start; }
+.ndvi-image-frame { min-height:320px; display:grid; place-items:center; border:1px solid #cbd5e1; border-radius:18px; overflow:hidden; background:repeating-conic-gradient(#f8fafc 0 25%,#e2e8f0 0 50%) 50%/24px 24px; }
+.ndvi-image-frame img { display:block; width:100%; height:auto; max-height:680px; object-fit:contain; }
+.ndvi-image-info { display:grid; gap:9px; color:#334155; line-height:1.6; overflow-wrap:anywhere; }
+.ndvi-image-legend { display:grid; grid-template-columns:repeat(5,1fr); border-radius:12px; overflow:hidden; margin-top:16px; border:1px solid #cbd5e1; }
+.ndvi-image-legend span { padding:9px 4px; text-align:center; font-size:.76rem; font-weight:900; }
+.ndvi-image-legend span:nth-child(1) { background:#dc2626; color:#fff; }
+.ndvi-image-legend span:nth-child(2) { background:#f97316; color:#fff; }
+.ndvi-image-legend span:nth-child(3) { background:#facc15; color:#713f12; }
+.ndvi-image-legend span:nth-child(4) { background:#73c64c; color:#163b0c; }
+.ndvi-image-legend span:nth-child(5) { background:#15803d; color:#fff; }
+.ndvi-image-controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:14px; }
+.ndvi-image-controls label { display:flex; align-items:center; gap:7px; margin:0; }
+.ndvi-image-controls input[type="range"] { width:150px; }
+.is-hidden { display:none !important; }
+
+@media (max-width: 800px) {
+  .ndvi-image-layout { grid-template-columns:1fr; }
+  .ndvi-image-legend { grid-template-columns:1fr; }
+  .ndvi-image-frame { min-height:220px; }
+}
+
 .ndvi-record-list {
   display: grid;
   gap: 10px;
@@ -1302,7 +1325,7 @@
     <header class="topbar">
       <a class="brand" href="#">
         <span class="brand-icon">🌦️</span>
-        <span>🛰️ AI衛星農業氣象教練 AIAKOS V6.2</span>
+        <span>🛰️ AI衛星農業氣象教練 AIAKOS V6.3</span>
       </a>
 
       <nav class="nav-links">
@@ -1320,7 +1343,7 @@
     <section class="hero">
       <div class="hero-content">
         <div class="tag">🌾 真實氣象資料 × AI推演式學習</div>
-        <h1>🛰️ AI衛星農業氣象教練 AIAKOS V6.2</h1>
+        <h1>🛰️ AI衛星農業氣象教練 AIAKOS V6.3</h1>
         <p class="hero-subtitle">
           整合 Sentinel-2 衛星影像、NDVI 植生分析、農業氣象、IoT 感測器、AI 農事決策，打造每位農民專屬的智慧農業助手。也同時協助學生從「看天氣」進一步學會
           氣象判讀、農事規劃、病蟲害風險分析與智慧農業決策推演。
@@ -1817,14 +1840,14 @@
         <div class="eyebrow">SATELLITE NDVI</div>
         <h2>🛰️ 衛星 NDVI 田區判讀基礎版</h2>
         <p>
-          本版已完成依據農地 Polygon 取得真實 Sentinel-2 L2A NDVI 統計，
-          顯示平均值、最小值、最大值、標準差、有效像素比例與統計期間。
-          NDVI 影像分布與歷史趨勢屬於後續版本，本版對應端點仍明確回傳 501 Not Implemented。
+          本版已完成真實 Sentinel-2 L2A NDVI 統計與 Process API 彩色 PNG，
+          可檢視田區植生差異、透明遮罩、觀測資訊與地圖定位覆蓋。
+          NDVI 歷史趨勢仍屬後續版本，相關端點明確回傳 501 Not Implemented。
         </p>
       </div>
 
       <div class="api-note">
-        Sentinel-2 觀測資料搜尋只列出可用觀測日期與雲量；真實 NDVI 統計由 Sentinel-2 L2A 的 B08、B04 與 dataMask 計算，顯示平均值、最小值、最大值、標準差、有效像素比例與統計期間。NDVI 影像分布及歷史趨勢為後續版本，相關端點目前仍為 501。
+        Sentinel-2 觀測搜尋提供日期與雲量；統計 API 顯示平均值等指標，Process API 則以相同 B04、B08 與 dataMask 產生具透明通道的 NDVI 彩色 PNG。NDVI 歷史趨勢為後續版本。
       </div>
 
       <div class="ndvi-panel">
@@ -1874,6 +1897,7 @@
           <div class="action-row">
             <button class="btn btn-green" id="searchSatelliteButton" type="button" onclick="searchSatelliteObservations()">🔎 搜尋 Sentinel-2 可用觀測</button>
             <button class="btn btn-green" id="fetchRealNdviButton" type="button" onclick="fetchRealSatelliteNdvi()">☁️ 取得真實衛星 NDVI</button>
+            <button class="btn btn-green" id="fetchNdviImageButton" type="button" onclick="fetchNdviImage()">🌈 取得 NDVI 彩色影像</button>
             <button class="btn btn-green" onclick="analyzeNdvi()">🛰️ 進行 NDVI 判讀</button>
             <button class="btn btn-light" onclick="saveNdviRecord()">💾 存入 Farm Memory</button>
             <button class="btn btn-light" onclick="loadNdviDemo()">🎓 載入教學範例</button>
@@ -1899,6 +1923,36 @@
 
           <h3 style="color:#14532d;margin-top:24px;">📚 Farm Memory｜NDVI 紀錄</h3>
           <div class="ndvi-record-list" id="ndviRecordList"></div>
+        </div>
+      </div>
+
+      <div class="ndvi-card ndvi-image-card" id="ndviImagePanel">
+        <span class="phase-badge">v1.0｜NDVI Image API</span>
+        <h2>🌈 Sentinel-2 NDVI 彩色影像</h2>
+        <div class="api-note" id="ndviImageStatus" role="status" aria-live="polite">請先選取農地與 Sentinel-2 觀測日期。</div>
+
+        <div class="ndvi-image-layout is-hidden" id="ndviImageContent">
+          <div>
+            <div class="ndvi-image-frame"><img id="ndviImagePreview" alt="Sentinel-2 NDVI 彩色影像"></div>
+            <div class="ndvi-image-legend" aria-label="NDVI 彩色影像圖例">
+              <span>&lt; 0.20<br>紅色</span><span>0.20–0.39<br>橙色</span><span>0.40–0.59<br>黃色</span><span>0.60–0.79<br>淺綠</span><span>≥ 0.80<br>深綠</span>
+            </div>
+          </div>
+          <div>
+            <div class="ndvi-image-info" id="ndviImageInfo"></div>
+            <div class="ndvi-image-controls">
+              <button class="btn btn-light btn-mini" type="button" onclick="downloadNdviImage()">⬇️ 下載 PNG</button>
+              <button class="btn btn-light btn-mini" type="button" onclick="clearNdviImage()">清除影像</button>
+              <label><input id="ndviOverlayVisible" type="checkbox" checked onchange="toggleNdviImageOverlay(this.checked)"> 地圖覆蓋</label>
+              <label>透明度 <input id="ndviOverlayOpacity" type="range" min="0" max="1" step="0.05" value="0.75" oninput="setNdviImageOverlayOpacity(this.value)"></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="api-note">
+          此彩色影像由 Copernicus Sentinel-2 L2A 的 B04、B08 與 dataMask 經 Process API 產生。<br>
+          Esri 衛星參考底圖僅供定位，並非本張 NDVI 影像。<br>
+          NDVI 只能顯示植生差異，不能單獨判定病害、缺肥或缺水。
         </div>
       </div>
     </section>
@@ -2150,7 +2204,7 @@
 
     <div class="ecosystem-copy">
       © 2026 AI農業教育平台｜
-      🛰️ AI衛星農業氣象教練 AIAKOS V6.2 ｜
+      🛰️ AI衛星農業氣象教練 AIAKOS V6.3 ｜
       🛰️ Sentinel-2 × NDVI × AI × IoT
     </div>
 
@@ -4079,6 +4133,10 @@ function getSavedFields() {
 function setSelectedFieldForNdvi(field) {
   if (!field || !field.geometry) return false;
 
+  if (window.aiaikosSelectedFieldId && window.aiaikosSelectedFieldId !== field.id && typeof clearNdviImage === "function") {
+    clearNdviImage();
+  }
+
   window.aiaikosSelectedFieldGeometry = JSON.parse(JSON.stringify(field.geometry));
   window.aiaikosSelectedFieldId = field.id;
   window.aiaikosSelectedFieldName = field.name;
@@ -4351,6 +4409,12 @@ function resolveSatelliteApiUrl() {
 
 const SATELLITE_API_URL = resolveSatelliteApiUrl();
 const REAL_NDVI_SOURCE = "Sentinel-2 L2A｜CDSE Statistical API";
+let satelliteObservations = [];
+let selectedSatelliteObservation = null;
+let ndviImageObjectUrl = null;
+let ndviImageOverlay = null;
+let ndviImageBoundaryLayer = null;
+let ndviImageDownloadName = "aiaikos-ndvi.png";
 
 function setSatelliteNdviStatus(message, state = "idle") {
   const status = document.getElementById("satelliteNdviStatus");
@@ -4368,11 +4432,13 @@ function ndviQueryRange() {
 
 function renderSatelliteObservations(observations, recommendedId) {
   const results = document.getElementById("satelliteSearchResults");
+  satelliteObservations = observations;
+  selectedSatelliteObservation = null;
   if (!observations.length) {
     results.innerHTML = '<div class="api-note">查詢期間沒有符合雲量條件的 Sentinel-2 L2A 觀測資料。</div>';
     return;
   }
-  results.innerHTML = observations.map(observation => {
+  results.innerHTML = observations.map((observation, index) => {
     const recommended = observation.id === recommendedId;
     const cloud = Number.isFinite(observation.cloudCoverage) ? `${observation.cloudCoverage.toFixed(1)}%` : "--";
     const productId = String(observation.id || "--");
@@ -4381,15 +4447,17 @@ function renderSatelliteObservations(observations, recommendedId) {
       <strong>${recommended ? "⭐ 建議觀測｜" : ""}${escapeHtml(observation.date || "--")}</strong>
       <div class="satellite-observation-meta">${escapeHtml(observation.platform || "Sentinel-2")}｜雲量 ${cloud}｜處理層級 ${escapeHtml(observation.processingLevel || "L2A")}</div>
       <div class="satellite-product-id" title="${escapeHtml(productId)}">產品 ID：${escapeHtml(shortProductId)}</div>
-      <button class="btn btn-light btn-mini" type="button" onclick="useSatelliteObservationDate('${escapeHtml(observation.date || "")}')">使用此日期查詢 NDVI</button>
+      <button class="btn btn-light btn-mini" type="button" onclick="useSatelliteObservationDate(${index})">使用此日期查詢 NDVI</button>
     </article>`;
   }).join("");
 }
 
-function useSatelliteObservationDate(date) {
-  if (!date) return;
-  document.getElementById("ndviDate").value = date;
-  setSatelliteNdviStatus(`已選擇 ${date}，可接著取得 Sentinel-2 NDVI 統計。`, "success");
+function useSatelliteObservationDate(index) {
+  const observation = satelliteObservations[index];
+  if (!observation?.date) return;
+  selectedSatelliteObservation = observation;
+  document.getElementById("ndviDate").value = observation.date;
+  setSatelliteNdviStatus(`已選擇 ${observation.date}，可接著取得 Sentinel-2 NDVI 統計或彩色影像。`, "success");
 }
 
 async function searchSatelliteObservations() {
@@ -4481,6 +4549,184 @@ async function fetchRealSatelliteNdvi() {
     setSatelliteNdviStatus(`成功：已取得真實 NDVI，平均值 ${mean.toFixed(4)}，有效像素比例 ${(validRatio * 100).toFixed(1)}%。`, "success");
   } catch (error) {
     setSatelliteNdviStatus(`錯誤：${error.message}。請檢查 Worker URL、CORS、CDSE Secrets 或稍後重試。`, "error");
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function setNdviImageStatus(message, state = "idle") {
+  const status = document.getElementById("ndviImageStatus");
+  if (!status) return;
+  status.textContent = message;
+  status.dataset.state = state;
+}
+
+function geometryToLeafletBounds(geometry) {
+  const positions = [];
+  function visit(node) {
+    if (!Array.isArray(node)) return;
+    if (node.length >= 2 && Number.isFinite(node[0]) && Number.isFinite(node[1])) {
+      positions.push([node[1], node[0]]);
+      return;
+    }
+    node.forEach(visit);
+  }
+  visit(geometry?.coordinates);
+  if (!positions.length || !window.L) return null;
+  return L.latLngBounds(positions);
+}
+
+function removeNdviImageOverlay() {
+  if (fieldBoundaryMap && ndviImageOverlay && fieldBoundaryMap.hasLayer(ndviImageOverlay)) {
+    fieldBoundaryMap.removeLayer(ndviImageOverlay);
+  }
+  if (fieldBoundaryMap && ndviImageBoundaryLayer && fieldBoundaryMap.hasLayer(ndviImageBoundaryLayer)) {
+    fieldBoundaryMap.removeLayer(ndviImageBoundaryLayer);
+  }
+  ndviImageOverlay = null;
+  ndviImageBoundaryLayer = null;
+}
+
+function renderNdviImageOverlay(imageUrl, geometry) {
+  removeNdviImageOverlay();
+  if (!fieldBoundaryMap || !window.L) return false;
+  const bounds = geometryToLeafletBounds(geometry);
+  if (!bounds?.isValid()) return false;
+
+  if (!fieldBoundaryMap.getPane("ndviImagePane")) {
+    const pane = fieldBoundaryMap.createPane("ndviImagePane");
+    pane.style.zIndex = "350";
+  }
+  ndviImageOverlay = L.imageOverlay(imageUrl, bounds, {
+    pane: "ndviImagePane",
+    opacity: Number(document.getElementById("ndviOverlayOpacity")?.value || 0.75)
+  }).addTo(fieldBoundaryMap);
+  ndviImageBoundaryLayer = L.geoJSON({ type: "Feature", properties: {}, geometry }, {
+    style: { color: "#ef4444", weight: 4, fillOpacity: 0 }
+  }).addTo(fieldBoundaryMap);
+  ndviImageBoundaryLayer.bringToFront();
+  fieldBoundaryMap.fitBounds(bounds, { padding: [30, 30] });
+  return true;
+}
+
+function toggleNdviImageOverlay(visible) {
+  if (!fieldBoundaryMap || !ndviImageOverlay) return;
+  if (visible) {
+    if (!fieldBoundaryMap.hasLayer(ndviImageOverlay)) ndviImageOverlay.addTo(fieldBoundaryMap);
+    if (ndviImageBoundaryLayer && !fieldBoundaryMap.hasLayer(ndviImageBoundaryLayer)) ndviImageBoundaryLayer.addTo(fieldBoundaryMap);
+    ndviImageBoundaryLayer?.bringToFront();
+  } else {
+    if (fieldBoundaryMap.hasLayer(ndviImageOverlay)) fieldBoundaryMap.removeLayer(ndviImageOverlay);
+    if (ndviImageBoundaryLayer && fieldBoundaryMap.hasLayer(ndviImageBoundaryLayer)) fieldBoundaryMap.removeLayer(ndviImageBoundaryLayer);
+  }
+}
+
+function setNdviImageOverlayOpacity(value) {
+  if (ndviImageOverlay) ndviImageOverlay.setOpacity(Number(value));
+}
+
+function clearNdviImage(statusMessage = "NDVI 彩色影像已清除。") {
+  if (ndviImageObjectUrl) {
+    URL.revokeObjectURL(ndviImageObjectUrl);
+    ndviImageObjectUrl = null;
+  }
+  removeNdviImageOverlay();
+  const preview = document.getElementById("ndviImagePreview");
+  if (preview) preview.removeAttribute("src");
+  const info = document.getElementById("ndviImageInfo");
+  if (info) info.innerHTML = "";
+  document.getElementById("ndviImageContent")?.classList.add("is-hidden");
+  const visibleControl = document.getElementById("ndviOverlayVisible");
+  if (visibleControl) visibleControl.checked = true;
+  setNdviImageStatus(statusMessage, "idle");
+}
+
+function downloadNdviImage() {
+  if (!ndviImageObjectUrl) {
+    setNdviImageStatus("目前沒有可下載的 NDVI PNG。", "error");
+    return;
+  }
+  const link = document.createElement("a");
+  link.href = ndviImageObjectUrl;
+  link.download = ndviImageDownloadName;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+}
+
+async function fetchNdviImage() {
+  const selectedField = getSelectedFieldForSatellite();
+  const button = document.getElementById("fetchNdviImageButton");
+  if (!selectedField) {
+    setNdviImageStatus("請先在農地管理中心選擇含 Polygon 的農地。", "error");
+    document.getElementById("fieldBoundary").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  const observationDate = document.getElementById("ndviDate").value;
+  if (!observationDate) {
+    setNdviImageStatus("請先搜尋並選取 Sentinel-2 觀測日期，或在 NDVI 日期欄選擇日期。", "error");
+    return;
+  }
+
+  const observation = selectedSatelliteObservation?.date === observationDate
+    ? selectedSatelliteObservation
+    : null;
+  clearNdviImage();
+  button.disabled = true;
+  setNdviImageStatus(
+    observation
+      ? `載入中：正在產生 ${observationDate} 的 Sentinel-2 NDVI 彩色影像…`
+      : `載入中：未使用搜尋結果，將依目前 NDVI 日期 ${observationDate} 查詢影像。`,
+    "loading"
+  );
+
+  try {
+    const response = await fetch(`${SATELLITE_API_URL}/api/v1/ndvi/image`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fieldId: selectedField.id || undefined,
+        fieldName: selectedField.name || undefined,
+        geometry: selectedField.geometry,
+        observationDate,
+        width: 768,
+        height: 768,
+        format: "image/png",
+        maxCloudCoverage: 30
+      })
+    });
+
+    if (!response.ok) {
+      const payload = await response.json().catch(() => null);
+      throw new Error(payload?.error?.message || `NDVI 影像服務回傳 HTTP ${response.status}`);
+    }
+    const blob = await response.blob();
+    if (blob.type !== "image/png" || blob.size === 0) {
+      throw new Error("影像服務未回傳有效的 PNG。");
+    }
+
+    ndviImageObjectUrl = URL.createObjectURL(blob);
+    ndviImageDownloadName = `aiaikos-ndvi-${selectedField.id || "field"}-${observationDate}.png`;
+    document.getElementById("ndviImagePreview").src = ndviImageObjectUrl;
+    document.getElementById("ndviImageContent").classList.remove("is-hidden");
+    const cloudText = Number.isFinite(observation?.cloudCoverage) ? `${observation.cloudCoverage.toFixed(2)}%` : "未由搜尋結果提供";
+    document.getElementById("ndviImageInfo").innerHTML = `
+      <strong>田區：${escapeHtml(selectedField.name || "未命名農地")}</strong>
+      <span>觀測日期：${escapeHtml(observationDate)}</span>
+      <span>衛星平台：${escapeHtml(observation?.platform || "Sentinel-2 L2A（未指定單一平台）")}</span>
+      <span>雲量：${escapeHtml(cloudText)}</span>
+      <span title="${escapeHtml(observation?.id || "")}">產品 ID：${escapeHtml(observation?.id || "未由搜尋結果提供")}</span>
+      <span>資料來源：${escapeHtml(response.headers.get("X-AIAKOS-Data-Source") || "Sentinel-2-L2A")}</span>`;
+    const overlayRendered = renderNdviImageOverlay(ndviImageObjectUrl, selectedField.geometry);
+    setNdviImageStatus(
+      `成功：${observation ? "已使用搜尋選取的觀測" : "未先搜尋觀測，已依目前 NDVI 日期"} ${observationDate} 取得真實 NDVI PNG${overlayRendered ? "，並依 Polygon bounds 疊加於地圖。" : "。地圖定位不可用，僅顯示獨立影像卡片。"}`,
+      "success"
+    );
+    document.getElementById("ndviImagePanel").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (error) {
+    clearNdviImage(`錯誤：${error.message}`);
+    setNdviImageStatus(`錯誤：${error.message}`, "error");
   } finally {
     button.disabled = false;
   }
@@ -4721,6 +4967,9 @@ function loadNdviDemo() {
 }
 
 function clearNdviForm() {
+  clearNdviImage();
+  satelliteObservations = [];
+  selectedSatelliteObservation = null;
   document.getElementById("ndviValue").value = "";
   document.getElementById("ndviSource").value = "手動輸入";
   const resultBox = document.getElementById("ndviResult");
@@ -4736,6 +4985,9 @@ function clearNdviForm() {
   const fetchButton = document.getElementById("fetchRealNdviButton");
   if (fetchButton) fetchButton.disabled = false;
 
+  const imageButton = document.getElementById("fetchNdviImageButton");
+  if (imageButton) imageButton.disabled = false;
+
   const selectedField = getSelectedFieldForSatellite();
   if (selectedField) {
     setSatelliteNdviStatus(
@@ -4749,6 +5001,9 @@ function clearNdviForm() {
 }
 
 function clearSelectedFieldForNdvi() {
+  clearNdviImage();
+  satelliteObservations = [];
+  selectedSatelliteObservation = null;
   window.aiaikosSelectedFieldGeometry = null;
   window.aiaikosSelectedFieldId = null;
   window.aiaikosSelectedFieldName = null;
@@ -4765,6 +5020,9 @@ function clearSelectedFieldForNdvi() {
   const fetchButton = document.getElementById("fetchRealNdviButton");
   if (fetchButton) fetchButton.disabled = false;
 
+  const imageButton = document.getElementById("fetchNdviImageButton");
+  if (imageButton) imageButton.disabled = false;
+
   setSatelliteNdviStatus(
     "已取消目前農地。請在農地管理中心選擇含 Polygon 的農地，再搜尋觀測或取得真實衛星 NDVI。",
     "idle"
@@ -4778,6 +5036,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ndviDate.value = new Date().toISOString().slice(0, 10);
   }
   renderNdviRecords();
+});
+
+window.addEventListener("beforeunload", () => {
+  if (ndviImageObjectUrl) URL.revokeObjectURL(ndviImageObjectUrl);
 });
 </script>
 
