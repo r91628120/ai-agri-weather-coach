@@ -12,8 +12,9 @@
 - CDSE 401 token refresh、429/5xx retry、timeout 與安全錯誤映射
 - 回傳 Sentinel-2 平台、日期、雲量、L2A 層級與建議觀測
 - 依時間新到舊排序；相同 datetime 時優先較低雲量
-- 無結果時 HTTP 200、空陣列、`recommendedObservation: null`
-- 前端新增「🔎 搜尋 Sentinel-2 影像」、載入/成功/空結果/錯誤狀態、觀測卡片及「使用此日期查詢 NDVI」
+- 成功回應包含 `resultCount`，且固定等於 `observations.length`
+- 無結果時 HTTP 200、`resultCount: 0`、空陣列、`recommendedObservation: null`
+- 前端新增「🔎 搜尋 Sentinel-2 可用觀測」、載入/成功/空結果/錯誤狀態、含產品 ID 的觀測卡片及「使用此日期查詢 NDVI」
 - 明確區分 Esri 參考底圖、Sentinel-2 觀測資料、Sentinel-2 NDVI 統計與後續 NDVI 影像
 
 ## 修改檔案
@@ -40,7 +41,7 @@
 
 ## 測試結果
 
-- `npm test`：26/26 通過（最終提交前將再執行）
+- `npm test`：26/26 通過（PR #2 第一輪 Review 修正後）
 - `npm run lint`：通過
 - `npm run check`：Wrangler dry-run 通過
 - `git diff --check`：通過
@@ -53,7 +54,7 @@
 
 ## API 測試方式
 
-在 Worker 本機開發環境啟動後，以 `Content-Type: application/json` POST 農地 geometry、日期、雲量與 limit 至 `/api/v1/satellite/search`。確認 HTTP 200、`observations` 為陣列、`recommendedObservation` 非空；空查詢結果仍應為 HTTP 200。
+在 Worker 本機開發環境啟動後，以 `Content-Type: application/json` POST 農地 geometry、日期、雲量與 limit 至 `/api/v1/satellite/search`。確認 HTTP 200、`resultCount === observations.length`、`observations` 為陣列、`recommendedObservation` 非空；空查詢結果仍應為 HTTP 200 且 `resultCount: 0`。
 
 ## 尚未完成項目
 
@@ -84,6 +85,15 @@
 - 上游錯誤不回傳原始 response body、stack、Secret 或 Access Token
 - 自動測試驗證成功及錯誤資料不包含測試 token
 - 本次驗收未讀取、輸出或記錄任何 Secret 或 Access Token
+
+## PR #2 第一輪 Review 修正
+
+- 成功回應新增 `resultCount`，並以測試驗證一般結果及空結果分別等於 3 與 0。
+- OpenAPI 與 Satellite Search API 文件已補充 `resultCount === observations.length` 契約。
+- 前端按鈕及狀態統一採用「搜尋可用觀測／搜尋觀測資料」，避免暗示本版會顯示圖片。
+- 觀測卡片新增產品 ID；畫面採截短文字，完整值保留於 `title`，兩者皆經 `escapeHtml`，並以 `overflow-wrap:anywhere` 保護手機版排版。
+- 修正後 `npm test`、`npm run lint`、`npm run check`、`git diff --check` 與前端 JavaScript 語法檢查均通過。
+- 未部署正式 Worker，未 Merge PR #2。
 
 ## 下一步
 

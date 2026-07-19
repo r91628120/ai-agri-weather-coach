@@ -8,7 +8,7 @@ The JSON request accepts `fieldId`, `fieldName`, GeoJSON `geometry`, `dateFrom`,
 
 ## Response
 
-HTTP 200 returns `observations` sorted by newest datetime, then lower cloud coverage for tied datetimes, plus `recommendedObservation`. No matches is also HTTP 200 with an empty array and `recommendedObservation: null`.
+HTTP 200 returns `resultCount`, `observations` sorted by newest date and then lower cloud coverage within that date, plus `recommendedObservation`. `resultCount` always equals `observations.length`. No matches is also HTTP 200 with `resultCount: 0`, an empty array and `recommendedObservation: null`.
 
 Each observation contains its STAC id, datetime/date, Sentinel-2 platform, cloud coverage, L2A processing level and collection. The endpoint does not download imagery and does not calculate NDVI.
 

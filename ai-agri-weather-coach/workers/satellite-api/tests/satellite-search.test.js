@@ -40,6 +40,7 @@ test("accepts MultiPolygon and rejects empty geometry, invalid dates, cloud and 
 test("normalizes, sorts newest date first and uses lower cloud within that date", () => {
   const result = normalizeCatalogResponse(catalog, searchInput);
   assert.equal(result.observations.length, 3);
+  assert.equal(result.resultCount, 3);
   assert.equal(result.observations[0].id, "S2B_LATEST_CLEAR");
   assert.equal(result.recommendedObservation.id, "S2B_LATEST_CLEAR");
   assert.equal(result.observations[0].platform, "Sentinel-2B");
@@ -48,6 +49,7 @@ test("normalizes, sorts newest date first and uses lower cloud within that date"
 test("normalizes an empty Catalog response", () => {
   const result = normalizeCatalogResponse(empty, searchInput);
   assert.deepEqual(result.observations, []);
+  assert.equal(result.resultCount, 0);
   assert.equal(result.recommendedObservation, null);
 });
 
@@ -79,5 +81,8 @@ test("frontend inline JavaScript has valid syntax", async () => {
   const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
   const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map((match) => match[1]);
   assert.ok(scripts.length > 0);
+  assert.match(html, /搜尋 Sentinel-2 可用觀測/);
+  assert.match(html, /產品 ID：\$\{escapeHtml\(shortProductId\)\}/);
+  assert.match(html, /title="\$\{escapeHtml\(productId\)\}"/);
   scripts.forEach((source, index) => assert.doesNotThrow(() => new vm.Script(source, { filename: `index-inline-${index}.js` })));
 });

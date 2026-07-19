@@ -65,6 +65,7 @@ export function normalizeCatalogResponse(data, input) {
     collection: SATELLITE_CONFIG.collection,
     requestedRange: { from: input.dateFrom, to: input.dateTo },
     maxCloudCoverage: input.maxCloudCoverage,
+    resultCount: observations.length,
     observations,
     recommendedObservation: observations[0] || null
   };

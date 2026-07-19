@@ -1048,6 +1048,7 @@
 .satellite-observation { border:1px solid #cbd5e1; border-radius:14px; padding:14px; background:#fff; }
 .satellite-observation.recommended { border-color:#16a34a; background:#f0fdf4; }
 .satellite-observation-meta { color:#475569; line-height:1.7; margin:6px 0 10px; }
+.satellite-product-id { color:#64748b; font-size:.78rem; line-height:1.5; margin-top:4px; overflow-wrap:anywhere; }
 
 .ndvi-record-list {
   display: grid;
@@ -1812,7 +1813,7 @@
       </div>
 
       <div class="api-note">
-        Sentinel-2 影像搜尋只列出可用觀測日期與雲量；真實 NDVI 統計由 Sentinel-2 L2A 的 B08、B04 與 dataMask 計算，顯示平均值、最小值、最大值、標準差、有效像素比例與統計期間。NDVI 影像分布及歷史趨勢為後續版本，相關端點目前仍為 501。
+        Sentinel-2 觀測資料搜尋只列出可用觀測日期與雲量；真實 NDVI 統計由 Sentinel-2 L2A 的 B08、B04 與 dataMask 計算，顯示平均值、最小值、最大值、標準差、有效像素比例與統計期間。NDVI 影像分布及歷史趨勢為後續版本，相關端點目前仍為 501。
       </div>
 
       <div class="ndvi-panel">
@@ -1860,7 +1861,7 @@
           </div>
 
           <div class="action-row">
-            <button class="btn btn-green" id="searchSatelliteButton" type="button" onclick="searchSatelliteObservations()">🔎 搜尋 Sentinel-2 影像</button>
+            <button class="btn btn-green" id="searchSatelliteButton" type="button" onclick="searchSatelliteObservations()">🔎 搜尋 Sentinel-2 可用觀測</button>
             <button class="btn btn-green" id="fetchRealNdviButton" type="button" onclick="fetchRealSatelliteNdvi()">☁️ 取得真實衛星 NDVI</button>
             <button class="btn btn-green" onclick="analyzeNdvi()">🛰️ 進行 NDVI 判讀</button>
             <button class="btn btn-light" onclick="saveNdviRecord()">💾 存入 Farm Memory</button>
@@ -4319,9 +4320,12 @@ function renderSatelliteObservations(observations, recommendedId) {
   results.innerHTML = observations.map(observation => {
     const recommended = observation.id === recommendedId;
     const cloud = Number.isFinite(observation.cloudCoverage) ? `${observation.cloudCoverage.toFixed(1)}%` : "--";
+    const productId = String(observation.id || "--");
+    const shortProductId = productId.length > 42 ? `${productId.slice(0, 24)}…${productId.slice(-12)}` : productId;
     return `<article class="satellite-observation${recommended ? " recommended" : ""}">
       <strong>${recommended ? "⭐ 建議觀測｜" : ""}${escapeHtml(observation.date || "--")}</strong>
       <div class="satellite-observation-meta">${escapeHtml(observation.platform || "Sentinel-2")}｜雲量 ${cloud}｜處理層級 ${escapeHtml(observation.processingLevel || "L2A")}</div>
+      <div class="satellite-product-id" title="${escapeHtml(productId)}">產品 ID：${escapeHtml(shortProductId)}</div>
       <button class="btn btn-light btn-mini" type="button" onclick="useSatelliteObservationDate('${escapeHtml(observation.date || "")}')">使用此日期查詢 NDVI</button>
     </article>`;
   }).join("");
@@ -4345,8 +4349,8 @@ async function searchSatelliteObservations() {
   const { dateFrom, dateTo } = ndviQueryRange();
   const fieldName = document.getElementById("ndviField").value.trim() || window.aiaikosSelectedFieldName || "未命名農地";
   button.disabled = true;
-  results.innerHTML = '<div class="api-note">正在搜尋 Sentinel-2 L2A 觀測資料…</div>';
-  setSatelliteNdviStatus(`搜尋中：${dateFrom} 至 ${dateTo}，最大雲量 30%。`, "loading");
+  results.innerHTML = '<div class="api-note">正在搜尋 Sentinel-2 L2A 可用觀測…</div>';
+  setSatelliteNdviStatus(`正在搜尋觀測資料：${dateFrom} 至 ${dateTo}，最大雲量 30%。`, "loading");
   try {
     const response = await fetch(`${SATELLITE_API_URL}/api/v1/satellite/search`, {
       method: "POST",
@@ -4357,7 +4361,7 @@ async function searchSatelliteObservations() {
     if (!response.ok || !payload?.success) throw new Error(payload?.error?.message || `衛星搜尋失敗 HTTP ${response.status}`);
     const observations = payload.data?.observations || [];
     renderSatelliteObservations(observations, payload.data?.recommendedObservation?.id);
-    setSatelliteNdviStatus(observations.length ? `搜尋完成：找到 ${observations.length} 筆 Sentinel-2 L2A 觀測資料。` : "搜尋完成，但沒有符合條件的觀測資料。", observations.length ? "success" : "empty");
+    setSatelliteNdviStatus(observations.length ? `觀測資料搜尋完成：找到 ${observations.length} 筆 Sentinel-2 L2A 可用觀測。` : "觀測資料搜尋完成，但沒有符合條件的可用觀測。", observations.length ? "success" : "empty");
   } catch (error) {
     results.innerHTML = `<div class="api-note">${escapeHtml(error.message)}</div>`;
     setSatelliteNdviStatus(`搜尋失敗：${error.message}`, "error");

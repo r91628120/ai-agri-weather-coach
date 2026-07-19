@@ -78,7 +78,17 @@ paths:
             schema:
               $ref: "#/components/schemas/SatelliteSearchRequest"
       responses:
-        "200": { description: 觀測清單與建議觀測 }
+        "200":
+          description: 觀測清單、筆數與建議觀測
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/SuccessResponse"
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/SatelliteSearchData"
         "400": { $ref: "#/components/responses/ErrorResponse" }
         "413": { $ref: "#/components/responses/ErrorResponse" }
         "415": { $ref: "#/components/responses/ErrorResponse" }
@@ -163,6 +173,33 @@ components:
               default: 10
               minimum: 1
               maximum: 50
+    SatelliteCatalogObservation:
+      type: object
+      required: [id, datetime, date, platform, cloudCoverage, processingLevel, collection]
+      properties:
+        id: { type: string }
+        datetime: { type: string, format: date-time }
+        date: { type: string, format: date }
+        platform: { type: string }
+        cloudCoverage: { type: [number, "null"] }
+        processingLevel: { const: L2A }
+        collection: { const: Sentinel-2 L2A }
+    SatelliteSearchData:
+      type: object
+      required: [resultCount, observations, recommendedObservation]
+      properties:
+        resultCount:
+          type: integer
+          minimum: 0
+          description: Number of normalized observations returned; always equals observations.length.
+        observations:
+          type: array
+          items:
+            $ref: "#/components/schemas/SatelliteCatalogObservation"
+        recommendedObservation:
+          oneOf:
+            - $ref: "#/components/schemas/SatelliteCatalogObservation"
+            - type: "null"
     Observation:
       type: object
       properties:
