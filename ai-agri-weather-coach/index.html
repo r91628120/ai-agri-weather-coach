@@ -4660,6 +4660,16 @@ function clearNdviForm() {
   document.getElementById("ndviSource").value = "手動輸入";
   document.getElementById("ndviNote").value = "";
   document.getElementById("ndviResult").textContent = "等待輸入田區與 NDVI 數值。";
+
+  const searchResults = document.getElementById("satelliteSearchResults");
+  if (searchResults) searchResults.innerHTML = "";
+
+  const searchButton = document.getElementById("searchSatelliteButton");
+  if (searchButton) searchButton.disabled = false;
+
+  const fetchButton = document.getElementById("fetchRealNdviButton");
+  if (fetchButton) fetchButton.disabled = false;
+
   setSatelliteNdviStatus("請先在農地管理中心選擇含 Polygon 的農地，再取得真實衛星 NDVI。", "idle");
   latestNdviSnapshot = null;
 }

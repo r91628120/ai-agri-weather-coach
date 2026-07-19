@@ -108,7 +108,7 @@
 - 空結果：以 2027-06-01 查詢，HTTP 200、`resultCount: 0`、空觀測陣列、`recommendedObservation: null`。
 - NDVI 回歸：HTTP 200，`latestObservation` 非空，mean 0.542049467563629，有效像素比例 1，統計期間 2026-07-08T00:00:00Z 至 2026-07-09T00:00:00Z。
 - 僅確認遠端 Secret 名稱存在，未讀取、輸出或記錄 Secret、Access Token 或 Authorization Header。
-- PR #2 保持 Draft，未 Merge。
+- 此段為 Merge 前正式 Worker 驗收結果；PR #2 後續已完成 Merge，詳見結案章節。
 
 ## 下一步
 
@@ -131,9 +131,17 @@
 - 正式 UI 驗收成功後，頁面版本已更新為 AIAKOS V6.2；此更新將由本結案 Commit 發布。
 - 本次版本正式結案。全程未記錄 Secret、Access Token 或 Authorization Header。
 
+## 結案後修正：清除 NDVI 表單
+
+- 修正 `clearNdviForm()`：按下「清除」時一併清空 Sentinel-2 可用觀測清單。
+- 重設衛星狀態提示、NDVI 結果、NDVI 輸入值、資料來源、備註與日期。
+- 將搜尋觀測與取得真實 NDVI 按鈕恢復為可操作狀態，避免非同步流程後按鈕殘留 disabled。
+- 不刪除 Farm Memory 的已儲存農地或 NDVI 紀錄，也不清除目前已選取的 Polygon。
+- 未影響農地管理、氣象、MQTT 或其他模組。
+
 ## 接手注意事項
 
 - 不要把 Catalog 搜尋描述成影像下載、Process API 或 NDVI 計算。
 - 不要宣稱仍為 501 的端點已完成。
 - 不要在 issue、PR、log、handoff 或測試輸出記錄任何 Secret 或 Access Token。
-- PR 不可 Merge，等待 ChatGPT Review。
+- 後續修正應維持既有 API 與正式 UI 契約，並完成相同比例的測試與 handoff 紀錄。
