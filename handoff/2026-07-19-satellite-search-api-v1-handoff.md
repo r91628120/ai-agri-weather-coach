@@ -134,10 +134,29 @@
 ## 結案後修正：清除 NDVI 表單
 
 - 修正 `clearNdviForm()`：按下「清除」時一併清空 Sentinel-2 可用觀測清單。
-- 重設衛星狀態提示、NDVI 結果、NDVI 輸入值、資料來源、備註與日期。
+- 重設衛星暫時狀態、NDVI 結果、NDVI 輸入值與資料來源；後續 Hotfix 改為保留已選農地的名稱、日期與正式邊界備註。
 - 將搜尋觀測與取得真實 NDVI 按鈕恢復為可操作狀態，避免非同步流程後按鈕殘留 disabled。
 - 不刪除 Farm Memory 的已儲存農地或 NDVI 紀錄，也不清除目前已選取的 Polygon。
 - 未影響農地管理、氣象、MQTT 或其他模組。
+
+## Hotfix：跨 NDVI 操作保留目前農地
+
+- 修正原因：頁面重新整理或清除後，表單文字可能仍存在，但記憶體中的 Polygon 已遺失，造成使用者看見田區名稱卻無法呼叫衛星 API。
+- 目前選取農地 ID 會保存於 `aiaikosSelectedFieldId`；頁面載入及呼叫衛星 API 前都會由 Farm Memory 重新驗證並恢復 Polygon。
+- `saveCurrentField()` 與 `useFieldForNdvi()` 改用同一個選取函式，避免名稱、ID、Polygon、備註與狀態訊息分流。
+- 一般「清除」只清除觀測卡片、NDVI 數值、判讀結果與暫時狀態，並恢復資料來源及按鈕；不清除目前農地、Polygon、日期、備註、Farm Memory 農地或已儲存 NDVI 紀錄。
+- 清除後會明確顯示已保留的農地名稱，可立即再次搜尋可用觀測或取得真實 NDVI。
+- 新增獨立「取消目前農地」操作；只有此操作會清除目前選取的 ID、名稱、Polygon 及其 localStorage 選取索引，不會刪除 Farm Memory 資料。
+- NDVI 判讀完成後顯示成功訊息，結果區會短暫醒目並捲動至可視範圍。
+- 自動測試新增前端選取狀態、一般清除不得移除選取狀態、取消按鈕及判讀成功訊息的靜態回歸檢查。
+- 本機瀏覽器驗收：選用既有 Farm Memory Polygon 後找到 6 筆真實 Sentinel-2 觀測；重新整理後未再次按「用於 NDVI」仍自動恢復相同農地並可成功搜尋。
+- 清除驗收：觀測卡片由 6 筆清為 0，田區名稱、日期、Polygon 選取與 3 筆既有 Farm Memory 農地均保留；搜尋及 NDVI 按鈕恢復可操作。
+- 清除後回歸：再次搜尋仍取得 6 筆觀測；真實 NDVI 平均值 0.1506、有效像素比例 100.0%、統計期間 2026-07-08T00:00:00Z 至 2026-07-09T00:00:00Z。
+- 判讀回饋驗收：狀態顯示「NDVI 判讀完成」，並確認結果區具有短暫 `is-complete` 醒目狀態。
+- 取消選取驗收：田區名稱與目前 Polygon 清除，但 3 筆 Farm Memory 農地仍保留；搜尋及 NDVI 兩個按鈕均提示重新選田。
+- 手機版相容性：新增按鈕沿用既有可換行 `.action-row`，產品 ID 與卡片維持既有響應式規則；前端 DOM 與語法檢查未發現錯誤。
+- 驗證命令：`npm test`（26/26 通過）、`npm run lint`、`npm run check`、`git diff --check` 及獨立前端 inline JavaScript 語法測試均通過。
+- 本 Hotfix 不變更 Worker API、部署內容、Farm Memory 資料格式、氣象、MQTT 或其他模組；不包含任何 Secret、Access Token 或 Authorization Header。
 
 ## 接手注意事項
 

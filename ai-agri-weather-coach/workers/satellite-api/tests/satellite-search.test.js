@@ -84,5 +84,16 @@ test("frontend inline JavaScript has valid syntax", async () => {
   assert.match(html, /搜尋 Sentinel-2 可用觀測/);
   assert.match(html, /產品 ID：\$\{escapeHtml\(shortProductId\)\}/);
   assert.match(html, /title="\$\{escapeHtml\(productId\)\}"/);
+  assert.match(html, /const SELECTED_FIELD_STORAGE_KEY = "aiaikosSelectedFieldId"/);
+  assert.match(html, /function setSelectedFieldForNdvi\(field\)/);
+  assert.match(html, /function restoreSelectedFieldForNdvi\(\)/);
+  assert.match(html, /function getSelectedFieldForSatellite\(\)/);
+  assert.match(html, /已保留農地「\$\{selectedField\.name\}」的 Polygon/);
+  assert.match(html, /取消目前農地/);
+  assert.match(html, /NDVI 判讀完成：\$\{field\}/);
+  const clearNdviSource = html.slice(html.indexOf("function clearNdviForm()"), html.indexOf("function clearSelectedFieldForNdvi()"));
+  assert.doesNotMatch(clearNdviSource, /localStorage\.removeItem/);
+  assert.doesNotMatch(clearNdviSource, /aiaikosSelectedFieldGeometry\s*=/);
+  assert.match(clearNdviSource, /searchResults\.innerHTML = ""/);
   scripts.forEach((source, index) => assert.doesNotThrow(() => new vm.Script(source, { filename: `index-inline-${index}.js` })));
 });
