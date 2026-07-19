@@ -39,7 +39,8 @@
 - 正式 `POST /api/v1/ndvi/statistics`：以嘉義縣大林鎮 Polygon 呼叫，HTTP 200，`latestObservation` 不為 `null`。
 - 正式 NDVI 統計：mean `0.5295413136482239`、min `0.5295413136482239`、max `0.5295413136482239`、stDev `0`、`validPixelRatio=1`，統計期間為 `2026-07-18T00:00:00Z` 至 `2026-07-19T00:00:00Z`。
 - 正式 CORS 預檢：以 `https://r91628120.github.io` 為 Origin 呼叫 NDVI 端點，HTTP 204，`Access-Control-Allow-Origin` 正確回傳該 Origin。
-- GitHub Pages 正式站驗收：根網址目前只有專案 landing page；實際應用位於 `/ai-agri-weather-coach/` 子路徑，但因 Pages 固定從 `main` `/` 發布，線上仍是未包含本 PR 的舊版，沒有真實 NDVI 按鈕，故合併前無法完成正式 UI 端到端成功驗收。
+- GitHub Pages 正式站驗收：根網址會自動導向 `/ai-agri-weather-coach/` 應用；可看到「取得真實衛星 NDVI」按鈕、匯入並選用農地 Polygon，且可成功取得真實結果。
+- 正式 UI 結果：平均 NDVI `0.5279`、有效像素比例 `100.0%`、統計期間 `2026-07-08T00:00:00Z` 至 `2026-07-09T00:00:00Z`，瀏覽器未出現 CORS 或 console error。
 - `GET /api/v1/cdse/status`：本機 HTTP 200，`configured` 與 `connected` 均為 `true`。
 - `POST /api/v1/ndvi/statistics`：以嘉義縣大林鎮真實地理位置 Polygon 呼叫本機 Worker，HTTP 200。
 - API 回應：`latestObservation` 不為 `null`，NDVI mean 為 `0.52954131364822388`（介於 -1 與 1），`validPixelRatio` 為 `1`，共 15 筆 observation。
@@ -63,7 +64,6 @@
 - `GET /api/v1/ndvi/history`：501。
 - `POST /api/v1/ai/analyze`：501。
 - NDVI 影像分布與歷史趨勢屬後續版本。
-- GitHub Pages 正式前端仍由 `main` 分支發布；在 PR #1 不合併的限制下，尚未上線本分支的前端按鈕與正式 Worker URL。合併並完成 Pages build 後必須重跑正式瀏覽器端到端驗收。
 
 ## 已知限制
 
@@ -85,19 +85,23 @@
 - 遠端 Secret 更新後目前 100% 流量 Version ID：`6544538e-56a2-426d-ba9d-dc8dab508bee`，建立時間 `2026-07-19T02:50:22.229Z`。
 - 正式 Worker 已通過 health、CDSE OAuth 與真實 NDVI Polygon 驗收；全程僅確認 Secret 名稱存在，未讀取、輸出或記錄值與 Access Token。
 - GitHub Pages 設定：legacy build，來源為 `main` 分支根目錄 `/`。
+- PR #1 Squash merge Commit：`bc5d4e384380d42d4bcabcbdae54da95422f313f`，合併時間 `2026-07-19T03:00:27Z`。
+- GitHub Pages 根網址轉址 Commit：`3fd5071e895a88a73554bc0567c8a4dde222f4f7`；Pages build 於 `2026-07-19T03:04:03Z` 完成。
+- 正式網站：`https://r91628120.github.io/ai-agri-weather-coach/`，會導向已驗收的應用子路徑。
 - 部署前指令：`npx.cmd wrangler secret put CDSE_CLIENT_ID`、`npx.cmd wrangler secret put CDSE_CLIENT_SECRET`、`npm.cmd run deploy`。
 
 ## Branch 與 PR
 
-- Branch：`feature/ndvi-statistical-api-v1`
+- 結案 Branch：`main`
+- 開發 Branch：`feature/ndvi-statistical-api-v1`
 - PR：#1 — `feat: AIAKOS NDVI Statistical API v1.0`
-- PR 狀態：Draft；第二輪 Review 已通過，本次不得 Merge，等待最終 Merge Review。
+- PR 狀態：已由 Draft 轉為 Ready，並於 `2026-07-19T03:00:27Z` Squash merge 至 `main`。
 
 ## 下一步
 
-1. 完成安全掃描、最終測試、commit 與 push。
-2. 等待 ChatGPT 最終 Merge Review，不在本次工作合併 PR。
-3. PR 合併並完成 GitHub Pages build 後，從正式站重新匯入／選取 Polygon，驗證真實 NDVI、有效像素比例與統計期間顯示。
+1. 本版進入維護狀態；後續功能應另開分支與 PR。
+2. 依產品優先序另行實作四個目前回傳 501 的預留端點。
+3. 持續監控 Cloudflare Worker 與 CDSE 服務狀態，不得在監控、文件或日誌記錄 Secret 或 Access Token。
 
 ## 接手注意事項
 
