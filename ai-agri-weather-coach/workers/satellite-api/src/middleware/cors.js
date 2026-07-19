@@ -26,6 +26,11 @@ export const aiaikosCors = cors({
     "Authorization",
     "X-Request-ID"
   ],
-  exposeHeaders: ["X-Request-ID"],
+  exposeHeaders: [
+    "X-Request-ID",
+    "X-AIAKOS-Observation-Date",
+    "X-AIAKOS-Field-Id",
+    "X-AIAKOS-Data-Source"
+  ],
   maxAge: 86400
 });

@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: AIAKOS Satellite Service Enterprise API
   version: 1.0.0
-  description: Sentinel-2 L2A NDVI 統計與 AIAKOS 衛星服務預留介面。
+  description: Sentinel-2 L2A 觀測搜尋、NDVI 統計與彩色 PNG 影像服務。
 servers:
   - url: http://127.0.0.1:8787
     description: Local Wrangler
@@ -64,10 +64,33 @@ paths:
           $ref: "#/components/responses/ErrorResponse"
   /api/v1/ndvi/image:
     post:
-      summary: 預留 NDVI 影像端點
+      summary: 取得指定農地與觀測日期的 Sentinel-2 L2A NDVI 彩色 PNG
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NdviImageRequest"
       responses:
-        "501":
-          $ref: "#/components/responses/NotImplemented"
+        "200":
+          description: NDVI PNG binary
+          headers:
+            Cache-Control: { schema: { type: string }, description: "private, max-age=300" }
+            X-AIAKOS-Observation-Date: { schema: { type: string, format: date } }
+            X-AIAKOS-Field-Id: { schema: { type: string } }
+            X-AIAKOS-Data-Source: { schema: { const: Sentinel-2-L2A } }
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        "400": { $ref: "#/components/responses/ErrorResponse" }
+        "404": { $ref: "#/components/responses/ErrorResponse" }
+        "413": { $ref: "#/components/responses/ErrorResponse" }
+        "415": { $ref: "#/components/responses/ErrorResponse" }
+        "502": { $ref: "#/components/responses/ErrorResponse" }
+        "503": { $ref: "#/components/responses/ErrorResponse" }
+        "504": { $ref: "#/components/responses/ErrorResponse" }
   /api/v1/satellite/search:
     post:
       summary: 依農地範圍搜尋 CDSE Sentinel-2 L2A 觀測資料
@@ -173,6 +196,20 @@ components:
               default: 10
               minimum: 1
               maximum: 50
+    NdviImageRequest:
+      type: object
+      required: [geometry, observationDate]
+      additionalProperties: true
+      properties:
+        fieldId: { type: string, maxLength: 200 }
+        fieldName: { type: string, maxLength: 200 }
+        geometry: { $ref: "#/components/schemas/Geometry" }
+        observationDate: { type: string, format: date }
+        width: { type: integer, minimum: 256, maximum: 1536, default: 768 }
+        height: { type: integer, minimum: 256, maximum: 1536, default: 768 }
+        format: { const: image/png, default: image/png }
+        maxCloudCoverage: { type: number, minimum: 0, maximum: 100, default: 30 }
+      description: width × height must not exceed 1,572,864 total pixels. OAuth credentials and tokens are forbidden.
     SatelliteCatalogObservation:
       type: object
       required: [id, datetime, date, platform, cloudCoverage, processingLevel, collection]
