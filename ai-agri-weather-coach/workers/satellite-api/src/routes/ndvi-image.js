@@ -1,11 +1,9 @@
 import { Hono } from "hono";
 import { validateNdviImageRequest } from "../schemas/ndvi-image-schema.js";
-import { requestNdviImage } from "../services/satellite/process-service.js";
+import { CdseProcessError, requestNdviImage } from "../services/satellite/process-service.js";
 import { logError } from "../utils/logger.js";
 import { readJsonBody } from "../utils/json-body.js";
 import { errorResponse } from "../utils/response.js";
-
-export const ndviImageRoutes = new Hono();
 
 export function buildNdviImageResponseHeaders(input, contentType = "image/png") {
   return {
@@ -17,34 +15,48 @@ export function buildNdviImageResponseHeaders(input, contentType = "image/png") 
   };
 }
 
-ndviImageRoutes.post("/", async (c) => {
-  const body = await readJsonBody(c);
-  if (body.error) return body.error;
+export function createNdviImageRoutes({ imageRequester = requestNdviImage, errorLogger = logError } = {}) {
+  const routes = new Hono();
 
-  const validation = validateNdviImageRequest(body.value);
-  if (!validation.valid) {
-    return errorResponse(c, "NDVI image request validation failed.", 400, "VALIDATION_ERROR", {
-      fields: validation.errors
-    });
-  }
+  routes.post("/", async (c) => {
+    const body = await readJsonBody(c);
+    if (body.error) return body.error;
 
-  try {
-    const image = await requestNdviImage(c.env, validation.value);
-    return c.body(image.bytes, 200, buildNdviImageResponseHeaders(validation.value, image.contentType));
-  } catch (error) {
-    const code = error.code || "CDSE_PROCESS_ERROR";
-    logError({
-      requestId: c.get("requestId"),
-      errorCode: code,
-      errorName: error.name || "Error",
-      safeMessage: error.message || "CDSE Process API request failed"
-    });
-    return errorResponse(
-      c,
-      error.message || "CDSE Process API request failed.",
-      error.httpStatus || 502,
-      code,
-      { providerStatus: error.providerStatus || null }
-    );
-  }
-});
+    const validation = validateNdviImageRequest(body.value);
+    if (!validation.valid) {
+      return errorResponse(c, "NDVI image request validation failed.", 400, "VALIDATION_ERROR", {
+        fields: validation.errors
+      });
+    }
+
+    try {
+      const image = await imageRequester(c.env, validation.value);
+      return c.body(image.bytes, 200, buildNdviImageResponseHeaders(validation.value, image.contentType));
+    } catch (error) {
+      const safeError = error instanceof CdseProcessError
+        ? error
+        : new CdseProcessError(
+          "NDVI image service encountered an unexpected error.",
+          "NDVI_IMAGE_INTERNAL_ERROR",
+          500
+        );
+      errorLogger({
+        requestId: c.get("requestId"),
+        errorCode: safeError.code,
+        errorName: error?.name || "Error",
+        safeMessage: "NDVI image request failed safely."
+      });
+      return errorResponse(
+        c,
+        safeError.message,
+        safeError.httpStatus,
+        safeError.code,
+        { providerStatus: safeError.providerStatus || null }
+      );
+    }
+  });
+
+  return routes;
+}
+
+export const ndviImageRoutes = createNdviImageRoutes();

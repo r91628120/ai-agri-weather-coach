@@ -39,7 +39,7 @@
 
 ## 測試結果
 
-- `npm test`：目前 46 項測試通過，涵蓋合法 Polygon、MultiPolygon、日期、尺寸、總像素、PNG 限制、透明 evalscript、200 binary、401 refresh、403、429、5xx、timeout、非影像、安全錯誤、Blob URL、清除、選田保留及前端語法。
+- `npm test`：目前 50 項測試通過，涵蓋合法 Polygon、MultiPolygon、日期、尺寸、總像素、PNG 限制、透明 evalscript、200 binary、401 refresh、Token Provider 安全錯誤邊界、未知 runtime error、403、429、5xx、timeout、非影像、安全錯誤、Blob URL、清除、選田保留及前端語法。
 - 既有 Satellite Search、NDVI Statistics 與安全 validation 測試全數回歸通過。
 - 真實回歸：Satellite Search 成功回傳 8 筆且建議日期為 2026-07-08；NDVI Statistics 的 `latestObservation` 非空、mean 0.5420494675636292、有效像素比例 1。
 - `npm run lint`、`npm run check`、`git diff --check` 與獨立前端 JavaScript 語法檢查：通過。
@@ -87,12 +87,21 @@
 - Content-Type、PNG signature、尺寸、總像素及格式均有防護。
 - 本文件與所有測試證據未包含任何 Secret、Access Token 或 Authorization Header 值。
 
+## ChatGPT 第一輪 Review：P1 安全錯誤邊界修正
+
+- Review finding：`process-service.js` 原先在 try/catch 外呼叫 `tokenProvider`；若 OAuth provider 或 runtime 拋出未知錯誤，route 可能將未消毒的 `error.message` 傳回瀏覽器並寫入 log。
+- Process service 修正：所有 Token Provider 例外一律轉為固定 `CdseProcessError("CDSE authentication service is unavailable.", "CDSE_AUTH_UNAVAILABLE", 503)`，不保留原始 message。
+- Route 修正：只有 `CdseProcessError` 可使用預先定義的安全 message、code、httpStatus；其他錯誤固定回 HTTP 500、`NDVI_IMAGE_INTERNAL_ERROR` 與 `NDVI image service encountered an unexpected error.`。
+- Logger 修正：只寫入 requestId、errorName、安全 errorCode 與固定 safeMessage；不寫入未知 error.message、Secret、Token、Authorization Header 或上游完整 body。
+- 新增測試：一般 Token Provider Error、含 `client_secret`、含 `access_token`、HTTP response 防洩漏、logger 防洩漏、未知 runtime 固定 500，以及既有 401 refresh 回歸。
+- 最終結果：`npm test` 50/50 通過；lint、Worker dry-run、`git diff --check origin/main...HEAD` 與前端 JavaScript syntax test 全數通過。
+
 ## Branch、Commit、PR
 
 - Branch：`feature/ndvi-image-api-v1`。
 - 起點 main Commit：`678757c16db2772fa76c421963ffc48268c3f2f2`（PR #3 Merge Commit）。
-- Commit：`feat: add AIAKOS NDVI Image API v1.0`（SHA 以本次 Git commit 結果為準）。
-- Draft PR：#4，base `main`，等待 ChatGPT 第一輪 Review；不可部署、不可 Merge。
+- Commits：`feat: add AIAKOS NDVI Image API v1.0`、`fix: harden NDVI image error boundaries`。
+- Draft PR：#4，base `main`；第一輪 P1 finding 已修正並等待 ChatGPT 第二輪 Review，不可部署、不可 Merge。
 
 ## 下一步：NDVI History API
 

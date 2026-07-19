@@ -2,10 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import vm from "node:vm";
+import { Hono } from "hono";
 import { validateNdviImageRequest, NDVI_IMAGE_LIMITS } from "../src/schemas/ndvi-image-schema.js";
 import { NDVI_IMAGE_COLORS, NDVI_IMAGE_EVALSCRIPT } from "../src/services/satellite/ndvi-image-colors.js";
 import { CdseProcessError, buildProcessRequest, requestNdviImage } from "../src/services/satellite/process-service.js";
-import { buildNdviImageResponseHeaders } from "../src/routes/ndvi-image.js";
+import { buildNdviImageResponseHeaders, createNdviImageRoutes } from "../src/routes/ndvi-image.js";
 
 const sourceInput = JSON.parse(await readFile(new URL("./fixtures/valid-polygon.json", import.meta.url), "utf8"));
 const input = {
@@ -124,6 +125,84 @@ test("refreshes the token once after a 401", async () => {
   });
   assert.equal(result.contentType, "image/png");
   assert.deepEqual(refreshFlags, [false, true]);
+});
+
+for (const [secretType, sensitiveMessage] of [
+  ["client_secret", "OAuth failed: client_secret=DO_NOT_EXPOSE"],
+  ["access_token", "OAuth failed: access_token=DO_NOT_EXPOSE"]
+]) {
+  test(`maps token provider ${secretType} failures to a fixed safe authentication error`, async () => {
+    await assert.rejects(
+      requestNdviImage({}, validateNdviImageRequest(input).value, {
+        maxRetries: 0,
+        tokenProvider: async () => { throw new Error(sensitiveMessage); },
+        fetchImpl: async () => assert.fail("Process API must not run after token provider failure")
+      }),
+      error => error instanceof CdseProcessError &&
+        error.code === "CDSE_AUTH_UNAVAILABLE" &&
+        error.httpStatus === 503 &&
+        error.message === "CDSE authentication service is unavailable." &&
+        !error.message.includes(sensitiveMessage)
+    );
+  });
+}
+
+function createImageRouteTestApp(imageRequester, errorEntries) {
+  const app = new Hono();
+  app.use("*", async (c, next) => {
+    c.set("requestId", "review-test-request-id");
+    await next();
+  });
+  app.route("/api/v1/ndvi/image", createNdviImageRoutes({
+    imageRequester,
+    errorLogger: entry => errorEntries.push(entry)
+  }));
+  return app;
+}
+
+test("HTTP response and logger never expose token provider sensitive text", async () => {
+  const sensitiveMessage = "client_secret=PRIVATE access_token=PRIVATE";
+  const errorEntries = [];
+  const app = createImageRouteTestApp(
+    (env, validatedInput) => requestNdviImage(env, validatedInput, {
+      maxRetries: 0,
+      tokenProvider: async () => { throw new Error(sensitiveMessage); }
+    }),
+    errorEntries
+  );
+  const response = await app.request("http://localhost/api/v1/ndvi/image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  const responseText = await response.text();
+  assert.equal(response.status, 503);
+  assert.match(responseText, /CDSE_AUTH_UNAVAILABLE/);
+  assert.match(responseText, /CDSE authentication service is unavailable\./);
+  assert.equal(responseText.includes(sensitiveMessage), false);
+  assert.equal(JSON.stringify(errorEntries).includes(sensitiveMessage), false);
+  assert.equal(errorEntries[0].errorCode, "CDSE_AUTH_UNAVAILABLE");
+});
+
+test("unknown runtime errors return a fixed safe HTTP 500 response", async () => {
+  const sensitiveMessage = "runtime leaked access_token=PRIVATE";
+  const errorEntries = [];
+  const app = createImageRouteTestApp(
+    async () => { throw new Error(sensitiveMessage); },
+    errorEntries
+  );
+  const response = await app.request("http://localhost/api/v1/ndvi/image", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input)
+  });
+  const payload = await response.json();
+  assert.equal(response.status, 500);
+  assert.equal(payload.error.code, "NDVI_IMAGE_INTERNAL_ERROR");
+  assert.equal(payload.error.message, "NDVI image service encountered an unexpected error.");
+  assert.equal(JSON.stringify(payload).includes(sensitiveMessage), false);
+  assert.equal(JSON.stringify(errorEntries).includes(sensitiveMessage), false);
+  assert.equal(errorEntries[0].errorCode, "NDVI_IMAGE_INTERNAL_ERROR");
 });
 
 for (const [status, expectedCode] of [

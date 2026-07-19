@@ -70,7 +70,16 @@ export async function requestNdviImage(env, input, options = {}) {
   let lastError;
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
-    const token = await tokenProvider(env, { forceRefresh });
+    let token;
+    try {
+      token = await tokenProvider(env, { forceRefresh });
+    } catch {
+      throw new CdseProcessError(
+        "CDSE authentication service is unavailable.",
+        "CDSE_AUTH_UNAVAILABLE",
+        503
+      );
+    }
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
