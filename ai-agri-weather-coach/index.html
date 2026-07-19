@@ -1044,6 +1044,11 @@
   white-space: pre-wrap;
 }
 
+.satellite-search-results { display:grid; gap:12px; margin-top:14px; }
+.satellite-observation { border:1px solid #cbd5e1; border-radius:14px; padding:14px; background:#fff; }
+.satellite-observation.recommended { border-color:#16a34a; background:#f0fdf4; }
+.satellite-observation-meta { color:#475569; line-height:1.7; margin:6px 0 10px; }
+
 .ndvi-record-list {
   display: grid;
   gap: 10px;
@@ -1666,6 +1671,10 @@
 
           <div id="fieldBoundaryMap" aria-label="農地邊界繪製地圖"></div>
 
+          <div class="api-note">
+            <strong>地圖與資料來源說明：</strong>Esri 圖磚只用於位置參考與繪製農地；紅色 Polygon 邊界的經緯度座標才會送往 CDSE 搜尋 Sentinel-2 L2A 觀測資料。Esri 底圖不參與 NDVI 計算。
+          </div>
+
           <div class="field-status" id="fieldMapStatus">
             步驟一：先貼上 Google Maps 完整網址或輸入經緯度定位。<br>
             步驟二：按「畫出農地範圍」，沿著田區四周依序點選，最後點回起點完成。
@@ -1802,6 +1811,10 @@
         </p>
       </div>
 
+      <div class="api-note">
+        Sentinel-2 影像搜尋只列出可用觀測日期與雲量；真實 NDVI 統計由 Sentinel-2 L2A 的 B08、B04 與 dataMask 計算，顯示平均值、最小值、最大值、標準差、有效像素比例與統計期間。NDVI 影像分布及歷史趨勢為後續版本，相關端點目前仍為 501。
+      </div>
+
       <div class="ndvi-panel">
         <div class="ndvi-card">
           <span class="phase-badge">v1.0｜NDVI Statistics</span>
@@ -1847,6 +1860,7 @@
           </div>
 
           <div class="action-row">
+            <button class="btn btn-green" id="searchSatelliteButton" type="button" onclick="searchSatelliteObservations()">🔎 搜尋 Sentinel-2 影像</button>
             <button class="btn btn-green" id="fetchRealNdviButton" type="button" onclick="fetchRealSatelliteNdvi()">☁️ 取得真實衛星 NDVI</button>
             <button class="btn btn-green" onclick="analyzeNdvi()">🛰️ 進行 NDVI 判讀</button>
             <button class="btn btn-light" onclick="saveNdviRecord()">💾 存入 Farm Memory</button>
@@ -1857,6 +1871,7 @@
           <div class="api-note" id="satelliteNdviStatus" role="status" aria-live="polite">
             請先在農地管理中心選擇含 Polygon 的農地，再取得真實衛星 NDVI。
           </div>
+          <div class="satellite-search-results" id="satelliteSearchResults" aria-live="polite"></div>
 
           <div class="api-note">
             <strong>重要限制：</strong>
@@ -4293,6 +4308,62 @@ function ndviQueryRange() {
   const from = new Date(`${selectedDate}T00:00:00Z`);
   from.setUTCDate(from.getUTCDate() - 30);
   return { dateFrom: from.toISOString().slice(0, 10), dateTo: selectedDate };
+}
+
+function renderSatelliteObservations(observations, recommendedId) {
+  const results = document.getElementById("satelliteSearchResults");
+  if (!observations.length) {
+    results.innerHTML = '<div class="api-note">查詢期間沒有符合雲量條件的 Sentinel-2 L2A 觀測資料。</div>';
+    return;
+  }
+  results.innerHTML = observations.map(observation => {
+    const recommended = observation.id === recommendedId;
+    const cloud = Number.isFinite(observation.cloudCoverage) ? `${observation.cloudCoverage.toFixed(1)}%` : "--";
+    return `<article class="satellite-observation${recommended ? " recommended" : ""}">
+      <strong>${recommended ? "⭐ 建議觀測｜" : ""}${escapeHtml(observation.date || "--")}</strong>
+      <div class="satellite-observation-meta">${escapeHtml(observation.platform || "Sentinel-2")}｜雲量 ${cloud}｜處理層級 ${escapeHtml(observation.processingLevel || "L2A")}</div>
+      <button class="btn btn-light btn-mini" type="button" onclick="useSatelliteObservationDate('${escapeHtml(observation.date || "")}')">使用此日期查詢 NDVI</button>
+    </article>`;
+  }).join("");
+}
+
+function useSatelliteObservationDate(date) {
+  if (!date) return;
+  document.getElementById("ndviDate").value = date;
+  setSatelliteNdviStatus(`已選擇 ${date}，可接著取得 Sentinel-2 NDVI 統計。`, "success");
+}
+
+async function searchSatelliteObservations() {
+  const geometry = window.aiaikosSelectedFieldGeometry;
+  const button = document.getElementById("searchSatelliteButton");
+  const results = document.getElementById("satelliteSearchResults");
+  if (!geometry) {
+    setSatelliteNdviStatus("請先在農地管理中心選擇含 Polygon 的農地。紅色邊界座標才是 Sentinel-2 搜尋範圍。", "error");
+    document.getElementById("fieldBoundary").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+  const { dateFrom, dateTo } = ndviQueryRange();
+  const fieldName = document.getElementById("ndviField").value.trim() || window.aiaikosSelectedFieldName || "未命名農地";
+  button.disabled = true;
+  results.innerHTML = '<div class="api-note">正在搜尋 Sentinel-2 L2A 觀測資料…</div>';
+  setSatelliteNdviStatus(`搜尋中：${dateFrom} 至 ${dateTo}，最大雲量 30%。`, "loading");
+  try {
+    const response = await fetch(`${SATELLITE_API_URL}/api/v1/satellite/search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fieldId: window.aiaikosSelectedFieldId || undefined, fieldName, geometry, dateFrom, dateTo, maxCloudCoverage: 30, limit: 10 })
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok || !payload?.success) throw new Error(payload?.error?.message || `衛星搜尋失敗 HTTP ${response.status}`);
+    const observations = payload.data?.observations || [];
+    renderSatelliteObservations(observations, payload.data?.recommendedObservation?.id);
+    setSatelliteNdviStatus(observations.length ? `搜尋完成：找到 ${observations.length} 筆 Sentinel-2 L2A 觀測資料。` : "搜尋完成，但沒有符合條件的觀測資料。", observations.length ? "success" : "empty");
+  } catch (error) {
+    results.innerHTML = `<div class="api-note">${escapeHtml(error.message)}</div>`;
+    setSatelliteNdviStatus(`搜尋失敗：${error.message}`, "error");
+  } finally {
+    button.disabled = false;
+  }
 }
 
 async function fetchRealSatelliteNdvi() {

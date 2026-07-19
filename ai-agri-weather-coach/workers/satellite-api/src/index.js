@@ -32,7 +32,8 @@ app.get("/api/v1", (c) => {
     endpoints: {
       health: "GET /api/v1/health",
       cdseStatus: "GET /api/v1/cdse/status",
-      ndviStatistics: "POST /api/v1/ndvi/statistics"
+      ndviStatistics: "POST /api/v1/ndvi/statistics",
+      satelliteSearch: "POST /api/v1/satellite/search"
     }
   });
 });

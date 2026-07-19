@@ -1,0 +1,8 @@
+{
+  "type": "Feature",
+  "properties": { "id": "FIELD-E2E-001", "name": "Satellite Search E2E Field", "crop": "test crop" },
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[120.45, 23.57], [120.46, 23.57], [120.46, 23.58], [120.45, 23.57]]]
+  }
+}

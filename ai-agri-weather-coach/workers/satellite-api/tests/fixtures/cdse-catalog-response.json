@@ -1,0 +1,8 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {"type":"Feature","id":"S2B_OLDER","properties":{"datetime":"2026-07-10T02:30:00Z","platform":"sentinel-2b","eo:cloud_cover":4.5}},
+    {"type":"Feature","id":"S2A_LATEST_CLOUDY","properties":{"datetime":"2026-07-15T02:31:00Z","platform":"sentinel-2a","eo:cloud_cover":12.4}},
+    {"type":"Feature","id":"S2B_LATEST_CLEAR","properties":{"datetime":"2026-07-15T02:30:00Z","platform":"sentinel-2b","eo:cloud_cover":3.2}}
+  ]
+}

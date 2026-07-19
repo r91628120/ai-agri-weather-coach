@@ -69,11 +69,22 @@ paths:
         "501":
           $ref: "#/components/responses/NotImplemented"
   /api/v1/satellite/search:
-    get:
-      summary: 預留衛星影像搜尋端點
+    post:
+      summary: 依農地範圍搜尋 CDSE Sentinel-2 L2A 觀測資料
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SatelliteSearchRequest"
       responses:
-        "501":
-          $ref: "#/components/responses/NotImplemented"
+        "200": { description: 觀測清單與建議觀測 }
+        "400": { $ref: "#/components/responses/ErrorResponse" }
+        "413": { $ref: "#/components/responses/ErrorResponse" }
+        "415": { $ref: "#/components/responses/ErrorResponse" }
+        "502": { $ref: "#/components/responses/ErrorResponse" }
+        "503": { $ref: "#/components/responses/ErrorResponse" }
+        "504": { $ref: "#/components/responses/ErrorResponse" }
   /api/v1/ndvi/history:
     get:
       summary: 預留 NDVI 歷史端點
@@ -142,6 +153,16 @@ components:
           default: 30
           minimum: 0
           maximum: 100
+    SatelliteSearchRequest:
+      allOf:
+        - $ref: "#/components/schemas/NdviStatisticsRequest"
+        - type: object
+          properties:
+            limit:
+              type: integer
+              default: 10
+              minimum: 1
+              maximum: 50
     Observation:
       type: object
       properties:
