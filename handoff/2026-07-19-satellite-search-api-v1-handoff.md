@@ -61,8 +61,7 @@
 - `POST /api/v1/ndvi/image`：HTTP 501
 - `GET /api/v1/ndvi/history`：HTTP 501
 - `POST /api/v1/ai/analyze`：HTTP 501
-- 尚未由 GitHub Pages 正式站驗收
-- 頁面保留既有 V6.0 標示；完成正式 UI 驗收後才可標示 V6.2
+- NDVI 影像、歷史趨勢與 AI 分析仍屬後續版本；本次 Satellite Search API v1.0 已正式結案
 
 ## 已知限制
 
@@ -113,10 +112,24 @@
 
 ## 下一步
 
-1. 等待 ChatGPT 最終 Merge Review。
-2. Review 通過後再依明確指示處理 PR #2 Merge；目前不可 Merge。
-3. 合併與 GitHub Pages 更新後，從正式網站驗收搜尋、CORS、日期選用及 NDVI 串接。
-4. 正式 UI 驗收通過後才更新頁面為 AIAKOS V6.2。
+1. 規劃 `POST /api/v1/ndvi/image` 的安全影像輸出與快取策略。
+2. 規劃 NDVI 歷史序列的持久化、查詢範圍及資料保留政策。
+3. 規劃 AI 分析端點整合衛星、氣象與 Farm Memory 的輸入契約。
+
+## PR Merge、GitHub Pages 與正式 UI 結案
+
+- PR #2 已由 Draft 改為 Ready for review，並於 2026-07-19 Merge 至 `main`。
+- Merge Commit SHA：`c24b490cf6e75669114b118099554019c50842f6`。
+- GitHub Pages workflow run：`29674394813`，部署 Commit `c24b490cf6e75669114b118099554019c50842f6`，結果 success。
+- 正式網站：`https://r91628120.github.io/ai-agri-weather-coach/`。
+- 正式 UI 顯示「🔎 搜尋 Sentinel-2 可用觀測」。
+- 正式 UI 顯示觀測日期、Sentinel-2 平台、雲量、截短產品 ID，完整產品 ID 保留於 `title`。
+- 建議觀測卡片標示正常：2026-07-08、Sentinel-2C、雲量 23.6%。
+- 「使用此日期查詢 NDVI」成功將日期設為 2026-07-08。
+- 真實 NDVI 查詢成功：平均值 0.5279、有效像素比例 100.0%、統計期間 2026-07-08T00:00:00Z 至 2026-07-09T00:00:00Z。
+- 正式 UI 無 CORS 或 browser console error。
+- 正式 UI 驗收成功後，頁面版本已更新為 AIAKOS V6.2；此更新將由本結案 Commit 發布。
+- 本次版本正式結案。全程未記錄 Secret、Access Token 或 Authorization Header。
 
 ## 接手注意事項
 
