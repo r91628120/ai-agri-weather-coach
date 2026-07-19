@@ -23,4 +23,6 @@
 
 ## 安全邊界
 
+`catalog-service` 與 Statistical API 共用既有 OAuth token provider 與 Polygon/MultiPolygon 驗證。Catalog 搜尋只回傳 STAC 中繼資料，不下載影像，也不計算 NDVI。
+
 瀏覽器只傳農地、日期與雲量。Cloudflare Worker 從 Secrets 讀取 CDSE 憑證。任何 log 均不得包含請求 body、完整 env、Authorization Header、Secret 或 Access Token。

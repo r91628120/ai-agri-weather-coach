@@ -5,11 +5,11 @@
 - `GET /api/v1/health`
 - `GET /api/v1/cdse/status`
 - `POST /api/v1/ndvi/statistics`
+- `POST /api/v1/satellite/search`：CDSE Catalog/STAC Sentinel-2 L2A 觀測搜尋。
 
 ## 預留端點（HTTP 501）
 
 - `POST /api/v1/ndvi/image`：Sentinel Hub Process API NDVI/RGB 影像。
-- `GET /api/v1/satellite/search`：Catalog API 影像搜尋。
 - `GET /api/v1/ndvi/history`：持久化時間序列。
 - `POST /api/v1/ai/analyze`：結合 NDVI、氣象與農場記憶的 AI 判讀。
 

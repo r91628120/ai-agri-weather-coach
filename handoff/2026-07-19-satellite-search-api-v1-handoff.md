@@ -1,0 +1,126 @@
+# AIAKOS Satellite Search API v1.0 Handoff
+
+## 本次目標
+
+在 `feature/satellite-search-api-v1` 建立真實 CDSE Sentinel Hub Catalog/STAC 搜尋 API，讓使用者以農地 Polygon 或 MultiPolygon 搜尋 Sentinel-2 L2A 可用觀測，並在既有 NDVI UI 中選用觀測日期。
+
+## 已完成功能
+
+- `POST /api/v1/satellite/search`
+- 共用既有 CDSE OAuth token provider、JSON body 安全限制及 Polygon/MultiPolygon 驗證
+- 日期、最大雲量（預設 30，0–100）及 limit（預設 10，1–50）驗證
+- CDSE 401 token refresh、429/5xx retry、timeout 與安全錯誤映射
+- 回傳 Sentinel-2 平台、日期、雲量、L2A 層級與建議觀測
+- 依日期新到舊排序；相同日期時優先較低雲量
+- 成功回應包含 `resultCount`，且固定等於 `observations.length`
+- 無結果時 HTTP 200、`resultCount: 0`、空陣列、`recommendedObservation: null`
+- 前端新增「🔎 搜尋 Sentinel-2 可用觀測」、載入/成功/空結果/錯誤狀態、含產品 ID 的觀測卡片及「使用此日期查詢 NDVI」
+- 明確區分 Esri 參考底圖、Sentinel-2 觀測資料、Sentinel-2 NDVI 統計與後續 NDVI 影像
+
+## 修改檔案
+
+- `ai-agri-weather-coach/index.html`
+- `workers/satellite-api/src/config/satellite.js`
+- `workers/satellite-api/src/index.js`
+- `workers/satellite-api/src/routes/ndvi-statistics.js`
+- `workers/satellite-api/src/routes/satellite-search.js`
+- `workers/satellite-api/src/schemas/ndvi-statistics-schema.js`
+- `workers/satellite-api/src/schemas/satellite-request-schema.js`
+- `workers/satellite-api/src/schemas/satellite-search-schema.js`
+- `workers/satellite-api/src/services/satellite/catalog-service.js`
+- `workers/satellite-api/src/utils/json-body.js`
+- `workers/satellite-api/tests/satellite-search.test.js`
+- `workers/satellite-api/tests/fixtures/cdse-catalog-response.json`
+- `workers/satellite-api/tests/fixtures/cdse-catalog-empty-response.json`
+- `workers/satellite-api/tests/fixtures/field-feature.geojson`
+- `workers/satellite-api/docs/openapi.yaml`
+- `workers/satellite-api/docs/API-ROADMAP.md`
+- `workers/satellite-api/docs/SATELLITE-ARCHITECTURE.md`
+- `workers/satellite-api/docs/CHANGELOG.md`
+- `workers/satellite-api/docs/SATELLITE-SEARCH-API.md`
+
+## 測試結果
+
+- `npm test`：26/26 通過（PR #2 第一輪 Review 修正後）
+- `npm run lint`：通過
+- `npm run check`：Wrangler dry-run 通過
+- `git diff --check`：通過
+- 前端 inline JavaScript 語法測試：通過
+- 真實 CDSE OAuth 狀態：`connected=true`
+- 真實 Search API：HTTP 200，回傳非空觀測清單及非空建議觀測
+- 本機瀏覽器端到端：成功選用匯入的 Polygon；最終查詢顯示 8 筆真實觀測，無 CORS 與 console error
+- UI 建議觀測：2026-07-08、Sentinel-2C、雲量 23.6%
+- UI 亦驗證既有真實 NDVI：平均 0.1506、有效像素比例 100.0%、統計期間 2026-07-08T00:00:00Z 至 2026-07-09T00:00:00Z
+
+## API 測試方式
+
+在 Worker 本機開發環境啟動後，以 `Content-Type: application/json` POST 農地 geometry、日期、雲量與 limit 至 `/api/v1/satellite/search`。確認 HTTP 200、`resultCount === observations.length`、`observations` 為陣列、`recommendedObservation` 非空；空查詢結果仍應為 HTTP 200 且 `resultCount: 0`。
+
+## 尚未完成項目
+
+- `POST /api/v1/ndvi/image`：HTTP 501
+- `GET /api/v1/ndvi/history`：HTTP 501
+- `POST /api/v1/ai/analyze`：HTTP 501
+- 尚未由 GitHub Pages 正式站驗收
+- 頁面保留既有 V6.0 標示；完成正式 UI 驗收後才可標示 V6.2
+
+## 已知限制
+
+- Catalog API 僅搜尋中繼資料，不下載 Sentinel-2 影像，也不計算 NDVI。
+- 雲量是觀測產品的 STAC 中繼資料，不代表農地 Polygon 內每一像素的局部雲量。
+- 推薦策略是最新日期優先，相同日期再取較低雲量；不是農業適用性的完整評分。
+
+## 部署與環境設定
+
+- Branch：`feature/satellite-search-api-v1`
+- Draft PR：#2（建立後等待 ChatGPT Review，不可 Merge）
+- 本機 Worker：`http://127.0.0.1:8787`
+- 正式 Worker：`https://aiaikos-satellite-api.r91628120.workers.dev`
+- 正式部署時間：2026-07-19 12:24:23 +08:00
+- 部署來源 Commit：`bc828e43ac193a3dd0e3f111ea5fef07faa2f050`
+- Cloudflare Worker Version ID：`aa5f0f80-7e20-4fae-b743-688033918b99`
+- Worker 僅從環境 Secrets 取得 CDSE OAuth 憑證；文件、程式碼、測試與紀錄均不得包含 Secret、Access Token 或 Authorization header 值
+
+## 安全檢查結果
+
+- Client 傳入 OAuth/Token 欄位會被拒絕
+- Client Authorization header 會被拒絕
+- 上游錯誤不回傳原始 response body、stack、Secret 或 Access Token
+- 自動測試驗證成功及錯誤資料不包含測試 token
+- 本次驗收未讀取、輸出或記錄任何 Secret 或 Access Token
+
+## PR #2 第一輪 Review 修正
+
+- 成功回應新增 `resultCount`，並以測試驗證一般結果及空結果分別等於 3 與 0。
+- OpenAPI 與 Satellite Search API 文件已補充 `resultCount === observations.length` 契約。
+- 前端按鈕及狀態統一採用「搜尋可用觀測／搜尋觀測資料」，避免暗示本版會顯示圖片。
+- 觀測卡片新增產品 ID；畫面採截短文字，完整值保留於 `title`，兩者皆經 `escapeHtml`，並以 `overflow-wrap:anywhere` 保護手機版排版。
+- 修正後 `npm test`、`npm run lint`、`npm run check`、`git diff --check` 與前端 JavaScript 語法檢查均通過。
+- 第一輪 Review 階段未部署；第二輪 Review 通過後才依核准進行正式部署。PR #2 仍未 Merge。
+
+## 正式 Worker 部署與驗收
+
+- 部署命令：`npm run deploy`
+- Worker Version ID：`aa5f0f80-7e20-4fae-b743-688033918b99`
+- `GET /api/v1/health`：HTTP 200，成功狀態正常。
+- `GET /api/v1/cdse/status`：HTTP 200，`connected=true`。
+- `POST /api/v1/satellite/search`：HTTP 200，`resultCount: 4`，且等於 `observations.length: 4`。
+- 建議觀測：2026-07-08、Sentinel-2C、雲量 23.65%；產品 ID 為非空有效字串。
+- 空結果：以 2027-06-01 查詢，HTTP 200、`resultCount: 0`、空觀測陣列、`recommendedObservation: null`。
+- NDVI 回歸：HTTP 200，`latestObservation` 非空，mean 0.542049467563629，有效像素比例 1，統計期間 2026-07-08T00:00:00Z 至 2026-07-09T00:00:00Z。
+- 僅確認遠端 Secret 名稱存在，未讀取、輸出或記錄 Secret、Access Token 或 Authorization Header。
+- PR #2 保持 Draft，未 Merge。
+
+## 下一步
+
+1. 等待 ChatGPT 最終 Merge Review。
+2. Review 通過後再依明確指示處理 PR #2 Merge；目前不可 Merge。
+3. 合併與 GitHub Pages 更新後，從正式網站驗收搜尋、CORS、日期選用及 NDVI 串接。
+4. 正式 UI 驗收通過後才更新頁面為 AIAKOS V6.2。
+
+## 接手注意事項
+
+- 不要把 Catalog 搜尋描述成影像下載、Process API 或 NDVI 計算。
+- 不要宣稱仍為 501 的端點已完成。
+- 不要在 issue、PR、log、handoff 或測試輸出記錄任何 Secret 或 Access Token。
+- PR 不可 Merge，等待 ChatGPT Review。
