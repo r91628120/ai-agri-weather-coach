@@ -34,6 +34,12 @@
 
 ## 測試結果
 
+- 正式 `GET /api/v1/health`：HTTP 200，`status=online`。
+- 正式 `GET /api/v1/cdse/status`：HTTP 200，`configured=true`、`connected=true`。
+- 正式 `POST /api/v1/ndvi/statistics`：以嘉義縣大林鎮 Polygon 呼叫，HTTP 200，`latestObservation` 不為 `null`。
+- 正式 NDVI 統計：mean `0.5295413136482239`、min `0.5295413136482239`、max `0.5295413136482239`、stDev `0`、`validPixelRatio=1`，統計期間為 `2026-07-18T00:00:00Z` 至 `2026-07-19T00:00:00Z`。
+- 正式 CORS 預檢：以 `https://r91628120.github.io` 為 Origin 呼叫 NDVI 端點，HTTP 204，`Access-Control-Allow-Origin` 正確回傳該 Origin。
+- GitHub Pages 正式站驗收：根網址目前只有專案 landing page；實際應用位於 `/ai-agri-weather-coach/` 子路徑，但因 Pages 固定從 `main` `/` 發布，線上仍是未包含本 PR 的舊版，沒有真實 NDVI 按鈕，故合併前無法完成正式 UI 端到端成功驗收。
 - `GET /api/v1/cdse/status`：本機 HTTP 200，`configured` 與 `connected` 均為 `true`。
 - `POST /api/v1/ndvi/statistics`：以嘉義縣大林鎮真實地理位置 Polygon 呼叫本機 Worker，HTTP 200。
 - API 回應：`latestObservation` 不為 `null`，NDVI mean 為 `0.52954131364822388`（介於 -1 與 1），`validPixelRatio` 為 `1`，共 15 筆 observation。
@@ -57,7 +63,7 @@
 - `GET /api/v1/ndvi/history`：501。
 - `POST /api/v1/ai/analyze`：501。
 - NDVI 影像分布與歷史趨勢屬後續版本。
-- 正式 Worker 目前仍提供舊版 6 天前的部署內容，尚未承載此分支的 NDVI Statistical API；須在第二輪審查通過後部署／提升目前版本，不得把本機成功誤記為正式環境已通過。
+- GitHub Pages 正式前端仍由 `main` 分支發布；在 PR #1 不合併的限制下，尚未上線本分支的前端按鈕與正式 Worker URL。合併並完成 Pages build 後必須重跑正式瀏覽器端到端驗收。
 
 ## 已知限制
 
@@ -74,21 +80,24 @@
 - Cloudflare Secrets 名稱：`CDSE_CLIENT_ID`、`CDSE_CLIENT_SECRET`。
 - 不得將 Secret、Access Token 或 Authorization Header 寫入 Git、Handoff、前端、log 或 API 回應。
 - 正式 Worker URL：`https://aiaikos-satellite-api.r91628120.workers.dev`。
-- Cloudflare Dashboard 顯示目前正式流量仍指向舊版「AIAKOS API v1 - Health Endpoint」部署；此工作階段未執行部署、Promote 或 Merge。
+- 正式程式部署時間：`2026-07-19T02:21:03.771Z`（臺北時間 `2026-07-19 10:21:03`）。
+- 程式部署 Version ID：`2c61e7a0-10c8-4bd9-bcb9-302a8581d9ad`，部署來源為 Git Commit `defd8df55ab3057b2b3177374302166e19d7baaf`。
+- 遠端 Secret 更新後目前 100% 流量 Version ID：`6544538e-56a2-426d-ba9d-dc8dab508bee`，建立時間 `2026-07-19T02:50:22.229Z`。
+- 正式 Worker 已通過 health、CDSE OAuth 與真實 NDVI Polygon 驗收；全程僅確認 Secret 名稱存在，未讀取、輸出或記錄值與 Access Token。
+- GitHub Pages 設定：legacy build，來源為 `main` 分支根目錄 `/`。
 - 部署前指令：`npx.cmd wrangler secret put CDSE_CLIENT_ID`、`npx.cmd wrangler secret put CDSE_CLIENT_SECRET`、`npm.cmd run deploy`。
 
 ## Branch 與 PR
 
 - Branch：`feature/ndvi-statistical-api-v1`
 - PR：#1 — `feat: AIAKOS NDVI Statistical API v1.0`
-- PR 狀態：Draft；不得 Merge，等待第二輪程式碼審查。
+- PR 狀態：Draft；第二輪 Review 已通過，本次不得 Merge，等待最終 Merge Review。
 
 ## 下一步
 
 1. 完成安全掃描、最終測試、commit 與 push。
-2. 等待 ChatGPT 第二輪 Review，不合併 PR。
-3. 第二輪審查通過後，才部署／Promote 本分支 Worker 並重新執行正式 URL 驗收。
-4. 正式部署後，以 GitHub Pages 再確認跨來源呼叫及真實 NDVI 顯示。
+2. 等待 ChatGPT 最終 Merge Review，不在本次工作合併 PR。
+3. PR 合併並完成 GitHub Pages build 後，從正式站重新匯入／選取 Polygon，驗證真實 NDVI、有效像素比例與統計期間顯示。
 
 ## 接手注意事項
 
