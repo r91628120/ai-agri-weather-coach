@@ -285,29 +285,80 @@ test("frontend creates and revokes Blob URLs, clears images and preserves select
   assert.doesNotMatch(clearImageSource, /aiaikosSelectedFieldGeometry\s*=/);
 });
 
-test("frontend GIS Viewer has the required default layer controls", async () => {
+test("frontend GIS Viewer has one Leaflet Layers Control with the required defaults", async () => {
   const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
   assert.match(html, /id="ndviGisViewer"/);
-  assert.match(html, /id="ndviBasemapVisible"[^>]*checked/);
-  assert.match(html, /id="ndviOverlayVisible"[^>]*checked/);
-  assert.match(html, /id="ndviBoundaryVisible"[^>]*checked/);
   assert.match(html, /id="ndviOverlayOpacity"[^>]*value="0\.55"/);
   assert.match(html, /World_Imagery\/MapServer\/tile/);
+  assert.match(html, /World_Street_Map\/MapServer\/tile/);
+  assert.match(html, /L\.control\.layers\(/);
+  assert.match(html, /"Esri World Imagery": ndviGisBasemapLayer/);
+  assert.match(html, /"Esri World Street Map": ndviGisStreetLayer/);
+  assert.match(html, /position: "topright", collapsed: true/);
+  assert.equal((html.match(/ndviGisLayersControl = L\.control\.layers\(/g) || []).length, 1);
+  assert.match(html, /ndviGisMap\.on\("overlayadd"/);
+  assert.match(html, /ndviGisMap\.on\("overlayremove"/);
+  assert.match(html, /ndviGisMap\.on\("baselayerchange"/);
   assert.match(html, /createPane\("ndviImagePane"\).*350/);
   assert.match(html, /createPane\("ndviBoundaryPane"\).*450/);
+  assert.doesNotMatch(html, /id="ndvi(?:Basemap|Overlay|Boundary)Visible"/);
 });
 
-test("frontend GIS layer toggles and opacity never call an API", async () => {
+test("frontend GIS layer changes and opacity never call an API", async () => {
   const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
   const controlsSource = html.slice(
-    html.indexOf("function toggleNdviBasemap("),
+    html.indexOf("function initializeNdviGisViewer("),
     html.indexOf("function fitNdviGisViewerToField(")
   );
-  assert.match(controlsSource, /toggleNdviImageOverlay/);
-  assert.match(controlsSource, /toggleNdviBoundary/);
+  assert.match(controlsSource, /addOverlay\(ndviImageOverlay, "NDVI 彩色圖層"\)/);
+  assert.match(controlsSource, /addOverlay\(ndviImageBoundaryLayer, "農地 Polygon"\)/);
   assert.match(controlsSource, /setNdviImageOverlayOpacity/);
-  assert.match(controlsSource, /setOpacity\(Number\(value\)\)/);
+  assert.match(controlsSource, /setOpacity\(opacity\)/);
   assert.doesNotMatch(controlsSource, /fetch\s*\(/);
+});
+
+test("frontend replaces dynamic Layer Control references without stale overlays", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  const overlaySource = html.slice(html.indexOf("function removeNdviImageOverlay("), html.indexOf("function toggleNdviBasemap("));
+  assert.match(overlaySource, /removeLayer\(ndviImageOverlay\)/);
+  assert.match(overlaySource, /removeLayer\(ndviImageBoundaryLayer\)/);
+  assert.match(overlaySource, /ndviImageOverlay = null/);
+  assert.match(overlaySource, /ndviImageBoundaryLayer = null/);
+  assert.match(overlaySource, /ndviGisLayersControl\?\.addOverlay\(ndviImageOverlay/);
+  assert.match(overlaySource, /ndviGisLayersControl\?\.addOverlay\(ndviImageBoundaryLayer/);
+});
+
+test("frontend floating five-level legend follows GIS, pure and clear states", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  assert.match(html, /L\.control\(\{ position: "bottomleft" \}\)/);
+  assert.match(html, /NDVI 五級圖例/);
+  assert.match(html, /&lt; 0\.20　極低/);
+  assert.match(html, /0\.20–0\.39　偏低/);
+  assert.match(html, /0\.40–0\.59　普通/);
+  assert.match(html, /0\.60–0\.79　良好/);
+  assert.match(html, /≥ 0\.80　旺盛/);
+  assert.match(html, /setNdviGisLegendVisible\(Boolean\(ndviImageOverlay\)\)/);
+  assert.match(html, /setNdviGisLegendVisible\(false\)/);
+  assert.match(html, /<div class="ndvi-pure-preview[\s\S]*?<div class="ndvi-image-legend"/);
+});
+
+test("frontend responsive controls preserve horizontal labels at 390px and 360px", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  assert.match(html, /\.ndvi-viewer-toolbar \{ display:grid;/);
+  assert.match(html, /\.ndvi-viewer-mode \.btn \{[^}]*white-space:nowrap;[^}]*word-break:keep-all;[^}]*overflow-wrap:normal;/);
+  assert.match(html, /\.ndvi-opacity-control \{[^}]*min-width:0;[^}]*white-space:nowrap;[^}]*word-break:keep-all;[^}]*overflow-wrap:normal;/);
+  assert.match(html, /@media \(max-width: 800px\)[\s\S]*?\.ndvi-viewer-toolbar \{ grid-template-columns:1fr;[^}]*overflow:hidden;/);
+  assert.match(html, /\.ndvi-gis-viewer \{ min-height:360px/);
+  assert.doesNotMatch(html, /\.ndvi-viewer-toolbar label \{ white-space:normal;/);
+});
+
+test("frontend opacity stays local and reports its current percentage", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  const opacitySource = html.slice(html.indexOf("function setNdviImageOverlayOpacity("), html.indexOf("function fitNdviGisViewerToField("));
+  assert.match(html, /id="ndviOverlayOpacityValue"[^>]*>55%<\/output>/);
+  assert.match(opacitySource, /ndviImageOverlay\.setOpacity\(opacity\)/);
+  assert.match(opacitySource, /Math\.round\(opacity \* 100\)/);
+  assert.doesNotMatch(opacitySource, /fetch\s*\(/);
 });
 
 test("frontend GIS Viewer supports fitBounds and GIS or pure NDVI modes", async () => {
