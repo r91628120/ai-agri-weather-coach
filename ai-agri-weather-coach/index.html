@@ -1062,7 +1062,24 @@
 .satellite-product-id { color:#64748b; font-size:.78rem; line-height:1.5; margin-top:4px; overflow-wrap:anywhere; }
 
 .ndvi-image-card { margin-top:22px; }
-.ndvi-image-layout { display:grid; grid-template-columns:minmax(0,1.35fr) minmax(280px,.65fr); gap:20px; align-items:start; }
+.ndvi-image-layout { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(300px,.5fr); gap:20px; align-items:start; }
+.ndvi-gis-stage { min-width:0; }
+.ndvi-gis-viewer { width:100%; min-height:520px; border:1px solid #94a3b8; border-radius:18px; overflow:hidden; background:#dbeafe; }
+.ndvi-viewer-toolbar { display:grid; grid-template-columns:auto minmax(220px,1fr) auto; gap:10px 14px; align-items:center; margin:0 0 14px; padding:12px 14px; border:1px solid #cbd5e1; border-radius:16px; background:#f8fafc; min-width:0; }
+.ndvi-opacity-control { display:grid; grid-template-columns:auto minmax(140px,1fr) auto; align-items:center; gap:9px; margin:0; min-width:0; white-space:nowrap; word-break:keep-all; overflow-wrap:normal; }
+.ndvi-opacity-control input[type="range"] { width:100%; min-width:0; }
+.ndvi-opacity-value { min-width:3.5em; color:#475569; font-variant-numeric:tabular-nums; text-align:right; }
+.ndvi-viewer-mode { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; min-width:0; }
+.ndvi-viewer-mode .btn { min-width:0; white-space:nowrap; word-break:keep-all; overflow-wrap:normal; }
+.ndvi-viewer-mode .is-active { background:#14532d; color:#fff; border-color:#14532d; }
+.ndvi-map-legend { min-width:150px; padding:10px 12px; border:1px solid rgba(148,163,184,.7); border-radius:12px; background:rgba(255,255,255,.92); box-shadow:0 5px 18px rgba(15,23,42,.22); color:#1e293b; line-height:1.35; backdrop-filter:blur(3px); }
+.ndvi-map-legend.is-hidden { display:none; }
+.ndvi-map-legend strong { display:block; margin-bottom:6px; font-size:.78rem; }
+.ndvi-map-legend-row { display:grid; grid-template-columns:18px auto; align-items:center; gap:7px; margin-top:4px; font-size:.72rem; white-space:nowrap; }
+.ndvi-map-legend-swatch { width:18px; height:12px; border:1px solid rgba(15,23,42,.18); border-radius:3px; }
+.ndvi-gis-viewer .leaflet-control-layers { max-width:min(240px,calc(100vw - 86px)); }
+.ndvi-gis-viewer .leaflet-control-layers label { white-space:nowrap; word-break:keep-all; overflow-wrap:normal; }
+.ndvi-pure-preview { margin-top:0; }
 .ndvi-image-frame { min-height:320px; display:grid; place-items:center; border:1px solid #cbd5e1; border-radius:18px; overflow:hidden; background:repeating-conic-gradient(#f8fafc 0 25%,#e2e8f0 0 50%) 50%/24px 24px; }
 .ndvi-image-frame img { display:block; width:100%; height:auto; max-height:680px; object-fit:contain; }
 .ndvi-image-info { display:grid; gap:9px; color:#334155; line-height:1.6; overflow-wrap:anywhere; }
@@ -1074,13 +1091,25 @@
 .ndvi-image-legend span:nth-child(4) { background:#73c64c; color:#163b0c; }
 .ndvi-image-legend span:nth-child(5) { background:#15803d; color:#fff; }
 .ndvi-image-controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:14px; }
-.ndvi-image-controls label { display:flex; align-items:center; gap:7px; margin:0; }
-.ndvi-image-controls input[type="range"] { width:150px; }
+.ndvi-image-controls label { display:flex; align-items:center; gap:7px; margin:0; white-space:nowrap; }
+.ndvi-gis-source-notes { margin-top:16px; line-height:1.75; }
 .is-hidden { display:none !important; }
 
-@media (max-width: 800px) {
+@media (max-width: 1100px) {
   .ndvi-image-layout { grid-template-columns:1fr; }
-  .ndvi-image-legend { grid-template-columns:1fr; }
+}
+
+@media (max-width: 800px) {
+  .ndvi-gis-viewer { min-height:360px; }
+  .ndvi-viewer-toolbar { grid-template-columns:1fr; align-items:stretch; gap:10px; padding:10px; overflow:hidden; }
+  .ndvi-opacity-control { grid-template-columns:auto minmax(0,1fr) auto; width:100%; }
+  .ndvi-viewer-toolbar > .btn { width:100%; white-space:nowrap; word-break:keep-all; overflow-wrap:normal; }
+  .ndvi-map-legend { min-width:128px; padding:8px 9px; }
+  .ndvi-map-legend strong { font-size:.72rem; }
+  .ndvi-map-legend-row { grid-template-columns:15px auto; gap:5px; font-size:.66rem; }
+  .ndvi-map-legend-swatch { width:15px; height:10px; }
+  .ndvi-image-legend { grid-template-columns:repeat(5,minmax(0,1fr)); }
+  .ndvi-image-legend span { padding:8px 2px; font-size:.68rem; }
   .ndvi-image-frame { min-height:220px; }
 }
 
@@ -1931,28 +1960,43 @@
         <h2>🌈 Sentinel-2 NDVI 彩色影像</h2>
         <div class="api-note" id="ndviImageStatus" role="status" aria-live="polite">請先選取農地與 Sentinel-2 觀測日期。</div>
 
-        <div class="ndvi-image-layout is-hidden" id="ndviImageContent">
-          <div>
-            <div class="ndvi-image-frame"><img id="ndviImagePreview" alt="Sentinel-2 NDVI 彩色影像"></div>
-            <div class="ndvi-image-legend" aria-label="NDVI 彩色影像圖例">
-              <span>&lt; 0.20<br>紅色</span><span>0.20–0.39<br>橙色</span><span>0.40–0.59<br>黃色</span><span>0.60–0.79<br>淺綠</span><span>≥ 0.80<br>深綠</span>
+        <div class="ndvi-image-layout" id="ndviImageContent">
+          <div class="ndvi-gis-stage">
+            <div class="ndvi-viewer-toolbar" aria-label="NDVI GIS 圖層控制">
+              <span class="ndvi-viewer-mode" aria-label="顯示模式">
+                <button class="btn btn-light btn-mini is-active" id="ndviGisModeButton" type="button" onclick="setNdviViewerMode('gis')">GIS 疊圖模式</button>
+                <button class="btn btn-light btn-mini" id="ndviPureModeButton" type="button" onclick="setNdviViewerMode('pure')">純 NDVI 模式</button>
+              </span>
+              <label class="ndvi-opacity-control">NDVI 透明度 <input id="ndviOverlayOpacity" type="range" min="0" max="1" step="0.05" value="0.55" oninput="setNdviImageOverlayOpacity(this.value)"><output class="ndvi-opacity-value" id="ndviOverlayOpacityValue" for="ndviOverlayOpacity">55%</output></label>
+              <button class="btn btn-light btn-mini" type="button" onclick="fitNdviGisViewerToField()">回到農地範圍</button>
+            </div>
+
+            <div id="ndviGisMode">
+              <div class="ndvi-gis-viewer" id="ndviGisViewer" aria-label="NDVI GIS Viewer"></div>
+            </div>
+
+            <div class="ndvi-pure-preview is-hidden" id="ndviPureMode">
+              <div class="ndvi-image-frame"><img id="ndviImagePreview" alt="Sentinel-2 NDVI 彩色影像"></div>
+              <div class="ndvi-image-legend" aria-label="NDVI 彩色影像圖例">
+                <span>&lt; 0.20<br>極低</span><span>0.20–0.39<br>偏低</span><span>0.40–0.59<br>普通</span><span>0.60–0.79<br>良好</span><span>≥ 0.80<br>旺盛</span>
+              </div>
             </div>
           </div>
-          <div>
-            <div class="ndvi-image-info" id="ndviImageInfo"></div>
+
+          <aside>
+            <div class="ndvi-image-info" id="ndviImageInfo">取得 NDVI 後將顯示觀測資訊。</div>
             <div class="ndvi-image-controls">
               <button class="btn btn-light btn-mini" type="button" onclick="downloadNdviImage()">⬇️ 下載 PNG</button>
               <button class="btn btn-light btn-mini" type="button" onclick="clearNdviImage()">清除影像</button>
-              <label><input id="ndviOverlayVisible" type="checkbox" checked onchange="toggleNdviImageOverlay(this.checked)"> 地圖覆蓋</label>
-              <label>透明度 <input id="ndviOverlayOpacity" type="range" min="0" max="1" step="0.05" value="0.75" oninput="setNdviImageOverlayOpacity(this.value)"></label>
             </div>
-          </div>
+          </aside>
         </div>
 
-        <div class="api-note">
-          此彩色影像由 Copernicus Sentinel-2 L2A 的 B04、B08 與 dataMask 經 Process API 產生。<br>
-          Esri 衛星參考底圖僅供定位，並非本張 NDVI 影像。<br>
-          NDVI 只能顯示植生差異，不能單獨判定病害、缺肥或缺水。
+        <div class="api-note ndvi-gis-source-notes">
+          衛星底圖：Esri World Imagery，僅供位置與地形參考。<br>
+          彩色圖層：Copernicus Sentinel-2 L2A，由 B04、B08 與 dataMask 經 Process API 產生。<br>
+          紅色邊界：使用者繪製並儲存的農地 Polygon。<br>
+          NDVI 顯示植生差異，不能單獨判定病害、缺肥或缺水。
         </div>
       </div>
     </section>
@@ -4142,6 +4186,10 @@ function setSelectedFieldForNdvi(field) {
   window.aiaikosSelectedFieldName = field.name;
   localStorage.setItem(SELECTED_FIELD_STORAGE_KEY, field.id);
 
+  if (typeof renderNdviBoundary === "function") {
+    renderNdviBoundary(window.aiaikosSelectedFieldGeometry, true);
+  }
+
   document.getElementById("ndviField").value = field.name || "";
   document.getElementById("ndviNote").value =
     `已選用正式農地邊界：${field.name}，面積約 ${Number(field.areaHa || 0).toFixed(4)} 公頃。`;
@@ -4412,9 +4460,17 @@ const REAL_NDVI_SOURCE = "Sentinel-2 L2A｜CDSE Statistical API";
 let satelliteObservations = [];
 let selectedSatelliteObservation = null;
 let ndviImageObjectUrl = null;
+let ndviGisMap = null;
+let ndviGisBasemapLayer = null;
+let ndviGisStreetLayer = null;
+let ndviGisLayersControl = null;
+let ndviGisLegendControl = null;
+let ndviGisLegendElement = null;
 let ndviImageOverlay = null;
 let ndviImageBoundaryLayer = null;
 let ndviImageDownloadName = "aiaikos-ndvi.png";
+let ndviViewerMode = "gis";
+const NDVI_GIS_DEFAULT_OPACITY = 0.55;
 
 function setSatelliteNdviStatus(message, state = "idle") {
   const status = document.getElementById("satelliteNdviStatus");
@@ -4577,52 +4633,179 @@ function geometryToLeafletBounds(geometry) {
 }
 
 function removeNdviImageOverlay() {
-  if (fieldBoundaryMap && ndviImageOverlay && fieldBoundaryMap.hasLayer(ndviImageOverlay)) {
-    fieldBoundaryMap.removeLayer(ndviImageOverlay);
+  if (ndviGisLayersControl && ndviImageOverlay) {
+    ndviGisLayersControl.removeLayer(ndviImageOverlay);
   }
-  if (fieldBoundaryMap && ndviImageBoundaryLayer && fieldBoundaryMap.hasLayer(ndviImageBoundaryLayer)) {
-    fieldBoundaryMap.removeLayer(ndviImageBoundaryLayer);
+  if (ndviGisMap && ndviImageOverlay && ndviGisMap.hasLayer(ndviImageOverlay)) {
+    ndviGisMap.removeLayer(ndviImageOverlay);
   }
   ndviImageOverlay = null;
-  ndviImageBoundaryLayer = null;
+  setNdviGisLegendVisible(false);
 }
 
-function renderNdviImageOverlay(imageUrl, geometry) {
-  removeNdviImageOverlay();
-  if (!fieldBoundaryMap || !window.L) return false;
-  const bounds = geometryToLeafletBounds(geometry);
-  if (!bounds?.isValid()) return false;
+function setNdviGisLegendVisible(visible) {
+  ndviGisLegendElement?.classList.toggle("is-hidden", !visible || ndviViewerMode !== "gis");
+}
 
-  if (!fieldBoundaryMap.getPane("ndviImagePane")) {
-    const pane = fieldBoundaryMap.createPane("ndviImagePane");
-    pane.style.zIndex = "350";
-  }
-  ndviImageOverlay = L.imageOverlay(imageUrl, bounds, {
-    pane: "ndviImagePane",
-    opacity: Number(document.getElementById("ndviOverlayOpacity")?.value || 0.75)
-  }).addTo(fieldBoundaryMap);
-  ndviImageBoundaryLayer = L.geoJSON({ type: "Feature", properties: {}, geometry }, {
-    style: { color: "#ef4444", weight: 4, fillOpacity: 0 }
-  }).addTo(fieldBoundaryMap);
-  ndviImageBoundaryLayer.bringToFront();
-  fieldBoundaryMap.fitBounds(bounds, { padding: [30, 30] });
+function createNdviGisLegendControl() {
+  if (ndviGisLegendControl || !ndviGisMap) return;
+  ndviGisLegendControl = L.control({ position: "bottomleft" });
+  ndviGisLegendControl.onAdd = () => {
+    ndviGisLegendElement = L.DomUtil.create("div", "ndvi-map-legend is-hidden");
+    ndviGisLegendElement.setAttribute("aria-label", "NDVI 五級地圖圖例");
+    ndviGisLegendElement.innerHTML = `<strong>NDVI 五級圖例</strong>
+      <div class="ndvi-map-legend-row"><span class="ndvi-map-legend-swatch" style="background:#dc2626"></span><span>&lt; 0.20　極低</span></div>
+      <div class="ndvi-map-legend-row"><span class="ndvi-map-legend-swatch" style="background:#f97316"></span><span>0.20–0.39　偏低</span></div>
+      <div class="ndvi-map-legend-row"><span class="ndvi-map-legend-swatch" style="background:#facc15"></span><span>0.40–0.59　普通</span></div>
+      <div class="ndvi-map-legend-row"><span class="ndvi-map-legend-swatch" style="background:#73c64c"></span><span>0.60–0.79　良好</span></div>
+      <div class="ndvi-map-legend-row"><span class="ndvi-map-legend-swatch" style="background:#15803d"></span><span>≥ 0.80　旺盛</span></div>`;
+    L.DomEvent.disableClickPropagation(ndviGisLegendElement);
+    L.DomEvent.disableScrollPropagation(ndviGisLegendElement);
+    return ndviGisLegendElement;
+  };
+  ndviGisLegendControl.addTo(ndviGisMap);
+}
+
+function initializeNdviGisViewer() {
+  const viewer = document.getElementById("ndviGisViewer");
+  if (!viewer || !window.L) return false;
+  if (ndviGisMap) return true;
+
+  ndviGisMap = L.map(viewer, { zoomControl: true }).setView([23.60, 120.48], 15);
+  ndviGisBasemapLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 20, attribution: "Tiles &copy; Esri" }
+  );
+  ndviGisStreetLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
+    { maxZoom: 20, attribution: "Tiles &copy; Esri" }
+  );
+  ndviGisMap.createPane("ndviImagePane").style.zIndex = "350";
+  ndviGisMap.createPane("ndviBoundaryPane").style.zIndex = "450";
+  ndviGisBasemapLayer.addTo(ndviGisMap);
+  ndviGisLayersControl = L.control.layers(
+    { "Esri World Imagery": ndviGisBasemapLayer, "Esri World Street Map": ndviGisStreetLayer },
+    {},
+    { position: "topright", collapsed: true }
+  ).addTo(ndviGisMap);
+  ndviGisMap.on("overlayadd", event => {
+    if (event.layer === ndviImageOverlay) setNdviGisLegendVisible(true);
+    ndviImageBoundaryLayer?.bringToFront();
+  });
+  ndviGisMap.on("overlayremove", event => {
+    if (event.layer === ndviImageOverlay) setNdviGisLegendVisible(false);
+  });
+  ndviGisMap.on("baselayerchange", () => ndviImageBoundaryLayer?.bringToFront());
+  createNdviGisLegendControl();
   return true;
 }
 
-function toggleNdviImageOverlay(visible) {
-  if (!fieldBoundaryMap || !ndviImageOverlay) return;
-  if (visible) {
-    if (!fieldBoundaryMap.hasLayer(ndviImageOverlay)) ndviImageOverlay.addTo(fieldBoundaryMap);
-    if (ndviImageBoundaryLayer && !fieldBoundaryMap.hasLayer(ndviImageBoundaryLayer)) ndviImageBoundaryLayer.addTo(fieldBoundaryMap);
-    ndviImageBoundaryLayer?.bringToFront();
-  } else {
-    if (fieldBoundaryMap.hasLayer(ndviImageOverlay)) fieldBoundaryMap.removeLayer(ndviImageOverlay);
-    if (ndviImageBoundaryLayer && fieldBoundaryMap.hasLayer(ndviImageBoundaryLayer)) fieldBoundaryMap.removeLayer(ndviImageBoundaryLayer);
+function renderNdviBoundary(geometry, fit = false) {
+  if (!initializeNdviGisViewer()) return false;
+  if (ndviGisLayersControl && ndviImageBoundaryLayer) {
+    ndviGisLayersControl.removeLayer(ndviImageBoundaryLayer);
   }
+  if (ndviImageBoundaryLayer && ndviGisMap.hasLayer(ndviImageBoundaryLayer)) {
+    ndviGisMap.removeLayer(ndviImageBoundaryLayer);
+  }
+  ndviImageBoundaryLayer = null;
+  if (!geometry) return false;
+
+  const bounds = geometryToLeafletBounds(geometry);
+  if (!bounds?.isValid()) return false;
+  ndviImageBoundaryLayer = L.geoJSON({ type: "Feature", properties: {}, geometry }, {
+    pane: "ndviBoundaryPane",
+    style: { color: "#ef4444", weight: 5, fillOpacity: 0 }
+  });
+  ndviImageBoundaryLayer.addTo(ndviGisMap);
+  ndviGisLayersControl?.addOverlay(ndviImageBoundaryLayer, "農地 Polygon");
+  ndviImageBoundaryLayer.bringToFront();
+  if (fit) ndviGisMap.fitBounds(bounds, { padding: [30, 30] });
+  return true;
+}
+
+function renderNdviImageOverlay(imageUrl, geometry) {
+  if (!initializeNdviGisViewer()) return false;
+  const bounds = geometryToLeafletBounds(geometry);
+  if (!bounds?.isValid()) return false;
+
+  removeNdviImageOverlay();
+  ndviImageOverlay = L.imageOverlay(imageUrl, bounds, {
+    pane: "ndviImagePane",
+    opacity: Number(document.getElementById("ndviOverlayOpacity")?.value || NDVI_GIS_DEFAULT_OPACITY)
+  });
+  ndviImageOverlay.addTo(ndviGisMap);
+  ndviGisLayersControl?.addOverlay(ndviImageOverlay, "NDVI 彩色圖層");
+  renderNdviBoundary(geometry);
+  ndviImageBoundaryLayer?.bringToFront();
+  setNdviGisLegendVisible(true);
+  ndviGisMap.fitBounds(bounds, { padding: [30, 30] });
+  setTimeout(() => ndviGisMap?.invalidateSize(), 0);
+  return true;
+}
+
+function toggleNdviBasemap(visible) {
+  if (!initializeNdviGisViewer() || !ndviGisBasemapLayer) return;
+  if (visible && !ndviGisMap.hasLayer(ndviGisBasemapLayer)) ndviGisBasemapLayer.addTo(ndviGisMap);
+  if (!visible && ndviGisMap.hasLayer(ndviGisBasemapLayer)) ndviGisMap.removeLayer(ndviGisBasemapLayer);
+  ndviImageBoundaryLayer?.bringToFront();
+}
+
+function toggleNdviImageOverlay(visible) {
+  if (!initializeNdviGisViewer() || !ndviImageOverlay) return;
+  if (visible && !ndviGisMap.hasLayer(ndviImageOverlay)) ndviImageOverlay.addTo(ndviGisMap);
+  if (!visible && ndviGisMap.hasLayer(ndviImageOverlay)) ndviGisMap.removeLayer(ndviImageOverlay);
+  ndviImageBoundaryLayer?.bringToFront();
+}
+
+function toggleNdviBoundary(visible) {
+  if (!initializeNdviGisViewer() || !ndviImageBoundaryLayer) return;
+  if (visible && !ndviGisMap.hasLayer(ndviImageBoundaryLayer)) ndviImageBoundaryLayer.addTo(ndviGisMap);
+  if (!visible && ndviGisMap.hasLayer(ndviImageBoundaryLayer)) ndviGisMap.removeLayer(ndviImageBoundaryLayer);
+  if (visible) ndviImageBoundaryLayer.bringToFront();
 }
 
 function setNdviImageOverlayOpacity(value) {
-  if (ndviImageOverlay) ndviImageOverlay.setOpacity(Number(value));
+  const opacity = Number(value);
+  if (ndviImageOverlay) ndviImageOverlay.setOpacity(opacity);
+  const output = document.getElementById("ndviOverlayOpacityValue");
+  if (output) output.value = `${Math.round(opacity * 100)}%`;
+}
+
+function fitNdviGisViewerToField() {
+  const selectedField = getSelectedFieldForSatellite();
+  if (!selectedField || !initializeNdviGisViewer()) {
+    setNdviImageStatus("請先選取含 Polygon 的農地。", "error");
+    return false;
+  }
+  const bounds = geometryToLeafletBounds(selectedField.geometry);
+  if (!bounds?.isValid()) return false;
+  if (!ndviImageBoundaryLayer) renderNdviBoundary(selectedField.geometry);
+  ndviGisMap.fitBounds(bounds, { padding: [30, 30] });
+  ndviImageBoundaryLayer?.bringToFront();
+  return true;
+}
+
+function setNdviViewerMode(mode) {
+  ndviViewerMode = mode === "pure" ? "pure" : "gis";
+  document.getElementById("ndviGisMode")?.classList.toggle("is-hidden", ndviViewerMode !== "gis");
+  document.getElementById("ndviPureMode")?.classList.toggle("is-hidden", ndviViewerMode !== "pure");
+  document.getElementById("ndviGisModeButton")?.classList.toggle("is-active", ndviViewerMode === "gis");
+  document.getElementById("ndviPureModeButton")?.classList.toggle("is-active", ndviViewerMode === "pure");
+  setNdviGisLegendVisible(Boolean(ndviImageOverlay));
+  if (ndviViewerMode === "gis") setTimeout(() => ndviGisMap?.invalidateSize(), 0);
+}
+
+function clearNdviViewerFieldState() {
+  removeNdviImageOverlay();
+  if (ndviGisLayersControl && ndviImageBoundaryLayer) {
+    ndviGisLayersControl.removeLayer(ndviImageBoundaryLayer);
+  }
+  if (ndviGisMap && ndviImageBoundaryLayer && ndviGisMap.hasLayer(ndviImageBoundaryLayer)) {
+    ndviGisMap.removeLayer(ndviImageBoundaryLayer);
+  }
+  ndviImageBoundaryLayer = null;
+  if (ndviGisMap) ndviGisMap.setView([23.60, 120.48], 15);
 }
 
 function clearNdviImage(statusMessage = "NDVI 彩色影像已清除。") {
@@ -4634,10 +4817,11 @@ function clearNdviImage(statusMessage = "NDVI 彩色影像已清除。") {
   const preview = document.getElementById("ndviImagePreview");
   if (preview) preview.removeAttribute("src");
   const info = document.getElementById("ndviImageInfo");
-  if (info) info.innerHTML = "";
-  document.getElementById("ndviImageContent")?.classList.add("is-hidden");
-  const visibleControl = document.getElementById("ndviOverlayVisible");
-  if (visibleControl) visibleControl.checked = true;
+  if (info) info.textContent = "取得 NDVI 後將顯示觀測資訊。";
+  const opacityControl = document.getElementById("ndviOverlayOpacity");
+  if (opacityControl) opacityControl.value = String(NDVI_GIS_DEFAULT_OPACITY);
+  setNdviImageOverlayOpacity(NDVI_GIS_DEFAULT_OPACITY);
+  setNdviViewerMode("gis");
   setNdviImageStatus(statusMessage, "idle");
 }
 
@@ -5002,6 +5186,7 @@ function clearNdviForm() {
 
 function clearSelectedFieldForNdvi() {
   clearNdviImage();
+  clearNdviViewerFieldState();
   satelliteObservations = [];
   selectedSatelliteObservation = null;
   window.aiaikosSelectedFieldGeometry = null;
@@ -5030,6 +5215,7 @@ function clearSelectedFieldForNdvi() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  initializeNdviGisViewer();
   restoreSelectedFieldForNdvi();
   const ndviDate = document.getElementById("ndviDate");
   if (ndviDate && !ndviDate.value) {

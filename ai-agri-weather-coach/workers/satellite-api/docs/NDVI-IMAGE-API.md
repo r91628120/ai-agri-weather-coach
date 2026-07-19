@@ -63,3 +63,17 @@ Process API `timeRange` 固定為觀測日 00:00:00Z 至次日 00:00:00Z，`mosa
 驗證與上游錯誤使用 AIAKOS 統一 JSON 錯誤格式。服務不回傳 OAuth Token、Client ID、Client Secret、Authorization Header、上游完整錯誤或 stack trace。
 
 可能代碼包括 `VALIDATION_ERROR`、`CDSE_NO_IMAGE`、`CDSE_UNAUTHORIZED`、`CDSE_FORBIDDEN`、`CDSE_RATE_LIMITED`、`CDSE_UNAVAILABLE`、`CDSE_TIMEOUT` 與 `CDSE_INVALID_IMAGE_RESPONSE`。
+
+## Frontend GIS Viewer
+
+AIAKOS V6.3 Hotfix 將 NDVI Image 的預設前端呈現改為 GIS 疊圖模式：
+
+1. Esri World Imagery 衛星底圖只供位置與地形參考。
+2. Process API 回傳的透明 NDVI PNG 以 `L.imageOverlay` 疊加，預設 opacity 為 0.55。
+3. 使用者儲存的農地 Polygon 以紅色邊界顯示，pane z-index 高於 NDVI 圖層。
+
+使用者可在瀏覽器內切換底圖、NDVI、農地邊界，調整透明度、回到農地範圍，或切換到純 NDVI 預覽。這些操作只調整既有 Leaflet layers，不重新呼叫 API，也不重新下載 PNG。
+
+「下載 PNG」仍下載 Copernicus Process API 產生的透明 NDVI 原圖，不包含 Esri 底圖。一般清除會 revoke Blob URL 並移除 NDVI ImageOverlay，但保留 selected field、Polygon geometry、Farm Memory 與 Viewer 底圖；只有取消目前農地才清除 Polygon 與 selected field localStorage。
+
+本節只描述前端顯示模式；`POST /api/v1/ndvi/image` 的 request、response、headers 與 error contract 均未修改。
