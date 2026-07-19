@@ -1,5 +1,13 @@
 # Changelog
 
+## AIAKOS V6.3 NDVI GIS Viewer Hotfix - 2026-07-19
+
+- 將 NDVI 彩色影像的預設主畫面改為獨立 Leaflet GIS Viewer：Esri World Imagery 底圖、55% 透明 NDVI ImageOverlay、最上層紅色農地 Polygon。
+- 新增底圖、NDVI、農地邊界圖層切換、透明度調整、回到農地範圍，以及 GIS 疊圖／純 NDVI 模式切換。
+- 一般清除只移除 NDVI Blob URL、ImageOverlay 與影像資訊，保留選取農地、Polygon 與 Viewer 底圖；取消農地才清除 Viewer 農地狀態。
+- 保留原始 Copernicus PNG 下載，不將 Esri 底圖合成至下載檔案。
+- 本 Hotfix 未修改 Worker Public API 或 OpenAPI endpoint。
+
 ## NDVI Image API v1.0 / AIAKOS V6.3 - 2026-07-19
 
 - 正式實作 `POST /api/v1/ndvi/image`，呼叫 CDSE Process API 並直接回傳 `image/png` binary。

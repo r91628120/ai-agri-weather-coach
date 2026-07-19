@@ -285,6 +285,65 @@ test("frontend creates and revokes Blob URLs, clears images and preserves select
   assert.doesNotMatch(clearImageSource, /aiaikosSelectedFieldGeometry\s*=/);
 });
 
+test("frontend GIS Viewer has the required default layer controls", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  assert.match(html, /id="ndviGisViewer"/);
+  assert.match(html, /id="ndviBasemapVisible"[^>]*checked/);
+  assert.match(html, /id="ndviOverlayVisible"[^>]*checked/);
+  assert.match(html, /id="ndviBoundaryVisible"[^>]*checked/);
+  assert.match(html, /id="ndviOverlayOpacity"[^>]*value="0\.55"/);
+  assert.match(html, /World_Imagery\/MapServer\/tile/);
+  assert.match(html, /createPane\("ndviImagePane"\).*350/);
+  assert.match(html, /createPane\("ndviBoundaryPane"\).*450/);
+});
+
+test("frontend GIS layer toggles and opacity never call an API", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  const controlsSource = html.slice(
+    html.indexOf("function toggleNdviBasemap("),
+    html.indexOf("function fitNdviGisViewerToField(")
+  );
+  assert.match(controlsSource, /toggleNdviImageOverlay/);
+  assert.match(controlsSource, /toggleNdviBoundary/);
+  assert.match(controlsSource, /setNdviImageOverlayOpacity/);
+  assert.match(controlsSource, /setOpacity\(Number\(value\)\)/);
+  assert.doesNotMatch(controlsSource, /fetch\s*\(/);
+});
+
+test("frontend GIS Viewer supports fitBounds and GIS or pure NDVI modes", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  assert.match(html, /onclick="fitNdviGisViewerToField\(\)"/);
+  assert.match(html, /onclick="setNdviViewerMode\('gis'\)"/);
+  assert.match(html, /onclick="setNdviViewerMode\('pure'\)"/);
+  assert.match(html, /ndviGisMap\.fitBounds\(bounds/);
+  assert.match(html, /ndviViewerMode = mode === "pure" \? "pure" : "gis"/);
+});
+
+test("frontend clears the NDVI layer separately from selected field state", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  const clearImageSource = html.slice(html.indexOf("function clearNdviImage("), html.indexOf("function downloadNdviImage("));
+  const cancelFieldSource = html.slice(html.indexOf("function clearSelectedFieldForNdvi("), html.indexOf('document.addEventListener("DOMContentLoaded"', html.indexOf("function clearSelectedFieldForNdvi(")));
+  assert.match(clearImageSource, /removeNdviImageOverlay\(\)/);
+  assert.match(clearImageSource, /URL\.revokeObjectURL\(ndviImageObjectUrl\)/);
+  assert.doesNotMatch(clearImageSource, /clearNdviViewerFieldState\(\)/);
+  assert.doesNotMatch(clearImageSource, /SELECTED_FIELD_STORAGE_KEY/);
+  assert.match(cancelFieldSource, /clearNdviViewerFieldState\(\)/);
+  assert.match(cancelFieldSource, /localStorage\.removeItem\(SELECTED_FIELD_STORAGE_KEY\)/);
+});
+
+test("frontend reuses one Leaflet map and preserves API integrations", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  const initializeSource = html.slice(html.indexOf("function initializeNdviGisViewer("), html.indexOf("function renderNdviBoundary("));
+  assert.match(initializeSource, /if \(ndviGisMap\) return true/);
+  assert.equal((initializeSource.match(/L\.map\(/g) || []).length, 1);
+  assert.match(html, /\/api\/v1\/satellite\/search/);
+  assert.match(html, /\/api\/v1\/ndvi\/statistics/);
+  assert.match(html, /\/api\/v1\/ndvi\/image/);
+  assert.match(html, /\.ndvi-gis-viewer \{ min-height:360px/);
+  assert.match(html, /衛星底圖：Esri World Imagery/);
+  assert.match(html, /紅色邊界：使用者繪製並儲存的農地 Polygon/);
+});
+
 test("frontend inline JavaScript has valid syntax", async () => {
   const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
   const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
