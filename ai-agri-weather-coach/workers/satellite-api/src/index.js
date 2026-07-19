@@ -3,6 +3,8 @@ import { APP_CONFIG } from "./config/app.js";
 import { apiRoutes } from "./routes/index.js";
 import { aiaikosCors } from "./middleware/cors.js";
 import { requestIdMiddleware } from "./middleware/request-id.js";
+import { requestLoggerMiddleware } from "./middleware/request-logger.js";
+import { handleUnhandledError } from "./middleware/error-handler.js";
 import {
   successResponse,
   errorResponse
@@ -11,6 +13,7 @@ import {
 const app = new Hono();
 
 app.use("*", requestIdMiddleware);
+app.use("*", requestLoggerMiddleware);
 app.use("/api/*", aiaikosCors);
 
 app.get("/", (c) => {
@@ -28,7 +31,8 @@ app.get("/api/v1", (c) => {
     apiVersion: "v1",
     endpoints: {
       health: "GET /api/v1/health",
-      cdseStatus: "GET /api/v1/cdse/status"
+      cdseStatus: "GET /api/v1/cdse/status",
+      ndviStatistics: "POST /api/v1/ndvi/statistics"
     }
   });
 });
@@ -48,19 +52,6 @@ app.notFound((c) => {
   );
 });
 
-app.onError((error, c) => {
-  console.error("AIAKOS unhandled error", {
-    requestId: c.get("requestId"),
-    message: error.message,
-    stack: error.stack
-  });
-
-  return errorResponse(
-    c,
-    "An unexpected server error occurred",
-    500,
-    "INTERNAL_SERVER_ERROR"
-  );
-});
+app.onError(handleUnhandledError);
 
 export default app;

@@ -1,0 +1,19 @@
+{
+  "data": [
+    {
+      "interval": { "from": "2026-07-01T00:00:00Z", "to": "2026-07-02T00:00:00Z" },
+      "outputs": { "ndvi": { "bands": { "B0": { "stats": {
+        "min": 0.22, "max": 0.84, "mean": 0.63, "stDev": 0.11,
+        "sampleCount": 1000, "noDataCount": 90
+      } } } } }
+    },
+    {
+      "interval": { "from": "2026-07-17T00:00:00Z", "to": "2026-07-18T00:00:00Z" },
+      "outputs": { "ndvi": { "bands": { "B0": { "stats": {
+        "min": 0.31, "max": 0.88, "mean": 0.68, "stDev": 0.09,
+        "sampleCount": 800, "noDataCount": 80
+      } } } } }
+    }
+  ],
+  "status": "OK"
+}

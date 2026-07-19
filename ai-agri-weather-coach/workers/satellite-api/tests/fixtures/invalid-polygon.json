@@ -1,0 +1,9 @@
+{
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[120.47, 23.59], [120.48, 23.59], [120.48, 23.60]]]
+  },
+  "dateFrom": "2026-07-18",
+  "dateTo": "2026-07-01",
+  "maxCloudCoverage": 101
+}

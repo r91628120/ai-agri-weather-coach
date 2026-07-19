@@ -1,0 +1,11 @@
+{
+  "fieldId": "FIELD-001",
+  "fieldName": "頂員林黑豆田",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [[[120.47, 23.59], [120.48, 23.59], [120.48, 23.60], [120.47, 23.59]]]
+  },
+  "dateFrom": "2026-07-01",
+  "dateTo": "2026-07-18",
+  "maxCloudCoverage": 30
+}

@@ -1796,14 +1796,15 @@
         <div class="eyebrow">SATELLITE NDVI</div>
         <h2>🛰️ 衛星 NDVI 田區判讀基礎版</h2>
         <p>
-          第一階段先建立資料結構、判讀規則與 Farm Memory 紀錄。
-          本版採手動輸入或教學模擬 NDVI；後續再串接真實衛星服務。
+          本版已完成依據農地 Polygon 取得真實 Sentinel-2 L2A NDVI 統計，
+          顯示平均值、最小值、最大值、標準差、有效像素比例與統計期間。
+          NDVI 影像分布與歷史趨勢屬於後續版本，本版對應端點仍明確回傳 501 Not Implemented。
         </p>
       </div>
 
       <div class="ndvi-panel">
         <div class="ndvi-card">
-          <span class="phase-badge">Phase 1｜NDVI Foundation</span>
+          <span class="phase-badge">v1.0｜NDVI Statistics</span>
           <h2>🌾 輸入田區植生資料</h2>
 
           <div class="form-grid">
@@ -1827,7 +1828,7 @@
               <select id="ndviSource">
                 <option value="手動輸入">手動輸入</option>
                 <option value="教學模擬">教學模擬</option>
-                <option value="衛星服務（預留）">衛星服務（預留）</option>
+                <option value="Sentinel-2 L2A｜CDSE Statistical API">Sentinel-2 L2A｜CDSE Statistical API</option>
               </select>
             </div>
 
@@ -1846,10 +1847,15 @@
           </div>
 
           <div class="action-row">
+            <button class="btn btn-green" id="fetchRealNdviButton" type="button" onclick="fetchRealSatelliteNdvi()">☁️ 取得真實衛星 NDVI</button>
             <button class="btn btn-green" onclick="analyzeNdvi()">🛰️ 進行 NDVI 判讀</button>
             <button class="btn btn-light" onclick="saveNdviRecord()">💾 存入 Farm Memory</button>
             <button class="btn btn-light" onclick="loadNdviDemo()">🎓 載入教學範例</button>
             <button class="btn btn-light" onclick="clearNdviForm()">清除</button>
+          </div>
+
+          <div class="api-note" id="satelliteNdviStatus" role="status" aria-live="polite">
+            請先在農地管理中心選擇含 Polygon 的農地，再取得真實衛星 NDVI。
           </div>
 
           <div class="api-note">
@@ -4080,6 +4086,8 @@ function saveCurrentField() {
   fields.unshift(field);
   localStorage.setItem(FIELD_STORAGE_KEY,JSON.stringify(fields.slice(0,100)));
   window.aiaikosSelectedFieldGeometry = field.geometry;
+  window.aiaikosSelectedFieldId = field.id;
+  window.aiaikosSelectedFieldName = field.name;
   document.getElementById("ndviField").value = field.name;
   renderSavedFields();
   alert(`農地「${field.name}」已儲存。Polygon 將作為後續 Process API 與 Statistical API 的分析範圍。`);
@@ -4135,6 +4143,8 @@ function useFieldForNdvi(index) {
   const field = getSavedFields()[index];
   if (!field) return;
   window.aiaikosSelectedFieldGeometry = field.geometry;
+  window.aiaikosSelectedFieldId = field.id;
+  window.aiaikosSelectedFieldName = field.name;
   document.getElementById("ndviField").value = field.name;
   document.getElementById("ndviNote").value =
     `已選用正式農地邊界：${field.name}，面積約 ${Number(field.areaHa || 0).toFixed(4)} 公頃。`;
@@ -4254,8 +4264,95 @@ document.addEventListener("DOMContentLoaded", initFieldManagementCenter);
 <script>
 /* =====================================================
    AIAKOS V5.6 Satellite NDVI Foundation
-   第一階段：手動輸入／教學模擬／Farm Memory
+   手動輸入／教學模擬／CDSE Statistical API／Farm Memory
 ===================================================== */
+
+const LOCAL_SATELLITE_API_URL = "http://127.0.0.1:8787";
+const PRODUCTION_SATELLITE_API_URL = "https://aiaikos-satellite-api.r91628120.workers.dev";
+
+function resolveSatelliteApiUrl() {
+  if (["localhost", "127.0.0.1"].includes(window.location.hostname)) {
+    return LOCAL_SATELLITE_API_URL;
+  }
+
+  return window.AIAKOS_SATELLITE_API_URL || PRODUCTION_SATELLITE_API_URL;
+}
+
+const SATELLITE_API_URL = resolveSatelliteApiUrl();
+const REAL_NDVI_SOURCE = "Sentinel-2 L2A｜CDSE Statistical API";
+
+function setSatelliteNdviStatus(message, state = "idle") {
+  const status = document.getElementById("satelliteNdviStatus");
+  if (!status) return;
+  status.textContent = message;
+  status.dataset.state = state;
+}
+
+function ndviQueryRange() {
+  const selectedDate = document.getElementById("ndviDate").value || new Date().toISOString().slice(0, 10);
+  const from = new Date(`${selectedDate}T00:00:00Z`);
+  from.setUTCDate(from.getUTCDate() - 30);
+  return { dateFrom: from.toISOString().slice(0, 10), dateTo: selectedDate };
+}
+
+async function fetchRealSatelliteNdvi() {
+  const geometry = window.aiaikosSelectedFieldGeometry;
+  const button = document.getElementById("fetchRealNdviButton");
+  const resultBox = document.getElementById("ndviResult");
+
+  if (!geometry) {
+    setSatelliteNdviStatus("錯誤：尚未選擇農地 Polygon。請先繪製或從 Farm Memory 選用農地。", "error");
+    document.getElementById("fieldBoundary").scrollIntoView({ behavior: "smooth" });
+    return;
+  }
+
+  const { dateFrom, dateTo } = ndviQueryRange();
+  const fieldName = document.getElementById("ndviField").value.trim() || window.aiaikosSelectedFieldName || "未命名田區";
+  button.disabled = true;
+  setSatelliteNdviStatus(`載入中：正在查詢 ${dateFrom} 至 ${dateTo} 的 Sentinel-2 L2A 資料…`, "loading");
+
+  try {
+    const response = await fetch(`${SATELLITE_API_URL}/api/v1/ndvi/statistics`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        fieldId: window.aiaikosSelectedFieldId || undefined,
+        fieldName,
+        geometry,
+        dateFrom,
+        dateTo,
+        maxCloudCoverage: 30
+      })
+    });
+    const payload = await response.json().catch(() => null);
+
+    if (!response.ok || !payload?.success) {
+      throw new Error(payload?.error?.message || `衛星服務回傳 HTTP ${response.status}`);
+    }
+
+    const observation = payload.data?.latestObservation;
+    if (!observation || observation.ndvi?.mean === null) {
+      setSatelliteNdviStatus(`查詢完成，但 ${dateFrom} 至 ${dateTo} 沒有有效 NDVI 像素。可調整日期後重試。`, "empty");
+      resultBox.textContent = "目前查詢期間沒有可用的 Sentinel-2 L2A NDVI 統計。";
+      return;
+    }
+
+    const mean = Number(observation.ndvi.mean);
+    const validRatio = Number(observation.validPixelRatio || 0);
+    document.getElementById("ndviField").value = payload.data.fieldName || fieldName;
+    document.getElementById("ndviDate").value = String(observation.intervalTo || dateTo).slice(0, 10);
+    document.getElementById("ndviValue").value = mean.toFixed(4);
+    document.getElementById("ndviSource").value = REAL_NDVI_SOURCE;
+    analyzeNdvi();
+
+    resultBox.textContent += `\n\n【真實衛星統計】\n影像期間：${observation.intervalFrom || "--"} ～ ${observation.intervalTo || "--"}\n有效像素比例：${(validRatio * 100).toFixed(1)}%\n最小值：${observation.ndvi.min ?? "--"}\n最大值：${observation.ndvi.max ?? "--"}\n標準差：${observation.ndvi.stDev ?? "--"}\n樣本數：${observation.sampleCount ?? 0}\n無資料像素：${observation.noDataCount ?? 0}`;
+    setSatelliteNdviStatus(`成功：已取得真實 NDVI，平均值 ${mean.toFixed(4)}，有效像素比例 ${(validRatio * 100).toFixed(1)}%。`, "success");
+  } catch (error) {
+    setSatelliteNdviStatus(`錯誤：${error.message}。請檢查 Worker URL、CORS、CDSE Secrets 或稍後重試。`, "error");
+  } finally {
+    button.disabled = false;
+  }
+}
 
 function getNdviRecords() {
   try {
@@ -4488,6 +4585,7 @@ function clearNdviForm() {
   document.getElementById("ndviSource").value = "手動輸入";
   document.getElementById("ndviNote").value = "";
   document.getElementById("ndviResult").textContent = "等待輸入田區與 NDVI 數值。";
+  setSatelliteNdviStatus("請先在農地管理中心選擇含 Polygon 的農地，再取得真實衛星 NDVI。", "idle");
   latestNdviSnapshot = null;
 }
 
