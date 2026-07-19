@@ -1058,6 +1058,9 @@
 .satellite-search-results { display:grid; gap:12px; margin-top:14px; }
 .satellite-observation { border:1px solid #cbd5e1; border-radius:14px; padding:14px; background:#fff; }
 .satellite-observation.recommended { border-color:#16a34a; background:#f0fdf4; }
+.satellite-observation.selected { border:2px solid #0f766e; background:#ecfdf5; box-shadow:0 0 0 3px rgba(13,148,136,.16); }
+.satellite-selected-badge { display:inline-flex; align-items:center; margin-left:8px; padding:3px 8px; border-radius:999px; background:#0f766e; color:#fff; font-size:.72rem; font-weight:900; white-space:nowrap; }
+.satellite-observation .is-selected { border-color:#0f766e; background:#0f766e; color:#fff; }
 .satellite-observation-meta { color:#475569; line-height:1.7; margin:6px 0 10px; }
 .satellite-product-id { color:#64748b; font-size:.78rem; line-height:1.5; margin-top:4px; overflow-wrap:anywhere; }
 
@@ -4459,6 +4462,7 @@ const SATELLITE_API_URL = resolveSatelliteApiUrl();
 const REAL_NDVI_SOURCE = "Sentinel-2 L2A｜CDSE Statistical API";
 let satelliteObservations = [];
 let selectedSatelliteObservation = null;
+let satelliteRecommendedObservationId = null;
 let ndviImageObjectUrl = null;
 let ndviGisMap = null;
 let ndviGisBasemapLayer = null;
@@ -4486,24 +4490,41 @@ function ndviQueryRange() {
   return { dateFrom: from.toISOString().slice(0, 10), dateTo: selectedDate };
 }
 
+function satelliteObservationKey(observation) {
+  if (!observation) return "";
+  const productId = String(observation.id || "").trim();
+  if (productId) return `id:${productId}`;
+  return `date:${observation.date || ""}|platform:${observation.platform || ""}`;
+}
+
+function isSatelliteObservationSelected(observation) {
+  const observationKey = satelliteObservationKey(observation);
+  return Boolean(observationKey && observationKey === satelliteObservationKey(selectedSatelliteObservation));
+}
+
 function renderSatelliteObservations(observations, recommendedId) {
   const results = document.getElementById("satelliteSearchResults");
+  const selectedKey = satelliteObservationKey(selectedSatelliteObservation);
   satelliteObservations = observations;
-  selectedSatelliteObservation = null;
+  satelliteRecommendedObservationId = recommendedId || null;
+  selectedSatelliteObservation = selectedKey
+    ? observations.find(observation => satelliteObservationKey(observation) === selectedKey) || null
+    : null;
   if (!observations.length) {
     results.innerHTML = '<div class="api-note">查詢期間沒有符合雲量條件的 Sentinel-2 L2A 觀測資料。</div>';
     return;
   }
   results.innerHTML = observations.map((observation, index) => {
     const recommended = observation.id === recommendedId;
+    const selected = isSatelliteObservationSelected(observation);
     const cloud = Number.isFinite(observation.cloudCoverage) ? `${observation.cloudCoverage.toFixed(1)}%` : "--";
     const productId = String(observation.id || "--");
     const shortProductId = productId.length > 42 ? `${productId.slice(0, 24)}…${productId.slice(-12)}` : productId;
-    return `<article class="satellite-observation${recommended ? " recommended" : ""}">
-      <strong>${recommended ? "⭐ 建議觀測｜" : ""}${escapeHtml(observation.date || "--")}</strong>
+    return `<article class="satellite-observation${recommended ? " recommended" : ""}${selected ? " selected" : ""}" data-observation-index="${index}"${selected ? ' aria-current="true"' : ""}>
+      <strong>${recommended ? "⭐ 建議觀測｜" : ""}${escapeHtml(observation.date || "--")}${selected ? '<span class="satellite-selected-badge">✅ 已選取</span>' : ""}</strong>
       <div class="satellite-observation-meta">${escapeHtml(observation.platform || "Sentinel-2")}｜雲量 ${cloud}｜處理層級 ${escapeHtml(observation.processingLevel || "L2A")}</div>
       <div class="satellite-product-id" title="${escapeHtml(productId)}">產品 ID：${escapeHtml(shortProductId)}</div>
-      <button class="btn btn-light btn-mini" type="button" onclick="useSatelliteObservationDate(${index})">使用此日期查詢 NDVI</button>
+      <button class="btn btn-light btn-mini${selected ? " is-selected" : ""}" type="button" aria-pressed="${selected ? "true" : "false"}" onclick="useSatelliteObservationDate(${index})">${selected ? "目前使用中" : "使用此日期查詢 NDVI"}</button>
     </article>`;
   }).join("");
 }
@@ -4512,6 +4533,7 @@ function useSatelliteObservationDate(index) {
   const observation = satelliteObservations[index];
   if (!observation?.date) return;
   selectedSatelliteObservation = observation;
+  renderSatelliteObservations(satelliteObservations, satelliteRecommendedObservationId);
   document.getElementById("ndviDate").value = observation.date;
   setSatelliteNdviStatus(`已選擇 ${observation.date}，可接著取得 Sentinel-2 NDVI 統計或彩色影像。`, "success");
 }
@@ -5154,6 +5176,7 @@ function clearNdviForm() {
   clearNdviImage();
   satelliteObservations = [];
   selectedSatelliteObservation = null;
+  satelliteRecommendedObservationId = null;
   document.getElementById("ndviValue").value = "";
   document.getElementById("ndviSource").value = "手動輸入";
   const resultBox = document.getElementById("ndviResult");
@@ -5189,6 +5212,7 @@ function clearSelectedFieldForNdvi() {
   clearNdviViewerFieldState();
   satelliteObservations = [];
   selectedSatelliteObservation = null;
+  satelliteRecommendedObservationId = null;
   window.aiaikosSelectedFieldGeometry = null;
   window.aiaikosSelectedFieldId = null;
   window.aiaikosSelectedFieldName = null;
