@@ -87,6 +87,7 @@
 - GitHub Pages 設定：legacy build，來源為 `main` 分支根目錄 `/`。
 - PR #1 Squash merge Commit：`bc5d4e384380d42d4bcabcbdae54da95422f313f`，合併時間 `2026-07-19T03:00:27Z`。
 - GitHub Pages 根網址轉址 Commit：`3fd5071e895a88a73554bc0567c8a4dde222f4f7`；Pages build 於 `2026-07-19T03:04:03Z` 完成。
+- 結案文件 main Commit：`e45b4e58d8d0e4910889a1d1bc87b6b4e7ad5df5`；Pages build 於 `2026-07-19T03:06:42Z` 完成。
 - 正式網站：`https://r91628120.github.io/ai-agri-weather-coach/`，會導向已驗收的應用子路徑。
 - 部署前指令：`npx.cmd wrangler secret put CDSE_CLIENT_ID`、`npx.cmd wrangler secret put CDSE_CLIENT_SECRET`、`npm.cmd run deploy`。
 
@@ -97,7 +98,16 @@
 - PR：#1 — `feat: AIAKOS NDVI Statistical API v1.0`
 - PR 狀態：已由 Draft 轉為 Ready，並於 `2026-07-19T03:00:27Z` Squash merge 至 `main`。
 
-## 下一步
+## 正式結案摘要
+
+- PR #1 已 Merge。
+- Merge Commit SHA：`bc5d4e384380d42d4bcabcbdae54da95422f313f`。
+- 正式 Worker 驗收通過：health HTTP 200、CDSE `connected=true`、NDVI API HTTP 200、`latestObservation` 不為 `null`、mean 介於 -1 到 1、`validPixelRatio=1`。
+- GitHub Pages 正式驗收通過：根網址可進入正式應用、可選用農地 Polygon、真實 NDVI 按鈕執行成功、沒有 CORS 錯誤，並顯示平均值、有效像素比例與統計期間。
+- AIAKOS NDVI Statistical API v1.0 已完成開發、審查、正式部署、正式 API 驗收、正式 UI 驗收與文件交接，本次版本正式結案。
+- 本章僅記錄非敏感驗收證據；未記錄 Secret、Access Token 或 Authorization Header。
+
+## 下一階段建議
 
 1. 本版進入維護狀態；後續功能應另開分支與 PR。
 2. 依產品優先序另行實作四個目前回傳 501 的預留端點。
