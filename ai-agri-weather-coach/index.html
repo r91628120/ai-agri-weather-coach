@@ -1061,6 +1061,11 @@
 .satellite-observation.selected { border:2px solid #0f766e; background:#ecfdf5; box-shadow:0 0 0 3px rgba(13,148,136,.16); }
 .satellite-selected-badge { display:inline-flex; align-items:center; margin-left:8px; padding:3px 8px; border-radius:999px; background:#0f766e; color:#fff; font-size:.72rem; font-weight:900; white-space:nowrap; }
 .satellite-observation .is-selected { border-color:#0f766e; background:#0f766e; color:#fff; }
+.ndvi-next-action-highlight { animation:ndvi-next-action-pulse 2s ease-out; }
+@keyframes ndvi-next-action-pulse {
+  0%, 35% { border-color:#0f766e; background:#ccfbf1; box-shadow:0 0 0 6px rgba(13,148,136,.22); }
+  100% { border-color:transparent; box-shadow:0 0 0 0 rgba(13,148,136,0); }
+}
 .satellite-observation-meta { color:#475569; line-height:1.7; margin:6px 0 10px; }
 .satellite-product-id { color:#64748b; font-size:.78rem; line-height:1.5; margin-top:4px; overflow-wrap:anywhere; }
 
@@ -1095,6 +1100,7 @@
 .ndvi-image-legend span:nth-child(5) { background:#15803d; color:#fff; }
 .ndvi-image-controls { display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:14px; }
 .ndvi-image-controls label { display:flex; align-items:center; gap:7px; margin:0; white-space:nowrap; }
+.ndvi-download-note { margin:8px 0 0; color:#64748b; font-size:.78rem; line-height:1.55; }
 .ndvi-gis-source-notes { margin-top:16px; line-height:1.75; }
 .is-hidden { display:none !important; }
 
@@ -1989,9 +1995,10 @@
           <aside>
             <div class="ndvi-image-info" id="ndviImageInfo">取得 NDVI 後將顯示觀測資訊。</div>
             <div class="ndvi-image-controls">
-              <button class="btn btn-light btn-mini" type="button" onclick="downloadNdviImage()">⬇️ 下載 PNG</button>
+              <button class="btn btn-light btn-mini" type="button" onclick="downloadNdviImage()">⬇️ 下載 NDVI 透明 PNG</button>
               <button class="btn btn-light btn-mini" type="button" onclick="clearNdviImage()">清除影像</button>
             </div>
+            <p class="ndvi-download-note">下載內容僅包含 Sentinel-2 NDVI 圖層，不包含 Esri 衛星底圖與農地邊界。</p>
           </aside>
         </div>
 
@@ -4463,6 +4470,7 @@ const REAL_NDVI_SOURCE = "Sentinel-2 L2A｜CDSE Statistical API";
 let satelliteObservations = [];
 let selectedSatelliteObservation = null;
 let satelliteRecommendedObservationId = null;
+let ndviFetchHighlightTimer = null;
 let ndviImageObjectUrl = null;
 let ndviGisMap = null;
 let ndviGisBasemapLayer = null;
@@ -4535,7 +4543,20 @@ function useSatelliteObservationDate(index) {
   selectedSatelliteObservation = observation;
   renderSatelliteObservations(satelliteObservations, satelliteRecommendedObservationId);
   document.getElementById("ndviDate").value = observation.date;
-  setSatelliteNdviStatus(`已選擇 ${observation.date}，可接著取得 Sentinel-2 NDVI 統計或彩色影像。`, "success");
+  const cloudText = Number.isFinite(observation.cloudCoverage) ? observation.cloudCoverage.toFixed(1) : "--";
+  setSatelliteNdviStatus(`已選取 ${observation.date}、雲量 ${cloudText}% 的 Sentinel-2 觀測。下一步請按『取得 NDVI 彩色影像』。`, "success");
+  const fetchNdviImageButton = document.getElementById("fetchNdviImageButton");
+  fetchNdviImageButton?.scrollIntoView?.({ behavior: "smooth", block: "center" });
+  if (fetchNdviImageButton?.classList) {
+    fetchNdviImageButton.classList.remove("ndvi-next-action-highlight");
+    void fetchNdviImageButton.offsetWidth;
+    fetchNdviImageButton.classList.add("ndvi-next-action-highlight");
+    if (ndviFetchHighlightTimer) clearTimeout(ndviFetchHighlightTimer);
+    ndviFetchHighlightTimer = setTimeout(() => {
+      fetchNdviImageButton.classList.remove("ndvi-next-action-highlight");
+      ndviFetchHighlightTimer = null;
+    }, 2000);
+  }
 }
 
 async function searchSatelliteObservations() {
@@ -4746,8 +4767,18 @@ function renderNdviBoundary(geometry, fit = false) {
   return true;
 }
 
-function renderNdviImageOverlay(imageUrl, geometry) {
+function nextNdviViewerFrame() {
+  return new Promise(resolve => {
+    if (typeof requestAnimationFrame === "function") requestAnimationFrame(resolve);
+    else setTimeout(resolve, 0);
+  });
+}
+
+async function renderNdviImageOverlay(imageUrl, geometry) {
+  setNdviViewerMode("gis");
   if (!initializeNdviGisViewer()) return false;
+  await nextNdviViewerFrame();
+  ndviGisMap.invalidateSize();
   const bounds = geometryToLeafletBounds(geometry);
   if (!bounds?.isValid()) return false;
 
@@ -4761,8 +4792,9 @@ function renderNdviImageOverlay(imageUrl, geometry) {
   renderNdviBoundary(geometry);
   ndviImageBoundaryLayer?.bringToFront();
   setNdviGisLegendVisible(true);
+  ndviGisMap.invalidateSize();
   ndviGisMap.fitBounds(bounds, { padding: [30, 30] });
-  setTimeout(() => ndviGisMap?.invalidateSize(), 0);
+  ndviImageBoundaryLayer?.bringToFront();
   return true;
 }
 
@@ -4924,7 +4956,7 @@ async function fetchNdviImage() {
       <span>雲量：${escapeHtml(cloudText)}</span>
       <span title="${escapeHtml(observation?.id || "")}">產品 ID：${escapeHtml(observation?.id || "未由搜尋結果提供")}</span>
       <span>資料來源：${escapeHtml(response.headers.get("X-AIAKOS-Data-Source") || "Sentinel-2-L2A")}</span>`;
-    const overlayRendered = renderNdviImageOverlay(ndviImageObjectUrl, selectedField.geometry);
+    const overlayRendered = await renderNdviImageOverlay(ndviImageObjectUrl, selectedField.geometry);
     setNdviImageStatus(
       `成功：${observation ? "已使用搜尋選取的觀測" : "未先搜尋觀測，已依目前 NDVI 日期"} ${observationDate} 取得真實 NDVI PNG${overlayRendered ? "，並依 Polygon bounds 疊加於地圖。" : "。地圖定位不可用，僅顯示獨立影像卡片。"}`,
       "success"
