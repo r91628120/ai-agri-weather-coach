@@ -370,6 +370,33 @@ test("frontend GIS Viewer supports fitBounds and GIS or pure NDVI modes", async 
   assert.match(html, /ndviViewerMode = mode === "pure" \? "pure" : "gis"/);
 });
 
+test("frontend first PNG render stabilizes the visible map before fitting bounds", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  const renderSource = html.slice(html.indexOf("async function renderNdviImageOverlay("), html.indexOf("function toggleNdviBasemap("));
+  const fetchSource = html.slice(html.indexOf("async function fetchNdviImage("), html.indexOf("function getNdviRecords("));
+  const firstInvalidate = renderSource.indexOf("ndviGisMap.invalidateSize()");
+  const overlayCreation = renderSource.indexOf("L.imageOverlay(");
+  const secondInvalidate = renderSource.indexOf("ndviGisMap.invalidateSize()", firstInvalidate + 1);
+  const fitBounds = renderSource.indexOf("ndviGisMap.fitBounds(");
+
+  assert.match(renderSource, /setNdviViewerMode\("gis"\)/);
+  assert.match(renderSource, /await nextNdviViewerFrame\(\)/);
+  assert.ok(firstInvalidate > renderSource.indexOf("await nextNdviViewerFrame()"));
+  assert.ok(overlayCreation > firstInvalidate);
+  assert.ok(secondInvalidate > overlayCreation);
+  assert.ok(fitBounds > secondInvalidate);
+  assert.ok(renderSource.indexOf("removeNdviImageOverlay()") < overlayCreation);
+  assert.match(fetchSource, /response\.blob\(\)[\s\S]*URL\.createObjectURL\(blob\)[\s\S]*await renderNdviImageOverlay\(ndviImageObjectUrl, selectedField\.geometry\)/);
+  assert.doesNotMatch(fetchSource, /renderNdviImageOverlay[\s\S]*renderNdviImageOverlay/);
+});
+
+test("frontend labels the download as the transparent NDVI layer only", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  assert.match(html, /下載 NDVI 透明 PNG/);
+  assert.match(html, /下載內容僅包含 Sentinel-2 NDVI 圖層，不包含 Esri 衛星底圖與農地邊界。/);
+  assert.doesNotMatch(html, /html2canvas|leaflet-image/);
+});
+
 test("frontend clears the NDVI layer separately from selected field state", async () => {
   const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
   const clearImageSource = html.slice(html.indexOf("function clearNdviImage("), html.indexOf("function downloadNdviImage("));

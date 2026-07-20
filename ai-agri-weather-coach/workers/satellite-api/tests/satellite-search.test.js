@@ -118,6 +118,58 @@ test("frontend keeps exactly one selected observation card in sync", async () =>
   assert.equal(vm.runInContext("selectedSatelliteObservation.id", context), "S2-THIRD");
 });
 
+test("frontend guides users to fetch the NDVI image without calling it automatically", async () => {
+  const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
+  const selectionSource = html.slice(
+    html.indexOf("function satelliteObservationKey("),
+    html.indexOf("async function searchSatelliteObservations(")
+  );
+  const classes = new Set();
+  let scrollOptions = null;
+  let removalCallback = null;
+  let statusMessage = "";
+  const elements = {
+    satelliteSearchResults: { innerHTML: "" },
+    ndviDate: { value: "" },
+    fetchNdviImageButton: {
+      offsetWidth: 120,
+      classList: {
+        add: (name) => classes.add(name),
+        remove: (name) => classes.delete(name)
+      },
+      scrollIntoView: (options) => { scrollOptions = options; }
+    }
+  };
+  const context = vm.createContext({
+    document: { getElementById: (id) => elements[id] },
+    escapeHtml: (value) => String(value),
+    setSatelliteNdviStatus: (message) => { statusMessage = message; },
+    setTimeout: (callback, delay) => { removalCallback = callback; assert.equal(delay, 2000); return 1; },
+    clearTimeout: () => {}
+  });
+  vm.runInContext(`
+    let satelliteObservations = [];
+    let selectedSatelliteObservation = null;
+    let satelliteRecommendedObservationId = null;
+    let ndviFetchHighlightTimer = null;
+    ${selectionSource}
+  `, context);
+  context.renderSatelliteObservations([
+    { id: "S2-GUIDE", date: "2026-07-08", platform: "Sentinel-2C", cloudCoverage: 7.4 }
+  ], "S2-GUIDE");
+  context.useSatelliteObservationDate(0);
+
+  assert.equal(statusMessage, "已選取 2026-07-08、雲量 7.4% 的 Sentinel-2 觀測。下一步請按『取得 NDVI 彩色影像』。");
+  assert.equal(scrollOptions?.behavior, "smooth");
+  assert.equal(scrollOptions?.block, "center");
+  assert.equal(classes.has("ndvi-next-action-highlight"), true);
+  assert.equal(typeof removalCallback, "function");
+  assert.doesNotMatch(selectionSource.slice(selectionSource.indexOf("function useSatelliteObservationDate(")), /fetchNdviImage\s*\(/);
+
+  removalCallback();
+  assert.equal(classes.has("ndvi-next-action-highlight"), false);
+});
+
 test("frontend reconciles selected observation when search results rebuild", async () => {
   const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
   const selectionSource = html.slice(
