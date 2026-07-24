@@ -297,3 +297,41 @@ Reasoning 可留空，也可填「尚未確認」或「不確定」。
 ## 25. Next Recommended Action
 
 人工 Review Sprint 1 的資訊層級、欄位語意、Mobile 可讀性與資料模型草案。確認後再另行授權 Sprint 2；本分支不自行開始整合。
+
+## 26. Simplified Farm Journal v2
+
+### 為何簡化
+
+將主要流程縮減為農民約一分鐘可完成的操作：選擇農場卡片、勾選農事、填寫一段作業內容並儲存。農民決策、成果追蹤與五段式 AI Experience 不再顯示於主要填寫流程。
+
+### 新操作流程
+
+1. 建立或選擇農場／田區卡片。
+2. 勾選「今天做了什麼」。
+3. 填寫單一「作業內容」。
+4. 視需要展開一個經驗／提醒欄位。
+5. 檢查田區環境摘要後儲存日誌。
+
+### Farm Profile Storage
+
+- localStorage key：`aiakosFarmProfilesV1`
+- 支援多張卡片、修改、選取與二次確認刪除。
+- 與既有 `farmLogs`、農地、NDVI、MQTT／IoT 儲存完全分離。
+
+### GPT 連結方式
+
+「複製分析資料」只透過 Clipboard API 複製純文字；「開啟 AI農業氣象教練」以新分頁與 `noopener noreferrer` 開啟既有 GPT 網址。網站不呼叫 OpenAI API、不傳送內容、不保存 API key。
+
+### 保留的相容功能
+
+- 舊版及新版 `farmLogs` 讀取與正式 append 儲存。
+- 當下氣象與最近 NDVI 快照。
+- 歷史列表、PNG／PDF 舊版匯出與獨立清除全部歷史。
+- Worker、Weather、Satellite、NDVI、GIS 與 Field Management 公開介面不變。
+
+### 未完成事項
+
+- Farm Profile 後端同步與跨裝置資料。
+- 草稿自動恢復。
+- PNG／PDF 新版結構化模板。
+- Farm Memory／AI Brain／正式 AI API 整合。
