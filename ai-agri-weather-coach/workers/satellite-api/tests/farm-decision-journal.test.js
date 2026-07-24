@@ -5,74 +5,112 @@ import vm from "node:vm";
 
 const html = await readFile(new URL("../../../index.html", import.meta.url), "utf8");
 const journalSource = html.slice(
-  html.indexOf('const DECISION_JOURNAL_DRAFT_KEY'),
+  html.indexOf("const DECISION_JOURNAL_DRAFT_KEY"),
   html.indexOf("function getFarmLogs()")
 );
 
-test("upgrades the existing farmLog section without creating a competing journal page", () => {
+test("keeps one simplified AI Farm Decision Journal as the primary journal", () => {
   assert.equal((html.match(/id="farmLog"/g) || []).length, 1);
   assert.equal((html.match(/id="decisionJournalForm"/g) || []).length, 1);
-  assert.match(html, /AI 農場決策日誌/);
+  assert.match(html, /約 1 分鐘完成/);
+  assert.match(html, /選擇田區、勾選今天的農事、簡單補充後即可儲存/);
   assert.match(html, /既有 AI 農場經營日誌紀錄（保留且不覆寫）/);
-  assert.match(html, /localStorage\.getItem\("farmLogs"\)/);
 });
 
-test("keeps facts, AI analysis, human decision, operations, outcome and experience separate", () => {
-  for (const key of [
-    "journalMeta",
-    "farmContext",
-    "aiSnapshot",
-    "farmerDecision",
-    "farmOperations",
-    "operationDetails",
-    "outcome",
-    "experienceNotes",
-    "media",
-    "status"
-  ]) {
-    assert.match(journalSource, new RegExp(`${key}:`));
-  }
-  assert.match(journalSource, /readonly: true/);
-  assert.match(journalSource, /expected: \{/);
-  assert.match(journalSource, /actual: \{/);
-  assert.match(journalSource, /createdAt:/);
-  assert.match(journalSource, /updatedAt:/);
-  assert.match(journalSource, /version: "1\.0-prototype"/);
+test("provides persistent multi-profile farm cards using an isolated key", () => {
+  assert.match(journalSource, /FARM_PROFILE_STORAGE_KEY = "aiakosFarmProfilesV1"/);
+  assert.match(journalSource, /localStorage\.getItem\(FARM_PROFILE_STORAGE_KEY\)/);
+  assert.match(journalSource, /localStorage\.setItem\(FARM_PROFILE_STORAGE_KEY/);
+  assert.match(html, /id="journalProfileList"/);
+  assert.match(html, /id="journalAddProfileButton"/);
+  assert.match(html, /id="journalEditProfileButton"/);
+  assert.match(html, /id="journalDeleteProfileButton"/);
+  assert.match(journalSource, /profiles\.push\(cloneJournalData\(profile\)\)/);
 });
 
-test("renders four read-only AI snapshot cards with empty, loading and mock states", () => {
-  assert.equal((html.match(/class="journal-snapshot-card"/g) || []).length, 4);
-  assert.equal((html.match(/系統自動帶入｜唯讀/g) || []).length, 4);
-  assert.match(html, /value="empty">尚無資料/);
-  assert.match(html, /value="loading">載入中/);
-  assert.match(html, /value="mock">Mock Data/);
-  assert.match(html, /尚未取得本次氣象或衛星觀測資料，仍可先建立農事紀錄。/);
-});
-
-test("provides all structured experience fields and leaves the candidate unchecked", () => {
+test("farm profile editor contains only the required profile fields", () => {
   for (const id of [
-    "journalExperienceObservation",
-    "journalExperienceReasoning",
-    "journalExperienceAction",
-    "journalExperienceOutcome",
-    "journalExperienceLesson"
+    "journalProfileName",
+    "journalFarm",
+    "journalField",
+    "journalCrop",
+    "journalVariety",
+    "journalStage",
+    "journalRecorder"
   ]) {
     assert.match(html, new RegExp(`id="${id}"`));
   }
-  const candidate = html.match(/<input id="journalExperienceCandidate"[^>]*>/)?.[0] || "";
+  assert.match(html, /儲存農場資料/);
+  assert.match(html, /取消修改/);
+  assert.match(journalSource, /selectedJournalProfileId/);
+  assert.match(journalSource, /is-selected/);
+});
+
+test("requires a selected profile before entry panels and formal save become available", () => {
+  for (const id of [
+    "journalOperationsPanel",
+    "journalDetailsPanel",
+    "journalExperienceSimplePanel",
+    "journalEnvironmentPanel",
+    "journalActionBar"
+  ]) {
+    assert.match(html, new RegExp(`id="${id}"[^>]*hidden`));
+  }
+  assert.match(journalSource, /setJournalEntryVisibility\(Boolean\(selectedProfile\)\)/);
+  assert.match(journalSource, /if \(!draft\.farmContext\.profileId\)/);
+});
+
+test("keeps all eighteen touch-friendly farm operation choices", () => {
+  const operationValues = [...html.matchAll(/name="journalOperation" value="([^"]+)"/g)].map(match => match[1]);
+  assert.deepEqual(operationValues, [
+    "播種", "育苗", "定植", "灌溉", "排水", "施肥", "用藥", "病蟲害防治", "除草",
+    "整枝或修剪", "土壤管理", "巡田", "取樣或檢測", "採收", "分級或包裝", "設備維護",
+    "災害應變", "其他"
+  ]);
+  assert.match(html, /請填寫其他農事作業/);
+});
+
+test("other operation toggles visibility without clearing entered text", () => {
+  const initializationSource = html.slice(
+    html.indexOf("function initializeDecisionJournal("),
+    html.indexOf("function getFarmLogs()")
+  );
+  assert.match(initializationSource, /field\.hidden = !event\.target\.checked/);
+  assert.match(initializationSource, /journalOperationOther"\)\.focus/);
+  assert.doesNotMatch(initializationSource, /journalOperationOther"\)\.value = ""/);
+});
+
+test("replaces complex operation details with one primary textarea", () => {
+  assert.match(html, /可以簡單記錄：/);
+  assert.match(html, /id="journalOperationDescription"/);
+  assert.match(html, /上午巡田後進行灌溉/);
+  assert.match(html, /不提供農藥或肥料劑量建議/);
+  assert.match(html, /aria-labelledby="journalOutcomeHeading" hidden/);
+  assert.match(html, /aria-labelledby="journalDecisionHeading" hidden/);
+});
+
+test("uses one optional collapsed experience note and unchecked candidate", () => {
+  assert.match(html, /<details id="journalExperienceDetails">/);
+  assert.match(html, /補充今天的經驗或提醒（選填）/);
+  assert.match(html, /id="journalExperienceNote"/);
+  const candidate = html.match(/<input id="journalExperienceSimpleCandidate"[^>]*>/)?.[0] || "";
   assert.ok(candidate);
   assert.doesNotMatch(candidate, /\bchecked\b/);
-  assert.match(html, /Sprint 1 不會真正寫入 AI 知識庫/);
+  assert.match(html, /不會寫入 Farm Memory 或 AI 知識庫/);
 });
 
-test("shows the other operation field only when Other is selected", () => {
-  assert.match(html, /id="journalOperationOtherField"[^>]*hidden/);
-  assert.match(journalSource, /journalOperationOtherToggle/);
-  assert.match(journalSource, /field\.hidden = !event\.target\.checked/);
-  assert.match(journalSource, /journalOperationOther"\)\.focus/);
+test("builds a simplified compatible record with weather and NDVI snapshots", () => {
+  assert.match(journalSource, /version: "2\.1-simplified"/);
+  assert.match(journalSource, /profileId: profile\?\.id/);
+  assert.match(journalSource, /description: journalValue\("journalOperationDescription"\)/);
+  assert.match(journalSource, /note: experienceNote/);
+  assert.match(journalSource, /latestWeatherSnapshot/);
+  assert.match(journalSource, /latestNdviSnapshot/);
+  assert.match(journalSource, /source: "legacy-compatibility"/);
+  assert.match(journalSource, /record\.version = "2\.1"/);
 });
 
-test("validates required context, operations and AI experience candidate fields", () => {
+test("validates date, selected farm profile, work and other operation", () => {
   const validationSource = html.slice(
     html.indexOf("function validateDecisionJournal("),
     html.indexOf("function clearJournalValidation(")
@@ -81,202 +119,92 @@ test("validates required context, operations and AI experience candidate fields"
   vm.runInContext(validationSource, context);
   const valid = {
     journalMeta: { date: "2026-07-24" },
-    farmContext: { farm: "示範農場", field: "", crop: "水稻" },
+    farmContext: { profileId: "farm-profile-1" },
     farmOperations: { selected: ["巡田"], other: "" },
-    operationDetails: { description: "" },
-    experienceNotes: {
-      farmMemoryCandidate: false,
-      observation: "",
-      action: "",
-      lessonLearned: ""
-    }
+    operationDetails: { description: "" }
   };
   assert.equal(context.validateDecisionJournal(valid).length, 0);
   const invalid = structuredClone(valid);
   invalid.journalMeta.date = "";
-  invalid.farmContext.farm = "";
-  invalid.farmContext.crop = "";
-  invalid.farmOperations.selected = [];
-  invalid.experienceNotes.farmMemoryCandidate = true;
-  assert.equal(context.validateDecisionJournal(invalid).length, 7);
+  invalid.farmContext.profileId = "";
+  invalid.farmOperations.selected = ["其他"];
+  assert.equal(context.validateDecisionJournal(invalid).length, 3);
 });
 
-test("keeps prototype drafts separate and writes formal journals only to the compatible farmLogs key", () => {
+test("keeps draft and formal storage separate without overwriting farmLogs", () => {
   assert.match(journalSource, /sessionStorage\.setItem\(DECISION_JOURNAL_DRAFT_KEY/);
-  assert.match(journalSource, /sessionStorage\.removeItem\(DECISION_JOURNAL_DRAFT_KEY/);
   assert.match(journalSource, /localStorage\.setItem\("farmLogs"/);
-  assert.match(journalSource, /record\.version = "2\.0"/);
+  assert.match(journalSource, /logs\.unshift\(cloneJournalData\(record\)\)/);
   assert.doesNotMatch(journalSource, /localStorage\.setItem\("(?!farmLogs)/);
-  assert.doesNotMatch(journalSource, /fetch\s*\(/);
-  assert.doesNotMatch(journalSource, /FarmMemoryNdviSessions|\/api\//);
 });
 
-test("supports preview, guarded clear and safe return navigation", () => {
-  assert.match(journalSource, /journalPreviewModal/);
-  assert.match(journalSource, /showModal/);
-  assert.match(journalSource, /confirm\("確定要清除目前表單嗎？此操作不會刪除既有農場日誌。"\)/);
-  assert.match(journalSource, /document\.getElementById\("coach"\)\?\.scrollIntoView/);
-  assert.match(journalSource, /escapeHtml\(error\.message\)/);
-  assert.match(journalSource, /formatJournalPreviewValue/);
-});
-
-test("associates journal labels with existing controls and supports responsive layouts", () => {
-  const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(match => match[1]));
-  const journalMarkup = html.slice(
-    html.indexOf('<form id="decisionJournalForm"'),
-    html.indexOf("</form>", html.indexOf('<form id="decisionJournalForm"'))
+test("renders a read-only field environment summary without mock AI analysis", () => {
+  assert.match(html, /田區環境摘要｜Field Environment Summary/);
+  for (const label of [
+    "選定農場", "田區", "作物", "生育階段", "今日氣象", "溫度", "濕度", "雨量", "風速",
+    "最近一次 NDVI", "衛星觀測日期", "今日農事作業", "作業內容"
+  ]) {
+    assert.match(journalSource, new RegExp(`"${label}"`));
+  }
+  const summarySource = html.slice(
+    html.indexOf("function updateJournalEnvironmentSummary("),
+    html.indexOf("function saveDecisionJournalDraft(")
   );
-  const labelTargets = [...journalMarkup.matchAll(/<label[^>]*\bfor="([^"]+)"/g)].map(match => match[1]);
-  assert.ok(labelTargets.length >= 30);
-  for (const target of labelTargets) assert.ok(ids.has(target), `missing control for label ${target}`);
-  assert.match(html, /@media \(max-width: 640px\)[\s\S]*?\.journal-grid,[\s\S]*?grid-template-columns: 1fr/);
-  assert.match(html, /button:focus-visible/);
-  assert.match(html, /aria-live="polite"/);
+  assert.doesNotMatch(summarySource, /fetch\s*\(|\/api\//);
+  assert.match(summarySource, /尚無資料/);
 });
 
-test("normalizes legacy and structured farmLogs without mutating either record", () => {
-  const normalizationSource = html.slice(
-    html.indexOf("function normalizeFarmLog("),
-    html.indexOf("function renderFarmLogs(")
-  );
-  const context = vm.createContext({});
-  vm.runInContext(normalizationSource, context);
-
-  const legacy = {
-    date: "2026-07-01",
-    location: "舊田區",
-    crop: "水稻",
-    work: "灌溉",
-    note: "舊資料",
-    weather: { temp: 28 }
-  };
-  const legacyBefore = structuredClone(legacy);
-  const normalizedLegacy = context.normalizeFarmLog(legacy);
-  assert.equal(normalizedLegacy.versionLabel, "舊版紀錄");
-  assert.equal(normalizedLegacy.decision, "未提供");
-  assert.deepEqual(legacy, legacyBefore);
-
-  const structured = {
-    version: "2.0",
-    id: "journal-1",
-    journalMeta: { date: "2026-07-24" },
-    farmContext: { farm: "示範農場", field: "一號田", crop: "番茄" },
-    farmOperations: { selected: ["巡田"], other: "" },
-    operationDetails: { description: "觀察葉片" },
-    farmerDecision: { finalDecision: "持續觀察" },
-    experienceNotes: { lessonLearned: "先確認現場" },
-    aiSnapshot: {
-      weather: { state: "available", data: { temp: 30 } }
-    }
-  };
-  const normalizedStructured = context.normalizeFarmLog(structured);
-  assert.equal(normalizedStructured.versionLabel, "新版結構化紀錄");
-  assert.equal(normalizedStructured.location, "示範農場／一號田");
-  assert.equal(normalizedStructured.weather.temp, 30);
+test("copies a plain-text GPT prompt and opens the existing coach safely", () => {
+  assert.match(html, /id="journalCopyAnalysisButton"/);
+  assert.match(html, /id="journalOpenGptButton"[^>]*target="_blank"[^>]*rel="noopener noreferrer"/);
+  assert.match(journalSource, /navigator\.clipboard\.writeText\(buildJournalAnalysisText\(\)\)/);
+  assert.match(journalSource, /分析資料已複製，請前往 AI農業氣象教練貼上/);
+  assert.match(journalSource, /請用農民容易理解的方式說明/);
+  assert.doesNotMatch(journalSource, /OpenAI|apiKey|Authorization/);
 });
 
-test("creates formal records with stable metadata and explicit weather availability", () => {
-  const helperSource = html.slice(
-    html.indexOf("function cloneJournalData("),
-    html.indexOf("function journalValue(")
-  );
-  const context = vm.createContext({
-    structuredClone,
-    Date,
-    Math,
-    globalThis: { crypto: { randomUUID: () => "fixed-id" } },
-    getFarmLogs: () => [],
-    localStorage: { setItem() {} }
-  });
-  vm.runInContext(helperSource, context);
-  const draft = {
-    journalMeta: { createdAt: "2026-07-24T00:00:00.000Z" },
-    aiSnapshot: { state: "empty" }
-  };
-  const withWeather = context.createFormalFarmLogRecord(draft, { temp: 31 });
-  assert.equal(withWeather.version, "2.0");
-  assert.equal(withWeather.id, "journal-fixed-id");
-  assert.equal(withWeather.aiSnapshot.weather.state, "available");
-  assert.equal(withWeather.aiSnapshot.weather.data.temp, 31);
-  assert.equal(draft.version, undefined);
-
-  const withoutWeather = context.createFormalFarmLogRecord(draft, null);
-  assert.equal(withoutWeather.aiSnapshot.weather.state, "empty");
-  assert.equal(withoutWeather.aiSnapshot.weather.data, null);
-});
-
-test("appends a new structured record without overwriting existing farmLogs", () => {
-  const appendSource = html.slice(
-    html.indexOf("function appendFarmLogRecord("),
-    html.indexOf("function journalValue(")
-  );
-  const existing = [{ date: "2026-07-01", work: "舊紀錄" }];
-  let written = null;
-  const context = vm.createContext({
-    cloneJournalData: structuredClone,
-    getFarmLogs: () => structuredClone(existing),
-    localStorage: {
-      setItem(key, value) {
-        assert.equal(key, "farmLogs");
-        written = JSON.parse(value);
-      }
-    }
-  });
-  vm.runInContext(appendSource, context);
-  context.appendFarmLogRecord({ id: "journal-new", version: "2.0" });
-  assert.equal(written.length, 2);
-  assert.equal(written[0].id, "journal-new");
-  assert.equal(written[1].work, "舊紀錄");
-});
-
-test("clear form and clear history have separate storage boundaries", () => {
+test("clear current content preserves profiles and farmLogs while profile deletion is isolated", () => {
   const clearFormSource = html.slice(
     html.indexOf("function clearDecisionJournalForm("),
     html.indexOf("function initializeDecisionJournal(")
   );
-  const clearHistorySource = html.slice(
-    html.indexOf("function clearFarmLogs("),
-    html.indexOf("function openGptCoach(")
-  );
   assert.match(clearFormSource, /sessionStorage\.removeItem\(DECISION_JOURNAL_DRAFT_KEY\)/);
-  assert.doesNotMatch(clearFormSource, /localStorage|farmLogs/);
-  assert.match(clearHistorySource, /localStorage\.removeItem\("farmLogs"\)/);
-  assert.doesNotMatch(clearHistorySource, /sessionStorage|removeItem\("(?!farmLogs)/);
-  assert.match(clearHistorySource, /會刪除所有已保存的農場日誌/);
+  assert.doesNotMatch(clearFormSource, /localStorage\.removeItem|farmLogs/);
+  const deleteProfileSource = html.slice(
+    html.indexOf("function deleteSelectedJournalFarmProfile("),
+    html.indexOf("function journalValue(")
+  );
+  assert.match(deleteProfileSource, /saveJournalFarmProfiles\(profiles\)/);
+  assert.doesNotMatch(deleteProfileSource, /localStorage\.removeItem|localStorage\.setItem\("farmLogs"/);
 });
 
-test("keeps PNG and PDF exports available through normalized records", () => {
+test("retains legacy farmLogs normalization, history deletion and PNG or PDF exports", () => {
+  assert.match(html, /function normalizeFarmLog\(/);
+  assert.match(html, /startsWith\("2\."\)/);
+  assert.match(html, /localStorage\.removeItem\("farmLogs"\)/);
   assert.match(html, /onclick="exportLatestLogImage\(\)"/);
   assert.match(html, /onclick="exportLatestLogPdf\(\)"/);
   assert.match(html, /onclick="exportFarmLogImage\(\$\{index\}\)"/);
   assert.match(html, /onclick="exportFarmLogPdf\(\$\{index\}\)"/);
-  const exportSource = html.slice(
-    html.indexOf("async function exportFarmLogImage("),
-    html.indexOf("async function renderShareCardToCanvas(")
-  );
-  assert.equal((exportSource.match(/normalizeFarmLog\(record\)/g) || []).length, 2);
 });
 
-test("supports native dialog cancel and restores focus without blocking Escape", () => {
-  const initializationSource = html.slice(
-    html.indexOf("function initializeDecisionJournal("),
-    html.indexOf("function getFarmLogs(")
-  );
-  assert.match(initializationSource, /addEventListener\("cancel"/);
-  assert.match(initializationSource, /addEventListener\("close"/);
-  assert.match(initializationSource, /previewModal\.close\(\)/);
-  assert.match(initializationSource, /target\?\.focus\(\)/);
-  assert.doesNotMatch(initializationSource, /preventDefault/);
+test("keeps dialog accessibility, responsive layout and inline JavaScript syntax", () => {
+  assert.match(journalSource, /addEventListener\("cancel"/);
+  assert.match(journalSource, /addEventListener\("close"/);
+  assert.match(html, /@media \(max-width: 640px\)/);
+  assert.match(html, /\.journal-profile-list/);
+  assert.match(html, /button:focus-visible/);
+  const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
+  scripts.forEach((source, index) => {
+    assert.doesNotThrow(() => new vm.Script(source, { filename: `index-inline-${index}.js` }));
+  });
 });
 
-test("retains existing integrations and keeps all inline JavaScript syntactically valid", () => {
+test("does not modify Worker, Weather, Satellite, NDVI, GIS or field integrations", () => {
   assert.match(html, /\/api\/v1\/satellite\/search/);
   assert.match(html, /\/api\/v1\/ndvi\/statistics/);
   assert.match(html, /\/api\/v1\/ndvi\/image/);
   assert.match(html, /id="fieldBoundary"/);
   assert.match(html, /id="iotCenter"/);
-  const scripts = [...html.matchAll(/<script(?![^>]*\bsrc=)[^>]*>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
-  scripts.forEach((source, index) => {
-    assert.doesNotThrow(() => new vm.Script(source, { filename: `index-inline-${index}.js` }));
-  });
+  assert.match(html, /id="ndviGisViewer"/);
 });

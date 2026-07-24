@@ -1067,6 +1067,111 @@
       margin-bottom: 14px;
     }
 
+    .journal-profile-toolbar,
+    .journal-profile-actions,
+    .journal-gpt-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .journal-profile-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 12px;
+      margin: 14px 0;
+    }
+
+    .journal-profile-card {
+      width: 100%;
+      min-height: 112px;
+      padding: 16px;
+      border: 2px solid #d1d5db;
+      border-radius: 16px;
+      background: #fff;
+      color: #1f2937;
+      text-align: left;
+      cursor: pointer;
+    }
+
+    .journal-profile-card:hover,
+    .journal-profile-card:focus-visible {
+      border-color: #0f766e;
+      background: #f0fdfa;
+    }
+
+    .journal-profile-card.is-selected {
+      border-color: #059669;
+      background: #ecfdf5;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.14);
+    }
+
+    .journal-profile-card strong,
+    .journal-profile-card span {
+      display: block;
+      overflow-wrap: anywhere;
+    }
+
+    .journal-profile-card strong {
+      color: #065f46;
+      font-size: 1.05rem;
+      margin-bottom: 7px;
+    }
+
+    .journal-profile-selected {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #ecfdf5;
+      color: #065f46;
+      font-weight: 800;
+      margin: 12px 0;
+    }
+
+    .journal-simple-hint {
+      margin: 0 0 12px;
+      padding: 12px 16px;
+      border-radius: 12px;
+      background: #f8fafc;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    .journal-simple-hint ul {
+      margin: 6px 0 0 20px;
+      padding: 0;
+    }
+
+    .journal-environment-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .journal-environment-item {
+      padding: 12px;
+      border: 1px solid #dbeafe;
+      border-radius: 12px;
+      background: #f8fafc;
+      overflow-wrap: anywhere;
+    }
+
+    .journal-environment-item span {
+      display: block;
+      color: #64748b;
+      font-size: 0.82rem;
+      margin-bottom: 3px;
+    }
+
+    .journal-environment-item strong {
+      color: #1e3a8a;
+    }
+
+    .journal-action-bar {
+      position: static;
+    }
+
     button:focus-visible,
     .btn:focus-visible,
     .journal-choice:focus-within,
@@ -2579,21 +2684,11 @@
       <form id="decisionJournalForm" class="journal-shell" novalidate>
         <header class="journal-header-card" aria-labelledby="journalPrototypeTitle">
           <div>
-            <span class="journal-mock-badge">Sprint 1｜互動原型</span>
+            <span class="journal-mock-badge">約 1 分鐘完成</span>
             <h3 id="journalPrototypeTitle">AI 農場決策日誌</h3>
-            <p>AI Farm Decision Journal</p>
-            <p>Facts → AI Analysis → Farmer Decision → Farm Operations → Outcome → Experience</p>
+            <p>選擇田區、勾選今天的農事、簡單補充後即可儲存。</p>
           </div>
-          <div class="journal-status-controls">
-            <span class="journal-status-badge" id="journalStatusBadge" aria-live="polite">新增紀錄</span>
-            <label for="journalStatus">原型狀態</label>
-            <select id="journalStatus">
-              <option value="new">新增紀錄</option>
-              <option value="draft">草稿</option>
-              <option value="follow-up">待追蹤</option>
-              <option value="completed">已完成</option>
-            </select>
-          </div>
+          <button class="btn btn-light" type="button" id="journalBackButton">返回氣象判讀</button>
         </header>
 
         <div id="journalValidationSummary" class="journal-validation-summary" role="alert" tabindex="-1" hidden></div>
@@ -2602,18 +2697,23 @@
           <div class="journal-panel-heading">
             <div>
               <h3 id="journalFarmHeading">農場資訊｜Farm Information</h3>
-              <p>建立本次紀錄的時間、農場與作物背景。</p>
+              <p>先選擇已保存卡片，或建立新的農場／田區卡片。</p>
             </div>
             <span class="journal-step" aria-hidden="true">1</span>
           </div>
+          <div class="journal-profile-toolbar">
+            <button class="btn btn-green" type="button" id="journalAddProfileButton">＋ 新增農場／田區</button>
+            <button class="btn btn-light" type="button" id="journalEditProfileButton" disabled>修改目前卡片</button>
+            <button class="btn btn-danger" type="button" id="journalDeleteProfileButton" disabled>刪除目前卡片</button>
+          </div>
+          <div class="journal-profile-list" id="journalProfileList" aria-label="已保存的農場卡片"></div>
+          <div class="journal-profile-selected" id="journalSelectedProfileStatus" role="status">尚未選擇農場卡片。</div>
+
+          <div id="journalProfileEditor">
           <div class="journal-grid journal-grid-three">
             <div>
-              <label for="journalDate">紀錄日期<span class="journal-required">必填</span></label>
-              <input id="journalDate" type="date" required>
-            </div>
-            <div>
-              <label for="journalTime">紀錄時間</label>
-              <input id="journalTime" type="time">
+              <label for="journalProfileName">卡片名稱<span class="journal-required">必填</span></label>
+              <input id="journalProfileName" type="text" required placeholder="例如：水稻一">
             </div>
             <div>
               <label for="journalRecorder">記錄者</label>
@@ -2621,13 +2721,11 @@
             </div>
             <div>
               <label for="journalFarm">農場<span class="journal-required">農場或田區擇一</span></label>
-              <input id="journalFarm" type="text" placeholder="Sprint 2 將由 Field Management 帶入">
-              <div class="journal-field-hint">目前為手動輸入；尚未連動正式田區資料。</div>
+              <input id="journalFarm" type="text" placeholder="例如：潮州農場">
             </div>
             <div>
               <label for="journalField">田區<span class="journal-required">農場或田區擇一</span></label>
               <input id="journalField" type="text" placeholder="例如：東側一號田">
-              <div class="journal-field-hint">未來可由 Field Management 自動帶入。</div>
             </div>
             <div>
               <label for="journalCrop">作物<span class="journal-required">必填</span></label>
@@ -2642,9 +2740,14 @@
               <input id="journalStage" type="text" placeholder="例如：分蘗期">
             </div>
           </div>
+          <div class="journal-profile-actions" style="margin-top:14px;">
+            <button class="btn btn-green" type="button" id="journalSaveProfileButton">儲存農場資料</button>
+            <button class="btn btn-light" type="button" id="journalCancelProfileButton">取消修改</button>
+          </div>
+          </div>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalAiHeading">
+        <section class="journal-panel" aria-labelledby="journalAiHeading" hidden>
           <div class="journal-panel-heading">
             <div>
               <h3 id="journalAiHeading">AI 分析快照｜AI Analysis Snapshot</h3>
@@ -2691,7 +2794,7 @@
           <p class="journal-field-hint">尚未取得本次氣象或衛星觀測資料，仍可先建立農事紀錄。</p>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalDecisionHeading">
+        <section class="journal-panel" aria-labelledby="journalDecisionHeading" hidden>
           <div class="journal-panel-heading">
             <div>
               <h3 id="journalDecisionHeading">農民決策｜Farmer Decision</h3>
@@ -2729,13 +2832,23 @@
           </div>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalOperationsHeading">
+        <section class="journal-panel" id="journalOperationsPanel" aria-labelledby="journalOperationsHeading" hidden>
           <div class="journal-panel-heading">
             <div>
-              <h3 id="journalOperationsHeading">農事作業｜Farm Operations</h3>
-              <p>可複選本次實際執行的作業。</p>
+              <h3 id="journalOperationsHeading">今天做了什麼</h3>
+              <p>勾選今天完成的農事作業，可複選。</p>
             </div>
             <span class="journal-step" aria-hidden="true">4</span>
+          </div>
+          <div class="journal-grid journal-grid-three" style="margin-bottom:16px;">
+            <div>
+              <label for="journalDate">紀錄日期<span class="journal-required">必填</span></label>
+              <input id="journalDate" type="date" required>
+            </div>
+            <div>
+              <label for="journalTime">紀錄時間</label>
+              <input id="journalTime" type="time">
+            </div>
           </div>
           <fieldset>
             <legend>作業項目<span class="journal-required">至少選一項，或填寫今日作業說明</span></legend>
@@ -2761,52 +2874,33 @@
             </div>
           </fieldset>
           <div id="journalOperationOtherField" class="journal-other-field" hidden style="margin-top:14px;">
-            <label for="journalOperationOther">其他農事作業</label>
-            <input id="journalOperationOther" type="text" placeholder="請說明其他作業">
+            <label for="journalOperationOther">請填寫其他農事作業</label>
+            <input id="journalOperationOther" type="text" placeholder="例如：清理排水溝">
           </div>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalDetailsHeading">
+        <section class="journal-panel" id="journalDetailsPanel" aria-labelledby="journalDetailsHeading" hidden>
           <div class="journal-panel-heading">
             <div>
-              <h3 id="journalDetailsHeading">作業內容｜Operation Details</h3>
-              <p>只記錄實際使用內容；本階段不提供農藥或肥料劑量建議。</p>
+              <h3 id="journalDetailsHeading">作業內容</h3>
+              <p>簡單記下今天的重要工作即可；不提供農藥或肥料劑量建議。</p>
             </div>
             <span class="journal-step" aria-hidden="true">5</span>
           </div>
-          <div class="journal-grid">
-            <div class="full">
-              <label for="journalOperationDescription">今日作業說明</label>
-              <textarea id="journalOperationDescription" placeholder="描述今天實際完成的作業。"></textarea>
-            </div>
-            <div>
-              <label for="journalMaterials">使用資材或設備</label>
-              <input id="journalMaterials" type="text" placeholder="例如：灌溉設備；不提供用量建議">
-            </div>
-            <div>
-              <label for="journalQuantity">使用數量或劑量</label>
-              <input id="journalQuantity" type="text" placeholder="依實際紀錄與官方標示填寫">
-            </div>
-            <div>
-              <label for="journalScope">作業範圍</label>
-              <input id="journalScope" type="text" placeholder="例如：全區、東側畦面">
-            </div>
-            <div>
-              <label for="journalOperationTime">作業時間</label>
-              <input id="journalOperationTime" type="text" placeholder="例如：08:30–10:00">
-            </div>
-            <div>
-              <label for="journalAnomalies">現場異常</label>
-              <textarea id="journalAnomalies" placeholder="記錄觀察到的異常，不將推測寫成已確認事實。"></textarea>
-            </div>
-            <div>
-              <label for="journalSafety">安全或注意事項</label>
-              <textarea id="journalSafety" placeholder="農藥、肥料與安全用量須依官方標示及相關規範。"></textarea>
-            </div>
+          <div class="journal-simple-hint">
+            可以簡單記錄：
+            <ul>
+              <li>做了哪些工作</li>
+              <li>使用了什麼資材或設備</li>
+              <li>作業範圍或時間</li>
+              <li>有沒有看到特殊狀況</li>
+            </ul>
           </div>
+          <label for="journalOperationDescription">作業內容</label>
+          <textarea id="journalOperationDescription" rows="5" placeholder="例如：上午巡田後進行灌溉，1號田施用有機液肥，葉片狀況正常，預計三天後再觀察。"></textarea>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalOutcomeHeading">
+        <section class="journal-panel" aria-labelledby="journalOutcomeHeading" hidden>
           <div class="journal-panel-heading">
             <div>
               <h3 id="journalOutcomeHeading">成果與後續追蹤｜Outcome and Follow-up</h3>
@@ -2853,7 +2947,7 @@
           </div>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalExperienceHeading">
+        <section class="journal-panel" aria-labelledby="journalExperienceHeading" hidden>
           <div class="journal-panel-heading">
             <div>
               <h3 id="journalExperienceHeading">AI 經驗分享｜AI Experience Notes</h3>
@@ -2899,7 +2993,26 @@
           </label>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalMediaHeading">
+        <section class="journal-panel" id="journalExperienceSimplePanel" aria-labelledby="journalExperienceSimpleHeading" hidden>
+          <details id="journalExperienceDetails">
+            <summary id="journalExperienceSimpleHeading"><strong>補充今天的經驗或提醒（選填）</strong></summary>
+            <div style="margin-top:14px;">
+              <label for="journalExperienceNote">經驗或提醒</label>
+              <textarea id="journalExperienceNote" rows="4" placeholder="例如：這次排水後葉色改善較快，下次連續降雨時可以提早處理。"></textarea>
+              <label class="journal-experience-candidate" style="margin-top:12px;">
+                <input id="journalExperienceSimpleCandidate" type="checkbox">
+                <span>
+                  值得保存為 AI 經驗
+                  <small style="display:block;font-weight:600;color:#713f12;margin-top:4px;">
+                    本次只記錄候選狀態，不會寫入 Farm Memory 或 AI 知識庫。
+                  </small>
+                </span>
+              </label>
+            </div>
+          </details>
+        </section>
+
+        <section class="journal-panel" aria-labelledby="journalMediaHeading" hidden>
           <div class="journal-panel-heading">
             <div>
               <h3 id="journalMediaHeading">照片與附件｜Media and Attachments</h3>
@@ -2914,7 +3027,7 @@
           </div>
         </section>
 
-        <section class="journal-panel" aria-labelledby="journalSafetyHeading">
+        <section class="journal-panel" aria-labelledby="journalSafetyHeading" hidden>
           <div class="journal-panel-heading">
             <div>
               <h3 id="journalSafetyHeading">資料品質與安全提醒</h3>
@@ -2929,12 +3042,28 @@
           </ul>
         </section>
 
-        <div class="journal-action-bar" aria-label="日誌操作">
+        <section class="journal-panel" id="journalEnvironmentPanel" aria-labelledby="journalEnvironmentHeading" hidden>
+          <div class="journal-panel-heading">
+            <div>
+              <h3 id="journalEnvironmentHeading">田區環境摘要｜Field Environment Summary</h3>
+              <p>由網站整理目前可取得的農場、氣象、NDVI 與今日作業資料；不在網站內產生 AI 分析。</p>
+            </div>
+            <span class="journal-step" aria-hidden="true">4</span>
+          </div>
+          <div class="journal-environment-grid" id="journalEnvironmentSummary" aria-live="polite"></div>
+          <div class="journal-gpt-actions" style="margin-top:16px;">
+            <button class="btn btn-light" type="button" id="journalCopyAnalysisButton">複製分析資料</button>
+            <a class="btn btn-green" id="journalOpenGptButton" href="#" target="_blank" rel="noopener noreferrer">開啟 AI農業氣象教練</a>
+          </div>
+          <p class="journal-field-hint">請先複製分析資料，再前往 GPT 貼上詢問。</p>
+          <div class="journal-draft-status" id="journalCopyStatus" role="status" aria-live="polite"></div>
+        </section>
+
+        <div class="journal-action-bar" id="journalActionBar" aria-label="日誌操作" hidden>
           <button class="btn btn-green" type="button" id="journalFormalSaveButton">✅ 儲存日誌</button>
-          <button class="btn btn-green" type="button" id="journalSaveDraftButton">💾 儲存草稿</button>
+          <button class="btn btn-light" type="button" id="journalClearButton">清除本次內容</button>
+          <button class="btn btn-light" type="button" id="journalSaveDraftButton">💾 儲存草稿</button>
           <button class="btn btn-light" type="button" id="journalPreviewButton">👁️ 預覽日誌</button>
-          <button class="btn btn-light" type="button" id="journalClearButton">清除表單</button>
-          <button class="btn btn-light" type="button" id="journalBackButton">返回上一頁</button>
           <div class="journal-draft-status" id="journalDraftStatus" role="status" aria-live="polite">草稿只暫存在此瀏覽器分頁，不會提交至後端。</div>
         </div>
       </form>
@@ -3471,6 +3600,7 @@
         sunshine: showValue(weather.sunshine),
         soil10: showValue(weather.soil10)
       };
+      updateJournalEnvironmentSummary();
 
       document.getElementById("tempValue").textContent = `${showValue(weather.temp)} ℃`;
       document.getElementById("humidityValue").textContent = `${showValue(weather.humidity)} %`;
@@ -3766,8 +3896,11 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
     }
 
   const DECISION_JOURNAL_DRAFT_KEY = "aiaikosDecisionJournalPrototypeDraftV1";
+  const FARM_PROFILE_STORAGE_KEY = "aiakosFarmProfilesV1";
   let decisionJournalCreatedAt = null;
   let decisionJournalPreviewTrigger = null;
+  let selectedJournalProfileId = null;
+  let editingJournalProfileId = null;
 
   function cloneJournalData(value) {
     return typeof structuredClone === "function"
@@ -3784,7 +3917,7 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
   function createFormalFarmLogRecord(draft, weatherSnapshot) {
     const now = new Date().toISOString();
     const record = cloneJournalData(draft);
-    record.version = "2.0";
+    record.version = "2.1";
     record.id = generateFarmLogId();
     record.journalMeta = {
       ...record.journalMeta,
@@ -3813,6 +3946,154 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
     logs.unshift(cloneJournalData(record));
     localStorage.setItem("farmLogs", JSON.stringify(logs));
     return cloneJournalData(record);
+  }
+
+  function getJournalFarmProfiles() {
+    try {
+      const profiles = JSON.parse(localStorage.getItem(FARM_PROFILE_STORAGE_KEY) || "[]");
+      return Array.isArray(profiles)
+        ? profiles.filter(profile => profile && typeof profile === "object").map(cloneJournalData)
+        : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveJournalFarmProfiles(profiles) {
+    localStorage.setItem(FARM_PROFILE_STORAGE_KEY, JSON.stringify(profiles.map(cloneJournalData)));
+  }
+
+  function generateFarmProfileId() {
+    const randomId = globalThis.crypto?.randomUUID?.()
+      || `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+    return `farm-profile-${randomId}`;
+  }
+
+  function getSelectedJournalProfile() {
+    return getJournalFarmProfiles().find(profile => profile.id === selectedJournalProfileId) || null;
+  }
+
+  function setJournalEntryVisibility(visible) {
+    [
+      "journalOperationsPanel",
+      "journalDetailsPanel",
+      "journalExperienceSimplePanel",
+      "journalEnvironmentPanel",
+      "journalActionBar"
+    ].forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.hidden = !visible;
+    });
+  }
+
+  function renderJournalFarmProfiles() {
+    const profiles = getJournalFarmProfiles();
+    const list = document.getElementById("journalProfileList");
+    const selectedProfile = profiles.find(profile => profile.id === selectedJournalProfileId) || null;
+    if (!selectedProfile) selectedJournalProfileId = null;
+
+    list.innerHTML = profiles.length
+      ? profiles.map(profile => `
+          <button class="journal-profile-card${profile.id === selectedJournalProfileId ? " is-selected" : ""}"
+                  type="button"
+                  data-profile-id="${escapeHtml(profile.id)}"
+                  aria-pressed="${profile.id === selectedJournalProfileId ? "true" : "false"}">
+            <strong>${escapeHtml(profile.cardName || "未命名卡片")}</strong>
+            <span>${escapeHtml(profile.farm || "未提供農場")}｜${escapeHtml(profile.field || "未提供田區")}</span>
+            <span>${escapeHtml(profile.variety || profile.crop || "未提供作物")}｜${escapeHtml(profile.growthStage || "未提供生育階段")}</span>
+          </button>
+        `).join("")
+      : `<div class="journal-field-hint">尚未建立農場卡片，請先新增一張卡片。</div>`;
+
+    const status = document.getElementById("journalSelectedProfileStatus");
+    status.textContent = selectedProfile
+      ? `目前選擇：${selectedProfile.cardName}｜${selectedProfile.farm || "未提供農場"}｜${selectedProfile.field || "未提供田區"}`
+      : "尚未選擇農場卡片。";
+    document.getElementById("journalEditProfileButton").disabled = !selectedProfile;
+    document.getElementById("journalDeleteProfileButton").disabled = !selectedProfile;
+    setJournalEntryVisibility(Boolean(selectedProfile));
+    updateJournalEnvironmentSummary();
+  }
+
+  function clearJournalProfileEditor() {
+    editingJournalProfileId = null;
+    [
+      "journalProfileName",
+      "journalRecorder",
+      "journalFarm",
+      "journalField",
+      "journalCrop",
+      "journalVariety",
+      "journalStage"
+    ].forEach(id => {
+      document.getElementById(id).value = "";
+    });
+  }
+
+  function openJournalProfileEditor(profile = null) {
+    editingJournalProfileId = profile?.id || null;
+    document.getElementById("journalProfileName").value = profile?.cardName || "";
+    document.getElementById("journalRecorder").value = profile?.recorder || "";
+    document.getElementById("journalFarm").value = profile?.farm || "";
+    document.getElementById("journalField").value = profile?.field || "";
+    document.getElementById("journalCrop").value = profile?.crop || "";
+    document.getElementById("journalVariety").value = profile?.variety || "";
+    document.getElementById("journalStage").value = profile?.growthStage || "";
+    document.getElementById("journalProfileEditor").hidden = false;
+    document.getElementById("journalProfileName").focus();
+  }
+
+  function saveJournalFarmProfile() {
+    const profile = {
+      id: editingJournalProfileId || generateFarmProfileId(),
+      cardName: journalValue("journalProfileName"),
+      recorder: journalValue("journalRecorder"),
+      farm: journalValue("journalFarm"),
+      field: journalValue("journalField"),
+      crop: journalValue("journalCrop"),
+      variety: journalValue("journalVariety"),
+      growthStage: journalValue("journalStage")
+    };
+    const errors = [];
+    if (!profile.cardName) errors.push({ id: "journalProfileName", message: "請填寫卡片名稱。" });
+    if (!profile.farm && !profile.field) errors.push({ id: "journalFarm", message: "農場或田區至少需要填寫一項。" });
+    if (!profile.crop) errors.push({ id: "journalCrop", message: "請填寫作物。" });
+    if (!showJournalValidation(errors)) return false;
+
+    const profiles = getJournalFarmProfiles();
+    const existingIndex = profiles.findIndex(item => item.id === profile.id);
+    if (existingIndex >= 0) profiles[existingIndex] = cloneJournalData(profile);
+    else profiles.push(cloneJournalData(profile));
+    saveJournalFarmProfiles(profiles);
+    selectedJournalProfileId = profile.id;
+    editingJournalProfileId = null;
+    document.getElementById("journalProfileEditor").hidden = true;
+    renderJournalFarmProfiles();
+    return true;
+  }
+
+  function selectJournalFarmProfile(profileId) {
+    const profile = getJournalFarmProfiles().find(item => item.id === profileId);
+    if (!profile) return false;
+    selectedJournalProfileId = profile.id;
+    editingJournalProfileId = null;
+    document.getElementById("journalProfileEditor").hidden = true;
+    renderJournalFarmProfiles();
+    document.getElementById("journalOperationsPanel").scrollIntoView({ behavior: "smooth", block: "start" });
+    return true;
+  }
+
+  function deleteSelectedJournalFarmProfile() {
+    const profile = getSelectedJournalProfile();
+    if (!profile) return false;
+    if (!confirm(`確定要刪除農場卡片「${profile.cardName}」嗎？已保存的 farmLogs 不會被刪除。`)) return false;
+    const profiles = getJournalFarmProfiles().filter(item => item.id !== profile.id);
+    saveJournalFarmProfiles(profiles);
+    selectedJournalProfileId = null;
+    clearJournalProfileEditor();
+    document.getElementById("journalProfileEditor").hidden = profiles.length > 0;
+    renderJournalFarmProfiles();
+    return true;
   }
 
   function journalValue(id) {
@@ -3873,43 +4154,47 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
 
   function buildDecisionJournalDraft() {
     const now = new Date().toISOString();
-    const snapshotState = document.getElementById("journalSnapshotState").value;
-    const selectedAdoption = document.querySelector('input[name="journalAdoption"]:checked');
+    const profile = getSelectedJournalProfile();
     const operations = journalCheckedValues("journalOperation");
-    const followUp = journalCheckedValues("journalFollowUp");
+    const experienceNote = journalValue("journalExperienceNote");
 
     return {
-      version: "1.0-prototype",
+      version: "2.1-simplified",
       journalMeta: {
-        source: "manual-ui-prototype",
+        source: "simplified-journal-ui",
         date: journalValue("journalDate"),
         time: journalValue("journalTime"),
-        recorder: journalValue("journalRecorder"),
+        recorder: profile?.recorder || "",
         createdAt: decisionJournalCreatedAt || now,
         updatedAt: now
       },
       farmContext: {
-        source: "manual-placeholder",
-        farm: journalValue("journalFarm"),
-        field: journalValue("journalField"),
-        crop: journalValue("journalCrop"),
-        variety: journalValue("journalVariety"),
-        growthStage: journalValue("journalStage")
+        source: "farm-profile",
+        profileId: profile?.id || "",
+        profileName: profile?.cardName || "",
+        farm: profile?.farm || "",
+        field: profile?.field || "",
+        crop: profile?.crop || "",
+        variety: profile?.variety || "",
+        growthStage: profile?.growthStage || ""
       },
       aiSnapshot: {
-        source: snapshotState === "mock" ? "mock-ui-review" : "not-connected",
+        source: "existing-page-snapshots",
         readonly: true,
-        state: snapshotState,
-        facts: getJournalSnapshotPrototype(snapshotState),
-        recommendation: getJournalSnapshotPrototype(snapshotState).recommendation
+        weather: latestWeatherSnapshot
+          ? { state: "available", source: "existing-weather-workflow", data: cloneJournalData(latestWeatherSnapshot) }
+          : { state: "empty", source: "not-available", data: null },
+        ndvi: latestNdviSnapshot
+          ? { state: "available", source: "existing-ndvi-workflow", data: cloneJournalData(latestNdviSnapshot) }
+          : { state: "empty", source: "not-available", data: null }
       },
       farmerDecision: {
-        source: "human-input",
-        adoption: selectedAdoption?.value || "undecided",
-        reason: journalValue("journalDecisionReason"),
-        constraints: journalValue("journalConstraints"),
-        finalDecision: journalValue("journalFinalDecision"),
-        decisionMaker: journalValue("journalDecisionMaker")
+        source: "legacy-compatibility",
+        adoption: "",
+        reason: "",
+        constraints: "",
+        finalDecision: "",
+        decisionMaker: ""
       },
       farmOperations: {
         source: "human-input",
@@ -3919,37 +4204,28 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
       operationDetails: {
         source: "human-input",
         description: journalValue("journalOperationDescription"),
-        materialsOrEquipment: journalValue("journalMaterials"),
-        quantityOrDose: journalValue("journalQuantity"),
-        scope: journalValue("journalScope"),
-        operationTime: journalValue("journalOperationTime"),
-        anomalies: journalValue("journalAnomalies"),
-        safetyNotes: journalValue("journalSafety")
+        materialsOrEquipment: "",
+        quantityOrDose: "",
+        scope: "",
+        operationTime: "",
+        anomalies: "",
+        safetyNotes: ""
       },
       outcome: {
-        source: "human-input",
-        expected: {
-          description: journalValue("journalExpectedOutcome"),
-          observationDate: journalValue("journalExpectedObservationDate")
-        },
-        actual: {
-          observationDate: journalValue("journalActualObservationDate"),
-          status: document.getElementById("journalActualOutcomeStatus").value,
-          description: journalValue("journalActualOutcome")
-        },
-        followUp: {
-          date: journalValue("journalFollowUpDate"),
-          actions: followUp
-        }
+        source: "legacy-compatibility",
+        expected: { description: "", observationDate: "" },
+        actual: { observationDate: "", status: "", description: "" },
+        followUp: { date: "", actions: [] }
       },
       experienceNotes: {
         source: "human-input-unverified",
-        observation: journalValue("journalExperienceObservation"),
-        reasoning: journalValue("journalExperienceReasoning"),
-        action: journalValue("journalExperienceAction"),
-        outcome: journalValue("journalExperienceOutcome"),
-        lessonLearned: journalValue("journalExperienceLesson"),
-        farmMemoryCandidate: document.getElementById("journalExperienceCandidate").checked,
+        note: experienceNote,
+        observation: "",
+        reasoning: "",
+        action: "",
+        outcome: "",
+        lessonLearned: experienceNote,
+        farmMemoryCandidate: document.getElementById("journalExperienceSimpleCandidate").checked,
         verified: false
       },
       media: {
@@ -3957,33 +4233,21 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
         items: [],
         uploadEnabled: false
       },
-      status: document.getElementById("journalStatus").value
+      status: "saved"
     };
   }
 
   function validateDecisionJournal(draft) {
     const errors = [];
     if (!draft.journalMeta.date) errors.push({ id: "journalDate", message: "請填寫紀錄日期。" });
-    if (!draft.farmContext.farm && !draft.farmContext.field) {
-      errors.push({ id: "journalFarm", message: "農場或田區至少需要填寫一項。" });
+    if (!draft.farmContext.profileId) {
+      errors.push({ id: "journalSelectedProfileStatus", message: "請先選擇一張農場卡片。" });
     }
-    if (!draft.farmContext.crop) errors.push({ id: "journalCrop", message: "請填寫作物。" });
     if (draft.farmOperations.selected.length === 0 && !draft.operationDetails.description) {
-      errors.push({ id: "journalOperationDescription", message: "請至少選擇一項農事作業，或填寫今日作業說明。" });
+      errors.push({ id: "journalOperationDescription", message: "請至少選擇一項農事作業，或填寫作業內容。" });
     }
     if (draft.farmOperations.selected.includes("其他") && !draft.farmOperations.other) {
       errors.push({ id: "journalOperationOther", message: "選擇「其他」時，請說明其他農事作業。" });
-    }
-    if (draft.experienceNotes.farmMemoryCandidate) {
-      if (!draft.experienceNotes.observation) {
-        errors.push({ id: "journalExperienceObservation", message: "勾選 AI 經驗候選時，請填寫現場觀察。" });
-      }
-      if (!draft.experienceNotes.action) {
-        errors.push({ id: "journalExperienceAction", message: "勾選 AI 經驗候選時，請填寫處理方式。" });
-      }
-      if (!draft.experienceNotes.lessonLearned) {
-        errors.push({ id: "journalExperienceLesson", message: "勾選 AI 經驗候選時，請填寫經驗與提醒。" });
-      }
     }
     return errors;
   }
@@ -4025,48 +4289,119 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
     const operationText = [...draft.farmOperations.selected];
     if (draft.farmOperations.other) operationText.push(draft.farmOperations.other);
     const experienceCandidate = draft.experienceNotes.farmMemoryCandidate
-      ? "已標示為 Farm Memory 候選（尚未驗證、尚未提交）"
+      ? "已標示為 AI 經驗候選（尚未提交）"
       : "未標示";
     return `
       <section class="journal-preview-section">
-        <h4>農場資訊｜Facts</h4>
+        <h4>${formatJournalPreviewValue(draft.farmContext.profileName, "農場日誌")}</h4>
         <p><strong>日期：</strong>${formatJournalPreviewValue(draft.journalMeta.date)} ${formatJournalPreviewValue(draft.journalMeta.time, "")}</p>
         <p><strong>農場／田區：</strong>${formatJournalPreviewValue(draft.farmContext.farm, "—")}／${formatJournalPreviewValue(draft.farmContext.field, "—")}</p>
-        <p><strong>作物：</strong>${formatJournalPreviewValue(draft.farmContext.crop)}　<strong>品種：</strong>${formatJournalPreviewValue(draft.farmContext.variety)}</p>
+        <p><strong>作物：</strong>${formatJournalPreviewValue(draft.farmContext.crop)}　<strong>品種：</strong>${formatJournalPreviewValue(draft.farmContext.variety)}　<strong>生育階段：</strong>${formatJournalPreviewValue(draft.farmContext.growthStage)}</p>
       </section>
       <section class="journal-preview-section">
-        <h4>AI Analysis｜系統唯讀快照</h4>
-        <p><strong>資料狀態：</strong>${formatJournalPreviewValue(draft.aiSnapshot.state)}</p>
-        <p>${formatJournalPreviewValue(draft.aiSnapshot.recommendation)}</p>
-      </section>
-      <section class="journal-preview-section">
-        <h4>Farmer Decision｜人類最終判斷</h4>
-        <p><strong>採納狀態：</strong>${formatJournalPreviewValue(draft.farmerDecision.adoption)}</p>
-        <p><strong>最終決定：</strong>${formatJournalPreviewValue(draft.farmerDecision.finalDecision)}</p>
-        <p><strong>原因：</strong>${formatJournalPreviewValue(draft.farmerDecision.reason)}</p>
-      </section>
-      <section class="journal-preview-section">
-        <h4>Farm Operations｜實際作業</h4>
+        <h4>今天的農事作業</h4>
         <p><strong>項目：</strong>${formatJournalPreviewValue(operationText)}</p>
-        <p><strong>說明：</strong>${formatJournalPreviewValue(draft.operationDetails.description)}</p>
-        <p><strong>現場異常：</strong>${formatJournalPreviewValue(draft.operationDetails.anomalies)}</p>
-      </section>
-      <section class="journal-preview-section">
-        <h4>Outcome｜成果與追蹤</h4>
-        <p><strong>預期成果：</strong>${formatJournalPreviewValue(draft.outcome.expected.description)}</p>
-        <p><strong>實際成果：</strong>${formatJournalPreviewValue(draft.outcome.actual.description, "尚待觀察")}</p>
-        <p><strong>下次追蹤：</strong>${formatJournalPreviewValue(draft.outcome.followUp.date)}</p>
-      </section>
-      <section class="journal-preview-section">
-        <h4>Experience｜結構化經驗</h4>
-        <p><strong>Observation：</strong>${formatJournalPreviewValue(draft.experienceNotes.observation)}</p>
-        <p><strong>Reasoning：</strong>${formatJournalPreviewValue(draft.experienceNotes.reasoning)}</p>
-        <p><strong>Action：</strong>${formatJournalPreviewValue(draft.experienceNotes.action)}</p>
-        <p><strong>Outcome：</strong>${formatJournalPreviewValue(draft.experienceNotes.outcome)}</p>
-        <p><strong>Lesson Learned：</strong>${formatJournalPreviewValue(draft.experienceNotes.lessonLearned)}</p>
+        <p><strong>作業內容：</strong>${formatJournalPreviewValue(draft.operationDetails.description)}</p>
+        <p><strong>補充經驗：</strong>${formatJournalPreviewValue(draft.experienceNotes.note)}</p>
         <p><strong>AI 經驗候選：</strong>${escapeHtml(experienceCandidate)}</p>
       </section>
+      <section class="journal-preview-section">
+        <h4>田區環境摘要</h4>
+        <p><strong>今日氣象：</strong>${draft.aiSnapshot.weather.state === "available" ? "已附加" : "尚無資料"}</p>
+        <p><strong>最近 NDVI：</strong>${draft.aiSnapshot.ndvi.state === "available" ? formatJournalPreviewValue(draft.aiSnapshot.ndvi.data.value) : "尚無資料"}</p>
+      </section>
     `;
+  }
+
+  function journalSummaryValue(value, suffix = "") {
+    return value === null || value === undefined || value === ""
+      ? "尚無資料"
+      : `${value}${suffix}`;
+  }
+
+  function updateJournalEnvironmentSummary() {
+    const container = document.getElementById("journalEnvironmentSummary");
+    if (!container) return;
+    const profile = getSelectedJournalProfile();
+    const operations = journalCheckedValues("journalOperation");
+    const operationOther = operations.includes("其他") ? journalValue("journalOperationOther") : "";
+    const operationText = [...operations.filter(item => item !== "其他"), operationOther].filter(Boolean).join("、");
+    const weather = latestWeatherSnapshot;
+    const ndvi = latestNdviSnapshot;
+    const items = [
+      ["卡片", profile?.cardName],
+      ["選定農場", profile?.farm],
+      ["田區", profile?.field],
+      ["作物", profile?.crop],
+      ["生育階段", profile?.growthStage],
+      ["今日氣象", weather?.obsTime || weather?.stationName],
+      ["溫度", weather?.temp, "℃"],
+      ["濕度", weather?.humidity, "%"],
+      ["雨量", weather?.rainMm, " mm"],
+      ["風速", weather?.windSpeed, " m/s"],
+      ["最近一次 NDVI", ndvi?.value],
+      ["衛星觀測日期", ndvi?.date],
+      ["今日農事作業", operationText],
+      ["作業內容", journalValue("journalOperationDescription")]
+    ];
+    container.innerHTML = items.map(([label, value, suffix = ""]) => `
+      <div class="journal-environment-item">
+        <span>${escapeHtml(label)}</span>
+        <strong>${escapeHtml(journalSummaryValue(value, suffix))}</strong>
+      </div>
+    `).join("");
+  }
+
+  function buildJournalAnalysisText() {
+    const draft = buildDecisionJournalDraft();
+    const weather = draft.aiSnapshot.weather.data;
+    const ndvi = draft.aiSnapshot.ndvi.data;
+    const operations = [...draft.farmOperations.selected.filter(item => item !== "其他")];
+    if (draft.farmOperations.other) operations.push(draft.farmOperations.other);
+    return `請根據以下農場資料進行氣象與農事分析：
+
+田區名稱：${draft.farmContext.field || "尚無資料"}
+農場：${draft.farmContext.farm || "尚無資料"}
+作物：${draft.farmContext.crop || "尚無資料"}
+品種：${draft.farmContext.variety || "尚無資料"}
+生育階段：${draft.farmContext.growthStage || "尚無資料"}
+
+今日農事作業：${operations.join("、") || "尚無資料"}
+
+作業內容：${draft.operationDetails.description || "尚無資料"}
+
+補充經驗：${draft.experienceNotes.note || "尚無資料"}
+
+今日氣象：${weather?.obsTime || weather?.stationName || "尚無資料"}
+氣溫：${journalSummaryValue(weather?.temp, "℃")}
+濕度：${journalSummaryValue(weather?.humidity, "%")}
+雨量：${journalSummaryValue(weather?.rainMm, " mm")}
+風速：${journalSummaryValue(weather?.windSpeed, " m/s")}
+
+最近 NDVI：${journalSummaryValue(ndvi?.value)}
+衛星觀測日期：${journalSummaryValue(ndvi?.date)}
+
+請用農民容易理解的方式說明：
+
+1. 目前田區狀況
+2. 需要注意的風險
+3. 下一步農事建議`;
+  }
+
+  async function copyJournalAnalysisData() {
+    const draft = buildDecisionJournalDraft();
+    const errors = validateDecisionJournal(draft);
+    if (!showJournalValidation(errors)) return false;
+    try {
+      await navigator.clipboard.writeText(buildJournalAnalysisText());
+      document.getElementById("journalCopyStatus").textContent =
+        "分析資料已複製，請前往 AI農業氣象教練貼上。";
+      return true;
+    } catch {
+      document.getElementById("journalCopyStatus").textContent =
+        "無法自動複製，請使用預覽內容手動複製。";
+      return false;
+    }
   }
 
   function saveDecisionJournalDraft() {
@@ -4076,8 +4411,6 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
     try {
       sessionStorage.setItem(DECISION_JOURNAL_DRAFT_KEY, JSON.stringify(draft));
       decisionJournalCreatedAt = draft.journalMeta.createdAt;
-      document.getElementById("journalStatus").value = "draft";
-      updateJournalStatus("draft");
       document.getElementById("journalDraftStatus").textContent =
         `草稿已暫存於此分頁（${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}），未提交至後端。`;
       return true;
@@ -4134,10 +4467,6 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
     document.getElementById("journalDate").value = now.toISOString().slice(0, 10);
     document.getElementById("journalTime").value =
       `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-    document.getElementById("journalStatus").value = "new";
-    document.getElementById("journalSnapshotState").value = "empty";
-    updateJournalStatus("new");
-    setJournalSnapshotState("empty");
   }
 
   function clearDecisionJournalForm() {
@@ -4148,7 +4477,9 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
     clearJournalValidation();
     setDecisionJournalDefaults();
     document.getElementById("journalOperationOtherField").hidden = true;
-    document.getElementById("journalDraftStatus").textContent = "表單已清除；既有農場日誌未受影響。";
+    document.getElementById("journalDraftStatus").textContent = "本次內容已清除；農場卡片與既有日誌未受影響。";
+    renderJournalFarmProfiles();
+    updateJournalEnvironmentSummary();
     closeDecisionJournalPreview();
     return true;
   }
@@ -4158,15 +4489,36 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
     if (!form || form.dataset.initialized === "true") return;
     form.dataset.initialized = "true";
     setDecisionJournalDefaults();
+    document.getElementById("journalOpenGptButton").href = GPT_COACH_URL;
+    document.getElementById("journalProfileEditor").hidden = getJournalFarmProfiles().length > 0;
+    renderJournalFarmProfiles();
 
-    document.getElementById("journalStatus").addEventListener("change", event => updateJournalStatus(event.target.value));
-    document.getElementById("journalSnapshotState").addEventListener("change", event => setJournalSnapshotState(event.target.value));
+    document.getElementById("journalProfileList").addEventListener("click", event => {
+      const card = event.target.closest("[data-profile-id]");
+      if (card) selectJournalFarmProfile(card.dataset.profileId);
+    });
+    document.getElementById("journalAddProfileButton").addEventListener("click", () => {
+      clearJournalProfileEditor();
+      document.getElementById("journalProfileEditor").hidden = false;
+      document.getElementById("journalProfileName").focus();
+    });
+    document.getElementById("journalEditProfileButton").addEventListener("click", () => {
+      const profile = getSelectedJournalProfile();
+      if (profile) openJournalProfileEditor(profile);
+    });
+    document.getElementById("journalDeleteProfileButton").addEventListener("click", deleteSelectedJournalFarmProfile);
+    document.getElementById("journalSaveProfileButton").addEventListener("click", saveJournalFarmProfile);
+    document.getElementById("journalCancelProfileButton").addEventListener("click", () => {
+      clearJournalProfileEditor();
+      document.getElementById("journalProfileEditor").hidden = getJournalFarmProfiles().length > 0;
+    });
     document.getElementById("journalOperationOtherToggle").addEventListener("change", event => {
       const field = document.getElementById("journalOperationOtherField");
       field.hidden = !event.target.checked;
       if (event.target.checked) document.getElementById("journalOperationOther").focus();
-      else document.getElementById("journalOperationOther").value = "";
+      updateJournalEnvironmentSummary();
     });
+    document.getElementById("journalCopyAnalysisButton").addEventListener("click", copyJournalAnalysisData);
     document.getElementById("journalFormalSaveButton").addEventListener("click", saveDecisionJournal);
     document.getElementById("journalSaveDraftButton").addEventListener("click", saveDecisionJournalDraft);
     document.getElementById("journalPreviewButton").addEventListener("click", previewDecisionJournal);
@@ -4196,7 +4548,9 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
         event.target.classList.remove("journal-field-error");
         event.target.removeAttribute("aria-invalid");
       }
+      updateJournalEnvironmentSummary();
     });
+    form.addEventListener("change", updateJournalEnvironmentSummary);
   }
 
   function getFarmLogs() {
@@ -4210,7 +4564,7 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
 
   function normalizeFarmLog(record) {
     const source = record && typeof record === "object" ? record : {};
-    const isStructured = source.version === "2.0" && source.journalMeta && source.farmContext;
+    const isStructured = String(source.version || "").startsWith("2.") && source.journalMeta && source.farmContext;
 
     if (!isStructured) {
       return {
@@ -4638,6 +4992,7 @@ pH：${showIotValue(window.latestIotSnapshot.ph)}`
          selectedGeoPosition = null;
    
          latestWeatherSnapshot = null;
+         updateJournalEnvironmentSummary();
     }
 
 
@@ -4998,6 +5353,7 @@ async function generateAdvice() {
     soil10: showValue(weather.soil10),
     confidence: fusion.quality?.confidence || "--"
   };
+  updateJournalEnvironmentSummary();
 
   document.getElementById("resultSubtitle").textContent =
     `AIAKOS Core 已完成最近 ${fusion.stationCount || stations.length} 站融合分析｜AI可信度：${fusion.quality?.confidence || "--"}%｜判斷重點：${task}`;
@@ -6369,6 +6725,7 @@ function analyzeNdvi() {
     risk: result.risk,
     action: combinedAdvice
   };
+  updateJournalEnvironmentSummary();
 
   resultBox.textContent =
 `🛰️ AIAKOS NDVI 判讀
@@ -6524,6 +6881,7 @@ function clearNdviForm() {
     setSatelliteNdviStatus("請先在農地管理中心選擇含 Polygon 的農地，再取得真實衛星 NDVI。", "idle");
   }
   latestNdviSnapshot = null;
+  updateJournalEnvironmentSummary();
 }
 
 function clearSelectedFieldForNdvi() {
